@@ -1,21 +1,5 @@
 /*
  * initParams.h
- *  *
- *    VIABLAB : a numerical library for Mathematical Viability Computations
- *    Copyright (C) <2020>  <Anna DESILLES, LASTRE>
- *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as
- *   published by the Free Software Foundation, either version 3 of the
- *   License, or (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
- *   
- *   You should have received a copy of the GNU Affero General Public License
- *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *  Created on: 24 août 2018
  *      Author: anna_desilles
@@ -33,16 +17,16 @@ void initParams(gridParams &gp, algoViabiParams &avp, controlParams &cp,systemPa
   gp.GRID_TYPE=0;
   gp.LIMINF=STATE_MIN;
   gp.LIMSUP=STATE_MAX;
-if((computeSet==0)  & (refine >0))
-  {
-  for(int k=0;k<dim;k++)
+  if((computeSet==0)  & (refine >0))
     {
-    for(int j=0;j<refine;j++)
+    for(int k=0;k<dim;k++)
       {
-      nbPointsState[k]=2*nbPointsState[k]-1;
+      for(int j=0;j<refine;j++)
+        {
+        nbPointsState[k]=2*nbPointsState[k]-1;
+        }
       }
     }
-  }
   gp.NBPOINTS=nbPointsState;
   gp.PERIODIC=periodic;
   gp.FILE_PREFIX=prefix;
@@ -68,10 +52,11 @@ if((computeSet==0)  & (refine >0))
   cp.LIMINFC=CONTROL_MIN;
   cp.LIMSUPC=CONTROL_MAX;
   cp.NBPOINTSC=nbPointsControl;
-  cp.DIM_TY=0;
+  cp.DIM_TY=dimc_ty;
   cp.LIMINF_TY=CONTROL_MIN_ty;
   cp.LIMSUP_TY=CONTROL_MAX_ty;
   cp.NBPOINTS_TY=nbPointsControl_ty;
+
   sp.COMPUTE_LC=computeLC;
   sp.COMPUTE_MF=computeM;
   sp.CONSTR_XU=&constraintsXU;
@@ -93,6 +78,11 @@ if((computeSet==0)  & (refine >0))
       break;
       }
     case 3:
+      {
+      sp.DYNAMICS=&dynamics;
+      break;
+      }
+    case 4:
       {
       sp.DYNAMICS=&dynamics_hybrid;
       break;
@@ -116,8 +106,11 @@ if((computeSet==0)  & (refine >0))
     sp.SCALE_PARAM|=scaling[i];
     }
   sp.TARGET=&target;
-
-
+  sp.CONSTR_XU_fd=&constraintsXU_fd;
+  sp.DYNAMICS_FD=&dynamics_fd;
+  sp.DYNAMICS_TYCH_FD=&dynamics_tych_fd;
+  sp.CONSTR_X_fd=&constraintsX_fd;
+  sp.DYN_CONSTR_FOR_TRAJ = &dynConstraintsForTraj;
   /*
    * Initialisation des paramètres de systèmes dynamique
    * Ici toutes les valeurs sont par defaut, non utilisés

@@ -1,21 +1,5 @@
 /*
  * main.cpp
- *  *
- *    VIABLAB : a numerical library for Mathematical Viability Computations
- *    Copyright (C) <2020>  <Anna DESILLES, LASTRE>
- *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as
- *   published by the Free Software Foundation, either version 3 of the
- *   License, or (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
- *   
- *   You should have received a copy of the GNU Affero General Public License
- *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *  Created on: 10 sept. 2013
  *      Author: ANYA
@@ -45,7 +29,10 @@
 //#include "../data/ex2_EcoPolut_data.h"
 
 //#include "../data/userModel.h"
-#include "../data/IPGG_data.h"
+//#include "../data/test_capt_discret_data.h"
+//#include "../data/corentin_no_control_feed_synth_data_funct_traj_v3.h"
+
+#include "../data/corentin_no_control_feed_synth_data_funct_traj_v3.h"
 /*
  * Code de la fonction d'initialisation de paramètres
  */

@@ -50,6 +50,7 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid * grRef)
   constraintsXU_fd=SP.CONSTR_XU_fd;
   constraintsX=SP.CONSTR_X;
   constraintsX_fd=SP.CONSTR_X_fd;
+  dynConstraintsForTraj=SP.DYN_CONSTR_FOR_TRAJ;
   target=SP.TARGET;
   target_fd=SP.TARGET_FD;
   dimS=ds;
