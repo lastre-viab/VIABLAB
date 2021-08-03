@@ -24,40 +24,33 @@
 #ifndef VIABI_H_
 #define VIABI_H_
 //#include "defs.h"
+#include "ParametersManager.h"
 #include "SysDyn.h"
+
 using namespace std;
 
 
 
-template <class T> class Viabi {
+class Viabi {
 public:
 	Viabi();
+	Viabi( ParametersManager * pm);
 	virtual ~Viabi();
-	Viabi( T* a, SysDyn *sd);
-	virtual void printViabiInfo() const=0;
-	virtual void initialiseTarget() const=0;
+	virtual void printViabiInfo() =0;
+	virtual void initialiseTarget() =0;
+	virtual void initialiseConstraints() =0;
+	virtual void  ViabilityKernel( bool sortieOK,int nbArret)  =0;
+	virtual void  CaptureBasin( )  =0;
+	virtual void  GarantedViabilityKernel( bool sortieOK,int nbArret)  =0;
+	virtual void computeTrajectories() =0;
+	virtual void loadViableSets() =0;
 
 protected:
-	T* grid;
+	ParametersManager* modelParams;
 	SysDyn* dynsys;
 	int nbOMPThreads;
 };
 
 
-template <class T>
-Viabi<T>::Viabi( T  *gr, SysDyn* sd)
-{
-	grid=gr;
-	system=sd;
-}
- template <class T>
-Viabi<T>::Viabi() {
-	// TODO Auto-generated constructor stub
-//cout<< "  coucou constructeur par defaut\n";
-}
-template <class T>
-Viabi<T>::~Viabi() {
-	// TODO Auto-generated destructor stub
-}
 
 #endif /* VIABI_H_ */

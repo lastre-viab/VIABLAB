@@ -1,21 +1,5 @@
 /*! \file  defs.h
  *
- *  *
- *    VIABLAB : a numerical library for Mathematical Viability Computations
- *    Copyright (C) <2020>  <Anna DESILLES, LASTRE>
- *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as
- *   published by the Free Software Foundation, either version 3 of the
- *   License, or (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
- *   
- *   You should have received a copy of the GNU Affero General Public License
- *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *  \author: A. D�silles, LATSRE
  *  \brief  Fichier  contenant les d�finitions de structures globales et les ioncludes std
@@ -61,7 +45,7 @@
 #include <mach-o/dyld.h>
 #endif
 #include <inttypes.h>
-*/
+ */
 
 //#include <magick++.h>
 #include <list>
@@ -154,19 +138,19 @@ using namespace std;
  */
 struct gridParams
 {
-  unsigned long long int  DIM;       //!< dimension de la  grille
-  unsigned long long int  *NBPOINTS;  //!<   tableau indicant le nombre de points par axe
-  double    *LIMINF;    //!<   tableau  de limites inf pour chaque variable
-  double    *LIMSUP;    //!<   tableau  de limites sup pour chaque variable
-  int       *PERIODIC;  //!<   tableau  de boolens pour indiquer   les variables  qui sont p�riodiques (1=p�riodique, 0=non)
-  int        GRID_TYPE; //!<  0=les points de calcul sont les noeuds de la grille, 1= les points de calcul sont les milieux des mailles
-  string FILE_PREFIX;
-  int GRID_MAIN_DIR;        //!< for bitSet grids only :  la grille sera stock�e comme tableau de segments paralleles  a cette dimension
-  int * SLICE_DIRS;
-  double *SLICE_VALUES;
-  int * SORTIE_OK_INF;
-  int * SORTIE_OK_SUP;
-  int OMP_THREADS;
+	unsigned long long int  DIM;       //!< dimension de la  grille
+	unsigned long long int  *NBPOINTS;  //!<   tableau indicant le nombre de points par axe
+	double    *LIMINF;    //!<   tableau  de limites inf pour chaque variable
+	double    *LIMSUP;    //!<   tableau  de limites sup pour chaque variable
+	int       *PERIODIC;  //!<   tableau  de boolens pour indiquer   les variables  qui sont p�riodiques (1=p�riodique, 0=non)
+	int        GRID_TYPE; //!<  0=les points de calcul sont les noeuds de la grille, 1= les points de calcul sont les milieux des mailles
+	string FILE_PREFIX;
+	int GRID_MAIN_DIR;        //!< for bitSet grids only :  la grille sera stock�e comme tableau de segments paralleles  a cette dimension
+	int * SLICE_DIRS;
+	double *SLICE_VALUES;
+	int * SORTIE_OK_INF;
+	int * SORTIE_OK_SUP;
+	int OMP_THREADS;
 };
 
 /*!
@@ -177,15 +161,15 @@ struct gridParams
 
 struct controlParams
 {
-  unsigned long long int DIMC;        //!<  dimension  de controles
-  unsigned long long int *NBPOINTSC;  //!<  nombre de points par axe en cas de discr�tisation
-  double    *LIMINFC;      //!<  limites inf de chaque variable de controle
-  double    *LIMSUPC;       //!<  limites sup de chaque variable de controle
+	unsigned long long int DIMC;        //!<  dimension  de controles
+	unsigned long long int *NBPOINTSC;  //!<  nombre de points par axe en cas de discr�tisation
+	double    *LIMINFC;      //!<  limites inf de chaque variable de controle
+	double    *LIMSUPC;       //!<  limites sup de chaque variable de controle
 
-  unsigned long long int DIM_TY;        //!<  dimension  de controles
-  unsigned long long int *NBPOINTS_TY;  //!<  nombre de points par axe en cas de discr�tisation
-  double    *LIMINF_TY;      //!<  limites inf de chaque variable de controle
-  double    *LIMSUP_TY;       //!<  limites sup de chaque variable de controle
+	unsigned long long int DIM_TY;        //!<  dimension  de controles
+	unsigned long long int *NBPOINTS_TY;  //!<  nombre de points par axe en cas de discr�tisation
+	double    *LIMINF_TY;      //!<  limites inf de chaque variable de controle
+	double    *LIMSUP_TY;       //!<  limites sup de chaque variable de controle
 
 };
 
@@ -197,54 +181,69 @@ struct controlParams
 
 struct systemParams
 {
-  void (*DYNAMICS)(double *, double *, double *);
-  void (*DYNAMICS_FD)(unsigned long long int *, unsigned long long int *, unsigned long long int *);
-  void (*DYNAMICS_TYCH_FD)(unsigned long long int *, unsigned long long int *, unsigned long long int *, unsigned long long int *);
+	void (*DYNAMICS)(double *, double *, double *);
+	void (*DYNAMICS_FD)(unsigned long long int *, unsigned long long int *, unsigned long long int *);
+	void (*DYNAMICS_TYCH_FD)(unsigned long long int *, unsigned long long int *, unsigned long long int *, unsigned long long int *);
 
-  double (*CONSTR_XU)(double *, double *u);
-  double (*CONSTR_XU_fd)(unsigned long long int *, unsigned long long int*);
-  double (*CONSTR_X)(double *);
-  double (*CONSTR_X_fd) (unsigned long long int *);
-  double (*TARGET) (double *);
-  double (*TARGET_FD) (unsigned long long int *);
-  double (*L_FUNC_FD)(unsigned long long int *, unsigned long long int*);
-  double (*L_FUNC_TYCH_FD)(unsigned long long int *, unsigned long long int*, unsigned long long int*);
+	double (*CONSTR_XU)(double *, double *u);
+	double (*CONSTR_XU_fd)(unsigned long long int *, unsigned long long int*);
+	double (*CONSTR_X)(double *);
+	double (*CONSTR_X_fd) (unsigned long long int *);
+	double (*DYN_CONSTR_FOR_TRAJ)(double *, double *);
+	double (*TARGET) (double *);
+	double (*TARGET_FD) (unsigned long long int *);
+	double (*L_FUNC_FD)(unsigned long long int *, unsigned long long int*);
+	double (*L_FUNC_TYCH_FD)(unsigned long long int *, unsigned long long int*, unsigned long long int*);
 
-  double (*L_FUNC)(double *, double *);
-  double (*MU_FUNC_FD)(unsigned long long int *, unsigned long long int*);
-  double (*M_FUNC)(double *, double *);
-  void (*JACOBIAN)(double *x, double *u , double ** jacob);
-  void (*LOCAL_DYN_BOUNDS)(double * x, double * res);
-  int COMPUTE_LC;
-  double LIP;
-  double L_LIP;
-  bool globDeltat;
-  int COMPUTE_MF;
-  double MF;
-  double L_MF;
-  double maxTime;
-  int SCHEME;
-  bool SCALE_PARAM;
-  int DYN_TYPE;     // type of dynamics : FD, CD,
-  int FD_DYN_TYPE;  // pour indiquer le type de repr�sentation de la dynamique : fonction ou fihciers r�tro
-  string RETRO_FILE_NAME;
+	double (*L_FUNC)(double *, double *);
+	double (*MU_FUNC_FD)(unsigned long long int *, unsigned long long int*);
+	double (*M_FUNC)(double *, double *);
+	void (*JACOBIAN)(double *x, double *u , double ** jacob);
+	void (*LOCAL_DYN_BOUNDS)(double * x, double * res);
+	int COMPUTE_LC;
+	double LIP;
+	double L_LIP;
+	bool globDeltat;
+	int COMPUTE_MF;
+	double MF;
+	double L_MF;
+	double maxTime;
+	int SCHEME;
+	bool SCALE_PARAM;
+	int DYN_TYPE;     // type of dynamics : FD, CD,
+	int FD_DYN_TYPE;  // pour indiquer le type de repr�sentation de la dynamique : fonction ou fihciers r�tro
+	std::string RETRO_FILE_NAME;
 };
 
 struct algoViabiParams
 {
 
 
-  int NB_OMP_THREADS;
-  int COMPUTE_TMIN;
+	int NB_OMP_THREADS;
+	int COMPUTE_TMIN;
 
-  string FILE_PREFIX;
-  int TARGET_OR_DEPARTURE;
+	string FILE_PREFIX;
+	int TARGET_OR_DEPARTURE;
+	int NB_TRAJS;
+	int TYPE_TRAJ;
+	double * INIT_POINTS;
+	double * INIT_CONTROLS;
+	int GRID_REFINMENTS_NUMBER;
+	int INTERMEDIATE_SAVINGS;
+	int SAVE_SLICE;
+	int SAVE_SLICE_BOUND;
+	int SAVE_BOUNDARY;
+	int SAVE_PROJECTION;
+	int SAVE_SUBLEVEL;
+	int LEVEL;
+	unsigned long long int* PROJECTION;
+
 
 };
 
 struct algoViabiBoolParams
 {
-  unsigned long long int NB_GO_RAM;
+	unsigned long long int NB_GO_RAM;
 
 };
 
@@ -265,16 +264,16 @@ struct algoViabiBoolParams
  */
 struct discretImageSet
 {
-  int nbImageCells;
-  int * tabImageCells;
-  int * tabImageControls;
-  int * tabCellEntrees;
+	int nbImageCells;
+	int * tabImageCells;
+	int * tabImageControls;
+	int * tabCellEntrees;
 };
 
 struct discretImageSet_simple
 {
-  unsigned long long  int nbImageCells;
-  unsigned long long  int * tabImageCells;
+	unsigned long long  int nbImageCells;
+	unsigned long long  int * tabImageCells;
 
 };
 
@@ -288,23 +287,23 @@ struct discretImageSet_simple
  */
 struct triple
 {
-  unsigned long long int posX; /*!< num�ro de l'�tat ant�c�dant */
-  unsigned long long int posU; /*!< num�roe de contr�le tel que x-rho*f(x,u) est dans la cellule*/
-  double rho;        /*!< le pas de temps */
+	unsigned long long int posX; /*!< num�ro de l'�tat ant�c�dant */
+	unsigned long long int posU; /*!< num�roe de contr�le tel que x-rho*f(x,u) est dans la cellule*/
+	double rho;        /*!< le pas de temps */
 };
 
 
 inline bool equal_triple(triple t1, triple t2)
 {
-  return ((t1.posX==t2.posX) & (t1.posU==t2.posU) & (t1.rho==t2.rho));
+	return ((t1.posX==t2.posX) & (t1.posU==t2.posU) & (t1.rho==t2.rho));
 }
 inline bool compare_triple_first(triple t1, triple t2)
 {
-  return ((t1.posX<t2.posX));
+	return ((t1.posX<t2.posX));
 }
 inline bool compare_triple_second(triple t1, triple t2)
 {
-  return ((t1.posU<t2.posU));
+	return ((t1.posU<t2.posU));
 }
 /*!
  * \struct imageCell
@@ -313,10 +312,10 @@ inline bool compare_triple_second(triple t1, triple t2)
  */
 struct imageCell
 {
-  unsigned long long int cellNum;    /*!< numero de cellule */
-  double minVal;           /*!< la valeur optimale de la fonction valeur sur cette cellule*/
-  list<triple> R_optimal;  /*!< la liste des ant�c�dents minimisant la fonction valeur*/
-  list<triple> R_viable;   /*!< la liste des ant�c�dents viables arrivant dans cette  cellule */
+	unsigned long long int cellNum;    /*!< numero de cellule */
+	double minVal;           /*!< la valeur optimale de la fonction valeur sur cette cellule*/
+	list<triple> R_optimal;  /*!< la liste des ant�c�dents minimisant la fonction valeur*/
+	list<triple> R_viable;   /*!< la liste des ant�c�dents viables arrivant dans cette  cellule */
 };
 
 /*!
@@ -327,17 +326,17 @@ struct imageCell
  */
 struct imageCellsList
 {
-  list<imageCell> cellsList;
-  int minNum;
-  int maxNum;
+	list<imageCell> cellsList;
+	int minNum;
+	int maxNum;
 
 };
 
 struct imageCellsIntList
 {
-  list<unsigned long long int> cellsList;
-  unsigned long long int minNum;
-  unsigned long long int maxNum;
+	list<unsigned long long int> cellsList;
+	unsigned long long int minNum;
+	unsigned long long int maxNum;
 };
 
 
@@ -348,17 +347,17 @@ struct imageCellsIntList
  */
 struct imagePoint
 {
-  unsigned long long int PointNum;    /*!< numero de cellule */
-  double minVal;           /*!< la valeur optimale de la fonction valeur sur cette cellule*/
-  list<triple> R_optimal;  /*!< la liste des ant�c�dents minimisant la fonction valeur*/
-  list<triple> R_viable;   /*!< la liste des ant�c�dents viables arrivant dans cette  cellule */
+	unsigned long long int PointNum;    /*!< numero de cellule */
+	double minVal;           /*!< la valeur optimale de la fonction valeur sur cette cellule*/
+	list<triple> R_optimal;  /*!< la liste des ant�c�dents minimisant la fonction valeur*/
+	list<triple> R_viable;   /*!< la liste des ant�c�dents viables arrivant dans cette  cellule */
 };
 struct imageTempPoint
 {
-  unsigned long long int PointNum;    /*!< numero de cellule */
-  double minVal;           /*!< la valeur optimale de la fonction valeur sur cette cellule*/
-  list<triple>* R_optimal;  /*!< la liste des ant�c�dents minimisant la fonction valeur*/
-  list<triple>* R_viable;   /*!< la liste des ant�c�dents viables arrivant dans cette  cellule */
+	unsigned long long int PointNum;    /*!< numero de cellule */
+	double minVal;           /*!< la valeur optimale de la fonction valeur sur cette cellule*/
+	list<triple>* R_optimal;  /*!< la liste des ant�c�dents minimisant la fonction valeur*/
+	list<triple>* R_viable;   /*!< la liste des ant�c�dents viables arrivant dans cette  cellule */
 };
 
 /*!
@@ -369,16 +368,16 @@ struct imageTempPoint
  */
 struct imagePointsList
 {
-  list<imagePoint> pointsList;
-  unsigned long long int minNum;
-  unsigned long long int maxNum;
+	std::list<imagePoint> pointsList;
+	unsigned long long int minNum;
+	unsigned long long int maxNum;
 };
 
 struct imagePointsIntList
 {
-  list<unsigned long long int> pointsList;
-  unsigned long long int minNum;
-  unsigned long long int maxNum;
+	list<unsigned long long int> pointsList;
+	unsigned long long int minNum;
+	unsigned long long int maxNum;
 };
 
 
@@ -389,7 +388,7 @@ struct imagePointsIntList
  */
 inline bool imageCellCompare(imageCell c1, imageCell c2)
 {
-  return (c1.cellNum<=c2.cellNum);
+	return (c1.cellNum<=c2.cellNum);
 }
 
 /***********************************************************************************************
@@ -403,26 +402,26 @@ inline bool imageCellCompare(imageCell c1, imageCell c2)
  */
 inline void numToIntCoords_gen(unsigned long long int num, unsigned long long int dim, unsigned long long int * nbPoints,unsigned long long int *res)
 {
-  int temp=num;
+	int temp=num;
 
-  for(  int d=dim-1;d>=0;d--)
-    {
-    res[d]=temp%nbPoints[d];                       // coordonn�es enti�res du point
-    temp=(temp-res[d])/nbPoints[d];
+	for(  int d=dim-1;d>=0;d--)
+	{
+		res[d]=temp%nbPoints[d];                       // coordonn�es enti�res du point
+		temp=(temp-res[d])/nbPoints[d];
 
-    }
+	}
 
 }
 
 inline void numToIntDoubleCoords_gen(unsigned long long int num, unsigned long long int dim, unsigned long long int * nbPoints,unsigned long long int *res)
 {
-  int temp=num;
+	int temp=num;
 
-  for(  int d=dim-1;d>=0;d--)
-    {
-    res[d]=temp%nbPoints[d];                       // coordonn�es enti�res du point
-    temp=(temp-res[d])/nbPoints[d];
-    }
+	for(  int d=dim-1;d>=0;d--)
+	{
+		res[d]=temp%nbPoints[d];                       // coordonn�es enti�res du point
+		temp=(temp-res[d])/nbPoints[d];
+	}
 }
 
 /*! \brief Transformation  de num�rotation alpha-num�rique
@@ -431,13 +430,13 @@ inline void numToIntDoubleCoords_gen(unsigned long long int num, unsigned long l
  */
 inline void intCoordsToNum_gen(unsigned long long int dim, unsigned long long int * nbPoints, unsigned long long int * coords, unsigned long long int * res)
 {
-  (*res)=coords[0];
+	(*res)=coords[0];
 
-  for(unsigned long long int i=0;i<dim-1;i++)
-    {
-    (*res)=(*res)*nbPoints[i+1]+coords[i+1];
+	for(unsigned long long int i=0;i<dim-1;i++)
+	{
+		(*res)=(*res)*nbPoints[i+1]+coords[i+1];
 
-    }
+	}
 }
 
 
@@ -454,7 +453,7 @@ typedef  pair<int,int> intPair;
  */
 inline bool pairCompare(intPair p1, intPair p2)
 {
-  return (p1.first<=p2.first);
+	return (p1.first<=p2.first);
 }
 
 
@@ -464,43 +463,43 @@ typedef  pair<unsigned long long int,unsigned long long int> uintPair;
 
 inline void printVector(double *vect, unsigned long long int dim)
 {
-  for(unsigned long long int k=0;k<dim;k++)
-    {
-    cout<< " "<<vect[k];
-    }
-  cout<<endl;
+	for(unsigned long long int k=0;k<dim;k++)
+	{
+		cout<< " "<<vect[k];
+	}
+	cout<<endl;
 }
 
 
 inline void printVector(int *vect, unsigned long long int dim)
 {
-  for(unsigned long long int k=0;k<dim;k++)
-    {
-    cout<< " "<<vect[k];
-    }
-  cout<<endl;
+	for(unsigned long long int k=0;k<dim;k++)
+	{
+		cout<< " "<<vect[k];
+	}
+	cout<<endl;
 }
 inline void printVector(unsigned long long int *vect, unsigned long long int dim)
 {
-  for(unsigned long long int k=0;k<dim;k++)
-    {
-    cout<< " "<<vect[k];
-    }
-  cout<<endl;
+	for(unsigned long long int k=0;k<dim;k++)
+	{
+		cout<< " "<<vect[k];
+	}
+	cout<<endl;
 }
 
 inline double sign(double x)
 {
-  return (double) ((x < 0) ? -1 : (x > 0));
+	return (double) ((x < 0) ? -1 : (x > 0));
 }
 
 struct imageFDPoint
 {
-  int PointNum;    /*!< numero de cellule */
-  double val;           /*!< la valeur optimale de la fonction valeur sur cette cellule*/
-  list<intPair> dynFD;  /*!< la liste des ant�c�dents minimisant la fonction valeur*/
-  list<intPair> R_viable;   /*!< la liste des ant�c�dents viables arrivant dans cette  cellule */
-  list<intPair> R_opti;  /*!< la liste des ant�c�dents viables arrivant dans cette  cellule */
+	int PointNum;    /*!< numero de cellule */
+	double val;           /*!< la valeur optimale de la fonction valeur sur cette cellule*/
+	list<intPair> dynFD;  /*!< la liste des ant�c�dents minimisant la fonction valeur*/
+	list<intPair> R_viable;   /*!< la liste des ant�c�dents viables arrivant dans cette  cellule */
+	list<intPair> R_opti;  /*!< la liste des ant�c�dents viables arrivant dans cette  cellule */
 };
 
 
@@ -511,68 +510,68 @@ struct imageFDPoint
  */
 inline void  fScale( const double *x, double *res, double *STATE_MINreel, double *STATE_MAXreel, int *scaling, int dim)
 {
-  /*
-   * le changement de variables est efectif seulement si scaling[i]=1
-   */
-  for(int i=0;i<dim;i++)
-    {
-    res[i]=scaling[i]*((x[i]-STATE_MINreel[i])/(STATE_MAXreel[i]-STATE_MINreel[i]))+(1-scaling[i])*x[i];
-    }
+	/*
+	 * le changement de variables est efectif seulement si scaling[i]=1
+	 */
+	for(int i=0;i<dim;i++)
+	{
+		res[i]=scaling[i]*((x[i]-STATE_MINreel[i])/(STATE_MAXreel[i]-STATE_MINreel[i]))+(1-scaling[i])*x[i];
+	}
 }
 
 inline void  fScaleInv( const double *x, double *res, double *STATE_MINreel, double *STATE_MAXreel, int *scaling, int dim)
 {
-  /*
-   * le changement de variables est efectif seulement si scaling[i]=1
-   */
-  for(int i=0;i<dim;i++)
-    {
-    res[i]=scaling[i]*(x[i]*(STATE_MAXreel[i]-STATE_MINreel[i])+STATE_MINreel[i])+(1-scaling[i])*x[i];
-    }
+	/*
+	 * le changement de variables est efectif seulement si scaling[i]=1
+	 */
+	for(int i=0;i<dim;i++)
+	{
+		res[i]=scaling[i]*(x[i]*(STATE_MAXreel[i]-STATE_MINreel[i])+STATE_MINreel[i])+(1-scaling[i])*x[i];
+	}
 }
 
 inline double fTimeScale( const double  x, double scaleL, int timeScaling )
 {
-  /*
-   * le changement de variables est efectif seulement si scaling[i]=1
-   */
+	/*
+	 * le changement de variables est efectif seulement si scaling[i]=1
+	 */
 
-  return (timeScaling *((x)*scaleL)+(1-timeScaling)*x);
+	return (timeScaling *((x)*scaleL)+(1-timeScaling)*x);
 
 }
 
 inline double  fTimeScaleInv( const double  x, double scaleL, int timeScaling)
 {
-  return (timeScaling *((x)/scaleL)+(1-timeScaling)*x);
+	return (timeScaling *((x)/scaleL)+(1-timeScaling)*x);
 }
 
 inline void  fScalePrime(  double *res, double *STATE_MINreel, double *STATE_MAXreel, int *scaling, int dim)
 {
-  /*
-   * le changement de variables est efectif seulement si scaling[i]=1
-   */
-  for(int i=0;i<dim;i++)
-    {
-    res[i]=scaling[i]/(STATE_MAXreel[i]-STATE_MINreel[i])+(1-scaling[i]);
-    }
+	/*
+	 * le changement de variables est efectif seulement si scaling[i]=1
+	 */
+	for(int i=0;i<dim;i++)
+	{
+		res[i]=scaling[i]/(STATE_MAXreel[i]-STATE_MINreel[i])+(1-scaling[i]);
+	}
 }
 
 inline double  fScaleComponent( const double x, int i, double *STATE_MINreel, double *STATE_MAXreel, int *scaling)
 {
-  /*
-   * le changement de variables est efectif seulement si scaling[i]=1
-   */
-  return   scaling[i]*(x -STATE_MINreel[i])/(STATE_MAXreel[i]-STATE_MINreel[i])+(1-scaling[i])*x ;
+	/*
+	 * le changement de variables est efectif seulement si scaling[i]=1
+	 */
+	return   scaling[i]*(x -STATE_MINreel[i])/(STATE_MAXreel[i]-STATE_MINreel[i])+(1-scaling[i])*x ;
 
 }
 
 inline double  fScaleInvComponent( const double x, int i, double *STATE_MINreel, double *STATE_MAXreel, int *scaling)
 {
-  /*
-   * le changement de variables est efectif seulement si scaling[i]=1
-   */
+	/*
+	 * le changement de variables est efectif seulement si scaling[i]=1
+	 */
 
-  return  scaling[i]*((x*(STATE_MAXreel[i]-STATE_MINreel[i])+STATE_MINreel[i]))+(1-scaling[i])*x;
+	return  scaling[i]*((x*(STATE_MAXreel[i]-STATE_MINreel[i])+STATE_MINreel[i]))+(1-scaling[i])*x;
 
 }
 /*
@@ -580,7 +579,7 @@ inline double  fScaleInvComponent( const double x, int i, double *STATE_MINreel,
  */
 inline double  fScalePrimeComponent(  int i, double *STATE_MINreel, double *STATE_MAXreel, int *scaling)
 {
-  return scaling[i]/(STATE_MAXreel[i]-STATE_MINreel[i])+(1-scaling[i]);
+	return scaling[i]/(STATE_MAXreel[i]-STATE_MINreel[i])+(1-scaling[i]);
 }
 
 

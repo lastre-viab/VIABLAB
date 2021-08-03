@@ -14,7 +14,7 @@ ViabiBitSet::~ViabiBitSet() {
 	// TODO Auto-generated destructor stub
 }
 
-void ViabiBitSet::initialiseTarget() const
+void ViabiBitSet::initialiseTarget()
 {
 
 
@@ -108,7 +108,7 @@ void ViabiBitSet::setK0_fd()
 void ViabiBitSet::setK0()
 {
 
-
+	cout<< " Initialisation de contraintes"<<endl;
 	int dirTramage=grid->getDirTram();
 
 	unsigned long long  int tailleTrame=grid->getNbPointsTotalSubGrid();
@@ -159,6 +159,17 @@ void ViabiBitSet::setK0()
 	}// fin de for de parcours de la trame
 }
 
+void ViabiBitSet::initialiseConstraints()
+{
+	if((this->dynsys->getDynType()==CC) ||(this->dynsys->getDynType()==DC) )
+	{
+		setK0();
+	}
+	else
+	{
+		setK0_fd();
+	}
+}
 
 void ViabiBitSet::testK0()
 {
@@ -206,10 +217,28 @@ void ViabiBitSet::testK0()
 }
 
 
-ViabiBitSet::ViabiBitSet(Grid_BitSet*   gr, SysDyn* sd, algoViabiParams avbp)
+ViabiBitSet::ViabiBitSet(ParametersManager *pm)
 {
-	grid=gr;
-	dynsys = sd;
+
+	/*
+	 * instanciation du système dynamique
+	 */
+	modelParams = pm;
+
+	systemParams sp= *(pm->getSystemParameters());
+	sp.L_LIP=0.0;
+	sp.L_MF=0;
+	algoViabiParams avp =*(pm->getAlgoParameters());
+	controlParams cp =*(pm->getControlParameters());
+
+	grid=new Grid_BitSet( *(pm->getGridParameters()));
+	dynsys = new SysDyn(sp, dim, cp, grid);
+
+	InitViabiBitSet(avp);
+}
+
+void ViabiBitSet::InitViabiBitSet(algoViabiParams avbp)
+{
 
 	/*!
 	 * On initialise la structure  qui servira au stockage temporaire de l'image discrete d'un point de grille
@@ -244,7 +273,7 @@ ViabiBitSet::ViabiBitSet(Grid_BitSet*   gr, SysDyn* sd, algoViabiParams avbp)
 }
 
 
-void ViabiBitSet::printViabiInfo() const
+void ViabiBitSet::printViabiInfo()
 {
 	grid->printGrid();
 }
@@ -1074,6 +1103,8 @@ int ViabiBitSet::findViabControl(double *currentPos,
 
 bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print)
 {
+
+	//cout<< " findImage no control debut"<<endl;
 	print=false;
 	int  nbPointsCube=(int) pow(2.0,dim);//pow(2.0, dim);
 	/*
@@ -1091,7 +1122,7 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print
 	 * nombre total de points de contrôle
 	 */
 	unsigned long long int nbCTotal=dynsys->getTotalNbPointsC();
-
+	//cout<< " nb controls total "<<nbCTotal<<endl;
 	/*
 	 * indices de déplacement pour parcourir les sommets d'une malle à partir
 	 * du sommet inf
@@ -1104,9 +1135,8 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print
 	/*
 	 * numéros de mailles
 	 */
-	int cellNum;
+	int cellNum, posTemp;
 
-	int posTemp;
 	double rho=dynsys->calculRho_local(xCoordsDouble);
 
 	/*
@@ -1115,6 +1145,7 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print
 	bool testNonVide=false;
 	double doubleVect1[dim];
 	double hMax=grid->maxStep;
+
 	unsigned long long int cu=0;
 	/*
 	 * On recherche la plus grande puissance de 2 plus grande  que le nombre totale de
@@ -1123,7 +1154,7 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print
 
 	int stepCu=1;
 
-	//cout<< " parcours controles debut = "<<first<< " step= "<<stepCu<<endl;
+	//cout<< " parcours controles debut = "<<cu<< " step= "<<stepCu<< " nb controls total "<<nbCTotal<<endl;
 	while((cu<nbCTotal) && ! testNonVide)
 	{
 		/*
@@ -1136,6 +1167,7 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print
 			 * calcul du successeur  du point en cours
 			 */
 			(dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[cu], doubleVect1, rho);
+
 			if(grid->isPointInGrid(doubleVect1))
 			{
 				/*
@@ -1149,7 +1181,6 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print
 					 * On identifie la maille où il se trouve
 					 */
 					cellNum=grid->localizePoint(doubleVect1);
-					// cout<< " num cellule "<<cellNum<<endl;
 
 					/*
 					 * On parcours les sommets de la maille
@@ -1169,13 +1200,15 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print
 								dist=max(dist, abs(testV[k]-doubleVect1[k]));
 							}
 							testNonVide= grid->isInSet(testI) && (dist<=hMax/2.0);
-							ii++;
+
 						}
+						ii++;
 					}
 				}
 			}
 			else
 			{
+				//cout<< " sortie du domaine : autorisation : "<<grid->unboundedDomain<< "point "<< doubleVect1[0]<<" "<<doubleVect1[1]<<endl;
 				testNonVide=  grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1) && (dynsys->constraintsX(doubleVect1)<PLUS_INF);
 			}
 		}
@@ -2393,8 +2426,46 @@ void ViabiBitSet::computeDiscreteImageOfPoint_noControl(double *doublePointCoord
 
 }
 
+void ViabiBitSet::computeTrajectories()
+{
+	computeViableTrajectories();
+}
 
-void ViabiBitSet::captureBasinLocalRho()
+
+void ViabiBitSet::computeViableTrajectories()
+{
+	algoViabiParams * avp=modelParams->getAlgoParameters();
+	int nbTrajs=avp->NB_TRAJS;
+	int typeTraj = avp->TYPE_TRAJ;
+	double T = modelParams->getSystemParameters()->maxTime;
+	ostringstream os;
+	string fileName;
+
+	if(nbTrajs>0)
+	{
+		for(int tr=0;tr<nbTrajs;tr++)
+		{
+			if(typeTraj==VD)
+			{
+				os<<"OUTPUT/"<<filePrefix<<"-traj-"<<tr+1<<".dat";
+				fileName=os.str();
+				os.str("");
+
+				computeViableTrajectorySetVal(avp->INIT_POINTS+tr*dim, T, fileName);
+			}
+			if(typeTraj==VL)
+			{
+				os<<"OUTPUT/"<<filePrefix<<"-traj-H-"<<tr+1<<".dat";
+				fileName=os.str();
+				os.str("");
+
+				computeViableTrajectoryHeavy(avp->INIT_POINTS+tr*dim, avp->INIT_CONTROLS+tr*dimC,T, fileName);
+			}
+		}
+	}
+}
+
+void ViabiBitSet::CaptureBasin()
 {
 
 
@@ -2802,24 +2873,24 @@ void ViabiBitSet::noyauViabi_sansControle( bool sortieOK,int nbArret)
 
 		for( unsigned long long int posX=0;posX< subGridSize;posX++)
 		{
-			//        cout<< " posX="<<posX<< " size "<<gridTab->size()<<endl;
+			//cout<< " posX="<<posX<<endl;
 			if(!gridTab[posX]->none())
 			{
 				comptEtats++;
 				testF=false;
 				numToIntCoords_gen(posX,dim-1,nbPointsSub, indice);
 
-				// cout<<  (*gridTab[posX])<<endl;
+				//cout<<  (*gridTab[posX])<<endl;
 
 				masque=grid->analyseTrameMasqueBis(posX,0);
 
-				// cout<<"masque d'analyse  "<<masque<<endl;
+				//cout<<"masque d'analyse  "<<masque<<endl;
 
 				masquePointsEnleves->set();
 
 				if(masque.none() | testF)
 				{
-					cout<<" rien e analyser posx= "<<posX<<" \n";
+					//		cout<<" rien e analyser posx= "<<posX<<" \n";
 				}
 				else
 				{
@@ -2832,14 +2903,14 @@ void ViabiBitSet::noyauViabi_sansControle( bool sortieOK,int nbArret)
 					{
 						xCoordsDouble[j]=limInf[j]+indice[j-1]*gridStep[j];
 					}
-
+					//cout<< " Analyse en cours "<<endl;
 					for(unsigned long long int k=0;k<longTrame;k++)
 					{
 						if(masque[k])
 						{
 							xCoordsDouble[dirTramage]=limInf[dirTramage]+k*gridStep[dirTramage];
 							testNonVide=this->findViabImagePoint_noControl(xCoordsDouble, false);
-
+							//cout<<" "<<testNonVide;
 							if(!testNonVide)
 							{
 								masquePointsEnleves->set(k,false);
@@ -2847,9 +2918,11 @@ void ViabiBitSet::noyauViabi_sansControle( bool sortieOK,int nbArret)
 							}
 						}// fin de if masque[k]
 					}// fin de for  de parcours de masque
-
+					//cout<< " fini"<<endl;
+					//cout<< " masque points enleves "<<*masquePointsEnleves<<endl;
 					if(masquePointsEnleves->count()<(unsigned long long int)longTrame)
 					{
+
 						*gridTab[posX]&=(*masquePointsEnleves);
 					}
 
@@ -2969,37 +3042,198 @@ void ViabiBitSet::noyauViabi_sansControle_omp( bool sortieOK,int nbArret)
 	cout<<"fini nbIter="<<nbIter;
 }
 
-void ViabiBitSet::ViabKer( bool sortieOK,int nbArret)
+void ViabiBitSet::GarantedViabilityKernel( bool sortieOK,int nbArret)
 {
-	if(this->dynsys->getDimC()   ==0)
+
+}
+
+void ViabiBitSet::loadViableSets()
+{
+
+	algoViabiParams * avp=modelParams->getAlgoParameters();
+	int refine = avp->GRID_REFINMENTS_NUMBER;
+
+	ostringstream os;
+	string fileName;
+	// on charge dans la mémoire l'ensemble calculé et enregistré
+	// correspondant au dernier raffinement
+	os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<".dat";
+	fileName=os.str();
+	os.str("");
+	grid->loadSet(fileName);
+
+	if(avp->SAVE_SLICE){
+		os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-Slice"<<".dat";
+		fileName=os.str();
+		os.str("");
+		grid->saveCoupe(fileName);
+	}
+	if(avp->SAVE_SLICE_BOUND){
+		os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-SliceBound"<<".dat";
+		fileName=os.str();
+		os.str("");
+		grid->saveCoupeBoundary(fileName);
+	}
+
+
+	if(avp->SAVE_PROJECTION)
+	{
+		os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-proj"<<".dat";
+		fileName=os.str();
+		os.str("");
+		/*
+		 *  calcul et sauvegarde  de la projection du  noyau
+		 */
+		grid->saveProjetion(fileName, avp->PROJECTION);
+	}
+}
+
+void ViabiBitSet::ViabilityKernel( bool sortieOK,int nbArret)
+{
+	algoViabiParams * avp=modelParams->getAlgoParameters();
+	int refine = avp->GRID_REFINMENTS_NUMBER;
+
+	ostringstream os;
+	string fileName;
+	double t1,t2,elapsed_time, t1_glob, t2_glob, elapsed_time_glob;
+	timeval tim, tim_glob;
+	//  raffinements successifs ( y compris le premier calcul si refine=0)
+	int refIter=-1;
+	int seuilArret=nbArret;
+
+	cout<< " debut de la boucle de rafinements nb refine = "<<refine<<endl;
+	while( refIter<refine)
+	{
+		gettimeofday(&tim,NULL);              //mesure le temps d'execution
+		t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+		//  Calcul du noyau de viabilité
+		cout<< "=============================Debut viab kernel =============================="<<endl;
+		ViabilityKernelSimple(1,seuilArret);
+		cout<< "=============================================================================="<<endl;
+		gettimeofday(&tim,NULL);
+		t2=tim.tv_sec+(tim.tv_usec/1000000.0);
+		elapsed_time=(double)((t2-t1));
+		cout << "Elapsed time : " << elapsed_time << " sec." << endl << endl;
+		//   cout<< "=============================================================================="<<endl;
+		/*  * sauvegardes
+		 */
+		if(avp->INTERMEDIATE_SAVINGS)
+		{
+			os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<".dat";
+			fileName=os.str();
+			os.str("");
+			grid->saveValOnGrid(fileName);
+
+			if(avp->SAVE_SLICE){
+				os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-Slice"<<".dat";
+				fileName=os.str();
+				os.str("");
+				grid->saveCoupe(fileName);
+			}
+			if(avp->SAVE_SLICE_BOUND){
+				os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-SliceBound"<<".dat";
+				fileName=os.str();
+				os.str("");
+				grid->saveCoupeBoundary(fileName);
+			}
+			if(avp->SAVE_BOUNDARY){
+				os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-bound.dat";
+				fileName=os.str();
+				os.str("");
+				grid->saveBoundary(fileName);
+			}
+
+			if(avp->SAVE_PROJECTION)
+			{
+				os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-proj"<<".dat";
+				fileName=os.str();
+				os.str("");
+				/*
+				 *  calcul et sauvegarde  de la projection du  noyau
+				 */
+				grid->saveProjetion(fileName, avp->PROJECTION);
+			}
+		}
+
+
+		refIter++;
+		seuilArret*=2;
+		/*
+		 * raffinement du maillage
+		 */
+
+		if(refIter<refine)
+		{
+			cout<< "refine\n";
+			grid->refine();
+		}
+	}
+	if(!avp->INTERMEDIATE_SAVINGS)
+	{
+		if(avp->SAVE_SLICE){
+			os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-Slice"<<".dat";
+			fileName=os.str();
+			os.str("");
+			grid->saveCoupe(fileName);
+		}
+		if(avp->SAVE_SLICE_BOUND){
+			os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-SliceBound"<<".dat";
+			fileName=os.str();
+			os.str("");
+			grid->saveCoupeBoundary(fileName);
+		}
+		if(avp->SAVE_BOUNDARY){
+			os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-bound.dat";
+			fileName=os.str();
+			os.str("");
+			grid->saveBoundary(fileName);
+		}
+
+		if(avp->SAVE_PROJECTION)
+		{
+			os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-proj"<<".dat";
+			fileName=os.str();
+			os.str("");
+			/*
+			 *  calcul et sauvegarde  de la projection du  noyau
+			 */
+			grid->saveProjetion(fileName, avp->PROJECTION);
+		}
+	}
+
+}
+void ViabiBitSet::ViabilityKernelSimple( bool sortieOK,int nbArret)
+{
+	if(dynsys->getDimC()   ==0)
 	{
 		if(nbOMPThreads>1)
 		{
-			this->noyauViabi_sansControle_omp(sortieOK, nbArret);
+			noyauViabi_sansControle_omp(sortieOK, nbArret);
 		}
 		else
 		{
-			this->noyauViabi_sansControle(sortieOK, nbArret);
+			cout<<"viab kernel sans controle"<<endl;
+			noyauViabi_sansControle(sortieOK, nbArret);
 		}
 	}
 	else
 	{
-		if((this->dynsys->getDynType()==CC) ||(this->dynsys->getDynType()==DC) )
+		if((dynsys->getDynType()==CC) ||(dynsys->getDynType()==DC) )
 		{
 			if(nbOMPThreads>1)
 			{
-				this->noyauViabi_omp(sortieOK, nbArret);
+				noyauViabi_omp(sortieOK, nbArret);
 			}
 			else
 			{
-				this->noyauViabi_omp(sortieOK, nbArret);
+				noyauViabi_omp(sortieOK, nbArret);
 			}
 		}
 		else
 		{
-			if((this->dynsys->getDynType()==DD)   )
+			if((dynsys->getDynType()==DD)   )
 			{
-				this->noyauViabi_FD(sortieOK, nbArret);
+				noyauViabi_FD(sortieOK, nbArret);
 			}
 		}
 	}

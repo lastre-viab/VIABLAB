@@ -40,6 +40,15 @@ int saveCoupe=0;
 int sliceDirs[dim]={  1, 0};
 double sliceVals[dim]={  1.0, 0.0};
 int saveProjection=0;
+int sortieOKinf[dim]={0, 0};
+int sortieOKsup[dim]={0,0};
+
+double level=0.0;
+double l_Lip = 1.0;
+double l_max=1.0;
+
+int saveSubLevel=0;
+
 /*
  * Paramètre permettant d'indiquer que la borne sur du pavé de calcul par rapport
  * n'ets pas une contrainte "naturelle" du problème; Ainsi la sortie du domaine
@@ -99,6 +108,7 @@ int ompThreads=1;
  *  cette méthode nécessite une initialisation de contrôle
  */
 int typeTraj=VD;
+
 
 double initControls[dimc*nbTrajs]={};
 
@@ -171,7 +181,7 @@ inline double resetSet( double * x, double * u )
     * 1= local calculation using the jacobian matrix
     * 2= local calculation using the finite differences
     */
-   const int computeLC=1;
+   const int computeLC=0;
   /*!
     * \var LC Lipschitz constant if known analytically
     */
@@ -196,7 +206,7 @@ inline double resetSet( double * x, double * u )
     * 1= local calculation using the localDynBounds function
     * 2= local calculation using  explicit maximization on controls
     */
-   const int computeM=1;
+   const int computeM=0;
    /*!
     * \brief Function  defining the mixed  constraints
     *

@@ -101,12 +101,10 @@ void Grid::numToIntCoords(unsigned long long int num,unsigned long long int *res
 void Grid::numToIntAndDoubleCoords(unsigned long long int num,unsigned long long int *resI, double * resD)
 {
   unsigned long long int temp=num;
-
   for(  int d=(int)dim-1;d>=0;d--)
     {
     resI[d]=temp%nbPoints[d];  // coordonn�es enti�res du point
     resD[d]=limInf[d]+step[d]*resI[d]+0.5*gridType*step[d];
-
     temp=(temp-resI[d])/nbPoints[d];
     }
 

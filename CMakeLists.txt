@@ -9,7 +9,9 @@ set(CMAKE_C_COMPILER   gcc)
   set(CMAKE_CXX_FLAGS "${OPTION} -O3 -fopenmp -Wno-deprecated -Wall")	 
   set(CMAKE_LINKER_FLAGS "")
     
-find_package(Boost)
+#find_package(Boost)
+set(Boost_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../../libs/boost_1_75_0")
+include_directories(${Boost_INCLUDE_DIRS})
 message("-- BOOST INCLUDE DIR : ${Boost_INCLUDE_DIRS}")
 include_directories(${Boost_INCLUDE_DIRS})
 

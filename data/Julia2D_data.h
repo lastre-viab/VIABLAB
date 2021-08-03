@@ -28,6 +28,9 @@
 #define TESTDATA_H_
 
 
+
+#include "WeakDeclarations.h"
+
 /***********************************************************
  * Some model specific parameters can be defined here
  *************************************************************/
@@ -35,6 +38,8 @@
 double R=2.0;      //rayon de la boule pour le calcul
 double a=-0.7998;  // Paramètres = u=(a,b)
 double b= 0.15517;
+
+
 
 /*! \var dim
  *  \brief State  dimension
@@ -80,7 +85,7 @@ double STATE_MAX[dim]={R, R};
  * number of  discretization points for the state variable
  * \see gridParams
  */
-unsigned long long int nbPointsState[dim]    =  {401,401};
+unsigned long long int nbPointsState[dim]    =  {101,101};
 /*
  * Direction le long de laquelle l'ensemble sera représenté par des suites de bits
  */
@@ -111,7 +116,7 @@ int refine=2;
  * 0=non periodic variable
  * \see gridParams
  */
-int periodic[dim]={0};
+int periodic[dim]={0,0};
 
 /*!
  * \var dbFileName
@@ -131,6 +136,7 @@ string prefix="JuliaTest-";
  */
 int computeSet=1;
 int saveBoundary=1;
+int intermediate_savings = 0;
 
 const int nbTrajs=0;
 double initPoints[dim*nbTrajs]={};

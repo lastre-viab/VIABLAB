@@ -1,21 +1,5 @@
 /*
  * SysDyn.h
- *  *
- *    VIABLAB : a numerical library for Mathematical Viability Computations
- *    Copyright (C) <2020>  <Anna DESILLES, LASTRE>
- *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as
- *   published by the Free Software Foundation, either version 3 of the
- *   License, or (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
- *   
- *   You should have received a copy of the GNU Affero General Public License
- *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *  Created on: 26 nov. 2013
  *      Author: ANYA
@@ -124,6 +108,17 @@ public:
    */
   double (*constraintsX)(double *);
   double (*constraintsX_fd)(unsigned long long int *);
+
+  /*!
+     * \brief  Cette fonction d?����finit les contraintes sur l'?����tat, elle correspond a la d?����finition k(x)
+     *
+     * Attention!  Cette fonction est d?����finie par l'utilisateur  dans une fichier "dataMonModele.h"
+     * Ici dans le code c'est un param?����tre dont ne conna?����t que la "signature" : les types des arguments  et de la sortie
+     *
+     * @param[in] x l'?����tat x
+     * @return valeur r?����elle si\f$x\in K\f$, \f$ +\infty\f$ sinon
+     */
+    double (*dynConstraintsForTraj)(double *, double *);
 
   /*!
    * \brief  Cette fonction d?����finit la cible, elle correspond a la d?����finition de c(x)

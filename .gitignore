@@ -82,3 +82,12 @@
 /save_mains/mainOptim.cpp
 /save_mains/mainSophie.cpp
 /save_mains/mainViab2D.cpp
+OUTPUT/
+CMakeFiles/
+Default/
+.settings/
+/.project
+/.cproject
+/cmake_install.cmake
+/CMakeCache.txt
+/Makefile

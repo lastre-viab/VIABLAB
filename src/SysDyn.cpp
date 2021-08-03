@@ -1,21 +1,5 @@
 /*
  * SysDyn.cpp
- *  *
- *    VIABLAB : a numerical library for Mathematical Viability Computations
- *    Copyright (C) <2020>  <Anna DESILLES, LASTRE>
- *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as
- *   published by the Free Software Foundation, either version 3 of the
- *   License, or (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
- *   
- *   You should have received a copy of the GNU Affero General Public License
- *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *  Created on: 26 nov. 2013
  *      Author: ANYA
@@ -106,12 +90,12 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid * grRef)
 
   if(L==0) L=1.0;
   if(MF==0) MF=1.0;
- // cout<< " MF="<<MF<< " LIP = "<<L<<endl;
+  // cout<< " MF="<<MF<< " LIP = "<<L<<endl;
 
   double h=(gr)->getMaxStep();
 
-//  cout<< " h="<<h<<endl;
-  //system("pause");
+   //cout<< " h="<<h<<endl;
+  // system("pause");
 
   //if(L*MF>1)
   //{
@@ -587,7 +571,6 @@ double  SysDyn::calculRho_local(double * x   )
 {
   double rho1;
   double h=gr->maxStep;
-
   double LL= ((this->*calcul_L))(x);
   double MFF=  ((this->*calcul_M))(x);
 
@@ -599,7 +582,7 @@ double  SysDyn::calculRho_local(double * x   )
     }
 
   rho1=  sqrt(( 2.0*h)/(LL*MFF));
-   // cout << "x= "<<x[0]<< " "<<x[1]<< " L= "<<LL<< "  M= "<< MFF<<  " h= "<<h<<" rho= "<<rho1<<endl;
+  //cout << "x= "<<x[0]<< " "<<x[1]<< " L= "<<LL<< "  M= "<< MFF<<  " h= "<<h<<" rho= "<<rho1<<endl;
   return rho1;
 }
 
