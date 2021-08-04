@@ -226,12 +226,14 @@ ViabiBitSet::ViabiBitSet(ParametersManager *pm)
 	modelParams = pm;
 
 	systemParams sp= *(pm->getSystemParameters());
-	sp.L_LIP=0.0;
-	sp.L_MF=0;
+	sp.L_LIP=1.0;
+	sp.L_MF=1.0;
 	algoViabiParams avp =*(pm->getAlgoParameters());
 	controlParams cp =*(pm->getControlParameters());
+	gridParams gp = *(pm->getGridParameters());
 
-	grid=new Grid_BitSet( *(pm->getGridParameters()));
+	dim = gp.DIM;
+	grid=new Grid_BitSet( gp);
 	dynsys = new SysDyn(sp, dim, cp, grid);
 
 	InitViabiBitSet(avp);
@@ -1163,10 +1165,13 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print
 		 */
 		if(dynsys->constraintsXU(xCoordsDouble,controlCoords[cu])<PLUS_INF)
 		{
+			//cout<< " constr XU OK rho = "<<rho<<endl;
+			//cout<< " xCoords "; printVector(xCoordsDouble, dim);
 			/*
 			 * calcul du successeur  du point en cours
 			 */
 			(dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[cu], doubleVect1, rho);
+			//cout<< "image "; printVector(doubleVect1, dim);
 
 			if(grid->isPointInGrid(doubleVect1))
 			{
@@ -2884,7 +2889,7 @@ void ViabiBitSet::noyauViabi_sansControle( bool sortieOK,int nbArret)
 
 				masque=grid->analyseTrameMasqueBis(posX,0);
 
-				//cout<<"masque d'analyse  "<<masque<<endl;
+			//	cout<<"masque d'analyse  "<<masque<<endl;
 
 				masquePointsEnleves->set();
 
@@ -2903,7 +2908,7 @@ void ViabiBitSet::noyauViabi_sansControle( bool sortieOK,int nbArret)
 					{
 						xCoordsDouble[j]=limInf[j]+indice[j-1]*gridStep[j];
 					}
-					//cout<< " Analyse en cours "<<endl;
+					///cout<< " Analyse en cours "<<endl;
 					for(unsigned long long int k=0;k<longTrame;k++)
 					{
 						if(masque[k])
@@ -3166,10 +3171,27 @@ void ViabiBitSet::ViabilityKernel( bool sortieOK,int nbArret)
 		{
 			cout<< "refine\n";
 			grid->refine();
+
+
+			os<<"OUTPUT/"<<filePrefix<<"-viab-Refined"<<refIter<<".dat";
+			fileName=os.str();
+			os.str("");
+			grid->saveValOnGrid(fileName);
+
+			if(avp->SAVE_BOUNDARY){
+				os<<"OUTPUT/"<<filePrefix<<"-viab-Refined"<<refIter<<"-bound.dat";
+				fileName=os.str();
+				os.str("");
+				grid->saveBoundary(fileName);
+			}
 		}
 	}
 	if(!avp->INTERMEDIATE_SAVINGS)
 	{
+		os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<".dat";
+		fileName=os.str();
+		os.str("");
+		grid->saveValOnGrid(fileName);
 		if(avp->SAVE_SLICE){
 			os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-Slice"<<".dat";
 			fileName=os.str();

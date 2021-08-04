@@ -109,7 +109,7 @@ int periodic[dim]={0,0,0,0};
 
 int saveProjection=1;
 unsigned long long int projection[dim]={0,0,0,1};
-
+int intermediate_savings = 1;
 string prefix="equi4D-testOMP-";
 
 /*!

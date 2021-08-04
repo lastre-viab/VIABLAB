@@ -86,7 +86,7 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid * grRef)
 
   lfunc_L=SP.L_LIP;  // constante de Lipschitz
   lfunc_MF=SP.L_MF;  // majoration de la norme de la dynamique
-
+  cout<< "lfunc_MF = "<<lfunc_MF<<endl;
 
   if(L==0) L=1.0;
   if(MF==0) MF=1.0;
@@ -582,7 +582,7 @@ double  SysDyn::calculRho_local(double * x   )
     }
 
   rho1=  sqrt(( 2.0*h)/(LL*MFF));
-  //cout << "x= "<<x[0]<< " "<<x[1]<< " L= "<<LL<< "  M= "<< MFF<<  " h= "<<h<<" rho= "<<rho1<<endl;
+ // cout << "x= "<<x[0]<< " "<<x[1]<< " L= "<<LL<< "  M= "<< MFF<<  " h= "<<h<<" rho= "<<rho1<<endl;
   return rho1;
 }
 
@@ -778,12 +778,13 @@ double SysDyn::calculMF_local_num(double * x )
 
 double SysDyn::calculMF_local_ana(double * x )
 {
+
   double image[dimS];
   double  normeImage;
   ////cout<<" commande num="<<compteComm<<"\n";
   // calcul  de vecteur de controle u
-
   (*localDynBounds)(x,image);
+
   normeImage=0.0;
   for(int k=0;k<dimS;k++)
     {
@@ -791,7 +792,7 @@ double SysDyn::calculMF_local_ana(double * x )
     }
   double   MF1=normeImage;
 
- // cout<< " MF= "<<MF1<<endl;
+  //cout<< " MF= "<<MF1<< " lfunc_MF = " << lfunc_MF<<endl;
   return max(MF1, lfunc_MF);
 }
 

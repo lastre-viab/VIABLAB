@@ -112,7 +112,7 @@ int dirTramage=1;
 /*
  * Nombre d'étapes de rafinement
  */
-int refine=6;
+int refine=3;
 /*
  * Paramètre qui définit si l'ensemble doit être recalculé.
  * Si computeSet=1 alors l'ensemble sea calculé, si
@@ -120,6 +120,9 @@ int refine=6;
 int computeSet=1;
 int ompThreads=1;
 int saveBoundary=1;
+
+int intermediate_savings = 1;
+
 
 /*
  * sélection de type de reconstruction de trajectoire

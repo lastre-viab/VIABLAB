@@ -18,10 +18,15 @@
 /*
  * inclusion des déclarations du modèle
  */
-//#include  "../data/equilibres4D_data.h"
-//#include  "../data/ex1Viabi2D_data.h"
 
-#include  "../data/julia2D_data.h"
+#include "../data/WeakDeclarations.h"
+//#include  "../data/equilibres4D_data.h"  //-- a jour, non reg OK
+//#include  "../data/ex1Viabi2D_data.h"   //-- a jour, non reg OK
+
+//#include  "../data/julia2D_data.h"  //-- a jour, non reg OK
+
+//#include  "../data/zermelo_tmin_data.h"  //-- a jour, non reg OK
+#include  "../data/zermelo_Lmin_data.h"  //-- a jour, non reg OK
 //#include  "../data/ex4_Viabi2D_data.h"
 //#include  "../data/ex3Dim_Viabi2D_data.h"
 //#include  "../data/ex1_Viabi_multiDim_data.h"

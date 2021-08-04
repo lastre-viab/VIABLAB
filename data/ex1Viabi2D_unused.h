@@ -44,7 +44,14 @@ int saveCoupe=0;
 int sliceDirs[dim]={  1, 0};
 double sliceVals[dim]={  1.0, 0.0};
 
-int sortieOK[dim]={0,0};
+int sortieOKinf[dim]={0, 0};
+int sortieOKsup[dim]={0,0};
+
+double level=0.0;
+double l_Lip = 1.0;
+double l_max=1.0;
+
+int saveSubLevel=0;
                                                                         //    C : carr� [-1,1]x[-1,1]x[-1,1] de R3 ;
 /*!
  * Function  defining the  switch conditions  between the continueos and  discrete dynamics

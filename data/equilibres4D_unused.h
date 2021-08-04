@@ -81,6 +81,14 @@ int refine=0;
  * contrôler plus précisément les modalités de sauvegarde).
  */
 int saveCoupeBound=0;
+int sortieOKinf[dim]={0, 0};
+int sortieOKsup[dim]={0,0};
+
+double level=0.0;
+double l_Lip = 1.0;
+double l_max=1.0;
+
+int saveSubLevel=0;
 
 /*!
  * \var saveCoupe

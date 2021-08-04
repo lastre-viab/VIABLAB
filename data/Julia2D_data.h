@@ -29,7 +29,6 @@
 
 
 
-#include "WeakDeclarations.h"
 
 /***********************************************************
  * Some model specific parameters can be defined here
@@ -85,7 +84,7 @@ double STATE_MAX[dim]={R, R};
  * number of  discretization points for the state variable
  * \see gridParams
  */
-unsigned long long int nbPointsState[dim]    =  {101,101};
+unsigned long long int nbPointsState[dim]    =  {1001,1001};
 /*
  * Direction le long de laquelle l'ensemble sera représenté par des suites de bits
  */
@@ -107,7 +106,7 @@ int setType=VIAB;
 /*
  * Nombre de raffinements successifs dans le calcul
  */
-int refine=2;
+int refine=1;
 
 /*!
  * \var periodic[dim]
@@ -123,7 +122,7 @@ int periodic[dim]={0,0};
  * the  name for the  main data base file for the roject
  */
 
-string prefix="JuliaTest-";
+string prefix="JuliaTest4-";
 
  /*
  * Definition of the dynamics  and associated functions and constants
@@ -136,7 +135,7 @@ string prefix="JuliaTest-";
  */
 int computeSet=1;
 int saveBoundary=1;
-int intermediate_savings = 0;
+int intermediate_savings = 1;
 
 const int nbTrajs=0;
 double initPoints[dim*nbTrajs]={};
