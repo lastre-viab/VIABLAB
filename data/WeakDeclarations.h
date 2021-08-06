@@ -8,6 +8,7 @@
 #ifndef DATA_WEAKDECLARATIONS_H_
 #define DATA_WEAKDECLARATIONS_H_
 
+#include "../include/defs.h"
 extern double level;
 extern int sortieOKinf[];
 extern int sortieOKsup[];
@@ -21,12 +22,18 @@ double  constraintsX_fd( unsigned long long int * x ) __attribute__((weak));
 
 void dynamics_fd(unsigned long long int  * x, unsigned long long int *u, unsigned long long int * image) __attribute__((weak));
 double dynConstraintsForTraj(double * x, double * image) __attribute__((weak));
+double  constraintsXUY_fd( unsigned long long int * x, unsigned long long int * u ) __attribute__((weak));
 
 double dynConstraintsForTraj_default(double * x, double * image);
 
 double dynConstraintsForTraj_default(double * x, double * image)
 {
 	return 1.0;
+}
+
+inline double  constraintsXUY_fd_default( unsigned long long int * x, unsigned long long int * u )
+{
+	return -PLUS_INF;
 }
 
 #endif /* DATA_WEAKDECLARATIONS_H_ */

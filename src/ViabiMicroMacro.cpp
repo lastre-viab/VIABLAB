@@ -71,9 +71,21 @@ void ViabiMicroMacro::InitViabiMicroMacro(algoViabiParams avp) {
 	 * d'un point qui  servira  é lire et remplir  correctement
 	 * la bonne partie de ces tableaux
 	 */
-	pointDI.tabCellEntrees=new int[dynsys->getTotalNbPointsC()+1];
-	pointDI.tabImageCells=new int[dynsys->getTotalNbPointsC()];
-	pointDI.tabImageControls=new int[dynsys->getTotalNbPointsC()];
+	pointDI.tabCellEntrees=new unsigned long long int[dynsys->getTotalNbPointsC()+1];
+	pointDI.tabImageCells=new unsigned long long int[dynsys->getTotalNbPointsC()];
+	pointDI.tabImageControls=new unsigned long long int[dynsys->getTotalNbPointsC()];
+
+	/*!
+	 * On initialise la structure  qui servira au stockage temporaire de l'image discrete d'un point de grille
+	 * Les tableaux sont initialisés  avec leur taille maximale possible :
+	 * égale au nb  de controles.
+	 * C'est la valeur effective  de nbImageCells , calculé é chaque evaluation de l'image discrete
+	 * d'un point qui  servira  é lire et remplir  correctement
+	 * la bonne partie de ces tableaux
+	 */
+	pointDI_DD.tabPointsEntrees=new unsigned long long int[dynsys->getTotalNbPointsC()+1];
+	pointDI_DD.tabImagePoints=new unsigned long long int[dynsys->getTotalNbPointsC()];
+	pointDI_DD.tabImageControls=new unsigned long long int[dynsys->getTotalNbPointsC()];
 
 	/*
 	 * Initialisation de tableaux servant de variables globales pour certaines fonctions
@@ -97,7 +109,15 @@ void ViabiMicroMacro::InitViabiMicroMacro(algoViabiParams avp) {
 	ViabiMicroMacro::addNewPointsToSet=&ViabiMicroMacro::addNewPoints;
 	ViabiMicroMacro::addDataToCurrentCell=&ViabiMicroMacro::addDataToCell;
 	ViabiMicroMacro::addDataToCurrentPoint=&ViabiMicroMacro::addDataToPoint;
-	ViabiMicroMacro::createCurrentPointsList=&ViabiMicroMacro::createPointsList;
+
+	if((dynsys->getDynType()==DD)   )
+	{
+		ViabiMicroMacro::createCurrentPointsList=&ViabiMicroMacro::createPointsList_DD;
+	}
+	else
+	{
+		ViabiMicroMacro::createCurrentPointsList=&ViabiMicroMacro::createPointsList;
+	}
 
 
 	if(avp.COMPUTE_TMIN)
@@ -109,10 +129,23 @@ void ViabiMicroMacro::InitViabiMicroMacro(algoViabiParams avp) {
 	else
 	{
 		//  ViabiMicroMacro::computeFirstConvexifiedImage_omp=&ViabiMicroMacro::computeConvexifiedImage_Lmin_omp;
-		ViabiMicroMacro::computeCurrentImage=&ViabiMicroMacro::computeCurrIm_Lmin;
-		ViabiMicroMacro::computeFirstConvexifiedImage=&ViabiMicroMacro::computeConvexifiedImage_Lmin;
+		if((dynsys->getDynType()==DD)   )
+		{
+			ViabiMicroMacro::computeCurrentImage=&ViabiMicroMacro::computeCurrIm_DD;
+			ViabiMicroMacro::computeFirstConvexifiedImage=&ViabiMicroMacro::computeConvexifiedImage_DD;
+		}
+		else
+		{
+			ViabiMicroMacro::computeCurrentImage=&ViabiMicroMacro::computeCurrIm_Lmin;
+			ViabiMicroMacro::computeFirstConvexifiedImage=&ViabiMicroMacro::computeConvexifiedImage_Lmin;
+		}
+
 	}
 
+	tempPointsList1 = new list<imagePoint>();
+	tempPointsList2 = new list<imagePoint>();;
+	whichPointListToUse = 1;
+	currentImagePointsList.pointsList = tempPointsList1;
 }
 
 void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
@@ -348,6 +381,224 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 	//  printVector(doublePointCoords, dim);
 }
 
+void ViabiMicroMacro::computeDiscreteImageOfPoint_DD(unsigned long long int num)
+{
+
+
+	// cout<< " calcul de l'image d'un point \n";
+	unsigned long long int  ** controlCoords=dynsys->getControlIntCoords();
+	unsigned long long int nbCTotal=dynsys->getTotalNbPointsC();
+	unsigned long long int nbPointsTotal=grid->getNbTotalPoints();
+
+	unsigned long long int *intVect1= new unsigned long long int[dim];
+
+
+	grid->numToIntAndDoubleCoords(num,intPointCoords,doublePointCoords);
+	// cout<<  " compute DI  pos = "<<num<< " juste apres num to int double coords\n";
+	// printVector(doublePointCoords, dim);
+	unsigned long long int cu;
+
+	list<uintPair> pointsList;
+	//double dv[dim];
+	for(cu=0;cu<nbCTotal;cu++)
+	{
+
+		//
+
+		// cout<< "  controle numero "<<cu<<endl;
+		//  	printVector(controlCoords[cu],dimC);
+		/*!
+		 * on calcule les coordonnées réelles de l'image du point par la dynamique discrete
+		 * elles sont stockes dans le tableau doubleVect
+		 * si \f$ u\in U(x)\f$  (contréle admissible) on calcule l'image réelle par la dynamique
+		 *  discrétisée  en temps  du point x avec le controle u
+		 */
+		if(dynsys->constraintsXU_fd(intPointCoords,controlCoords[cu])<PLUS_INF)
+		{
+
+
+			// printf("  contraintes sur U et X  ok\n");
+			//  printf( " x= ");
+			//  printVector(doublePointCoords,dim);
+
+			dynsys->dynamics_fd(intPointCoords, controlCoords[cu], intVect1);
+
+			// cout<< " retrour dnamique discrete ";
+			//printVector(doubleVect1, dim);
+			//(dynsys->*discretDynamics)(doublePointCoords, controlCoords[cu], doubleVect);
+			if(grid->isPointInGrid_fd(intVect1))
+			{
+				//////printf( "   le point est das la grlle\n " );
+
+				//////printf(" le point est das la grlle\n");
+				/*!
+				 * Si l'image est  dans les limites de la grille on étudie si elle vérifie les contraintes
+				 */
+				if(dynsys->constraintsX_fd(intVect1)<PLUS_INF)
+				{
+					//////printf( "   contraintes Xu ok\n " );
+
+					//	 ////printf("  contraintes sur   X  ok\n");
+
+					/*!
+					 * Si l'image  est dans l'ensemble de contraintes sur l'état \f$ K \f$
+					 * on calcule le numéro de maille qui contient cett image
+					 */
+					grid->intCoordsToNum(intVect1, &imageCells[cu]);
+
+					/*	grid->numToIntAndDoubleCoords(imageCells[cu],testI,testV);
+					if(testV[0]<doublePointCoords[0])
+					{
+						cout<< " num de déparrt "<<num<< " num de cell image "<<imageCells[cu]<<endl;
+						cout<< " int coords de départ ";
+						for(int lm=0;lm<dim;lm++)
+						{
+							cout<< " "<<intPointCoords[lm];
+						}
+						cout<< endl;
+						cout<< "double coords de départ ";
+						for(int lm=0;lm<dim;lm++)
+						{
+							cout<< " "<<doublePointCoords[lm];
+						}
+						cout<< endl;
+						cout<< " double coords de result ";
+						for(int lm=0;lm<dim;lm++)
+						{
+							cout<< " "<<doubleVect1[lm];
+						}
+						cout<< endl;
+						cout<< " int coords de result projeté ";
+						for(int lm=0;lm<dim;lm++)
+						{
+							cout<< " "<<testI[lm];
+						}
+						cout<< endl;
+						cout<< "double coords de result projeté  ";
+						for(int lm=0;lm<dim;lm++)
+						{
+							cout<< " "<<testV[lm];
+						}
+						cout<< endl;
+
+					}*/
+					// on enregistre le numero de maille
+					pointsList.push_back(uintPair(imageCells[cu],cu));
+					//////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,imageCells[cu]);
+					//   cout<< " les coordonnées  de cin bas de la maille  sont ";
+					//   grid->numToIntAndDoubleCoords(imageCells[cu], intPointCoords, doubleVect1);
+					//   printVector(doubleVect1, dim);
+				}
+				else
+				{
+					/*!
+					 * Si l'image n'est pas dans  \f$ K \f$ on enregistre un numéro de maille factice qui signifie que
+					 * cette image est rejetée
+					 */
+					imageCells[cu]=nbPointsTotal+1; // sinon on enregistre un nombre convenu reconnaissanble
+					pointsList.push_back(uintPair(imageCells[cu],cu));
+					//	////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,imageCells[cu]);
+				}
+			}
+			else
+			{
+				/*!
+				 * Si l'image n'est pas dans  la grille on enregistre un numéro de maille factice qui signifie que
+				 * cette image est rejetée
+				 */
+				/*!
+				 * \todo prévoir la gestion des autorisations de sortie  par axe pour les variables qui peuvent
+				 * se trouver dans des intervalles non bornés
+				 */
+				imageCells[cu]=nbPointsTotal+1; // sinon on enregistre un nombre convenu reconnaissanble
+				pointsList.push_back(uintPair(imageCells[cu],cu));
+				//////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,imageCells[cu]);
+			}
+
+
+			// cout<< " ajour d'une paire é la liste longueur "<<cellsList.size()<<"\n";
+
+		}
+		else
+		{
+			/*!
+			 * Si l'image n'est pas dans  la grille on enregistre un numéro de maille factice qui signifie que
+			 * cette image est rejetée
+			 */
+			/*!
+			 * \todo prévoir la gestion des autorisations de sortie  par axe pour les variables qui peuvent
+			 * se trouver dans des intervalles non bornés
+			 */
+			imageCells[cu]=nbPointsTotal+1; // sinon on enregistre un nombre convenu reconnaissanble
+			pointsList.push_back(uintPair(imageCells[cu],cu));
+			//printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,imageCells[cu]);
+		}
+
+	}
+	/* 	cout<< " fini traitement parallele\n";
+	 for( cu=0;cu<nbCTotal;cu++)
+	 {
+	 	cellsList.push_back(intPair(imageCells[cu],cu));
+	 cout<< " cu  = "<<cu<< " image cell = "<<imageCells[cu]<<endl;
+	 }*/
+	////////system("pause");
+	/*!
+	 * Toutes les images sont calculées  et stockées dans un tableau dans l'ordre
+	 *  de numérotation des controles. La tache suivante consiste é trier ce tableau, éliminer les doublons
+	 *   et  compléter la structure  image de point
+	 */
+
+	pointsList.sort(upairCompare);
+	list<uintPair>::iterator itCell,itDouble;
+
+	itCell=pointsList.begin();
+	itDouble=itCell;
+	unsigned long long int currentPoint;
+
+	cu=0;
+	unsigned long long int iControlTab=0, iCellsTab=0, iEntreesTab=0;
+	// cout<< " juste avant while de parcours de la liste  first "<<(*itCell).first<< " nb cells total "<<(int)nbCellsTotal<<endl;
+	while((itCell!=pointsList.end()) &( (*itCell).first<(int)nbPointsTotal))
+	{
+
+		currentPoint=(*itCell).first;
+
+		//cout<< " current cell "<<currentCell<<endl;
+		pointDI_DD.tabPointsEntrees[iEntreesTab]=iControlTab;
+		pointDI_DD.tabImagePoints[iCellsTab]=currentPoint;
+		iEntreesTab++;
+		iCellsTab++;
+
+		while((itDouble!=pointsList.end() )& ((*itDouble).first==currentPoint))
+		{
+
+			pointDI.tabImageControls[iControlTab]=(*itDouble).second;
+			iControlTab++;
+
+			itDouble++;
+		}
+		/*!
+		 * la boucle s'arrete au premier different
+		 * é la fin de la boucle soit itDouble a atteint la fin de la liste
+		 *  soit  il pointe sur une cellule différente
+		 */
+
+		itCell=itDouble;
+
+
+	}
+
+	pointDI.nbImageCells=iCellsTab;
+
+	/*!
+	 * La derniére valeur  du tableau des controles indique la fin  de la liste des controles associés
+	 * é la derniére cellule
+	 */
+	pointDI.tabCellEntrees[iCellsTab]=iControlTab;
+	// cout<<  " compute DI  FINFINFINF pos = "<<num<< " double coords\n";
+	//  printVector(doublePointCoords, dim);
+}
+
 void ViabiMicroMacro::initialiseTarget()
 {
 	/*!
@@ -449,11 +700,11 @@ void ViabiMicroMacro::initialiseTargetHJB()
 
 	currentImagePointsList.maxNum=0;
 	currentImagePointsList.minNum=0;
-	currentImagePointsList.pointsList=list<imagePoint>();
+	currentImagePointsList.pointsList= tempPointsList1;;
 
 	unsigned long long int pos ;
 
-	list<imagePoint>::iterator itStart=currentImagePointsList.pointsList.begin(),
+	list<imagePoint>::iterator itStart=currentImagePointsList.pointsList->begin(),
 			itNew;
 	int cpt=0;
 
@@ -670,8 +921,11 @@ void ViabiMicroMacro::CaptureBasin()
 	 * principale, associée é la grille  et représentant la fonction valeur, la base de rétroaction optimale et la base de
 	 *  rétro-action viable. On appelle pour cela la fonction addNewPoints().
 	 */
-	nbNewPoints=(this->*addNewPointsToSet)();
-	cout<< " points ajoutes =  "<<nbNewPoints<<endl;
+	if(!(dynsys->getDynType()==DD)   )
+	{
+		nbNewPoints=(this->*addNewPointsToSet)();
+		cout<< " points ajoutes =  "<<nbNewPoints<<endl;
+	}
 
 	iter++;
 
@@ -1666,7 +1920,7 @@ void ViabiMicroMacro::computeCurrIm_tmin( int iter)
 {
 
 
-	cout<< " toto calcul de l'image de Cn local opti nb points Cn = "<<currentImagePointsList.pointsList.size()<<endl;
+	cout<< " toto calcul de l'image de Cn local opti nb points Cn = "<<currentImagePointsList.pointsList->size()<<endl;
 
 	double t1,t2,elapsed_time;
 
@@ -1702,13 +1956,13 @@ void ViabiMicroMacro::computeCurrIm_tmin( int iter)
 	currentImageList.minNum=1000+grid->nbTotalCells;
 	double rho;
 
-	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList.begin(),
+	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList->begin(),
 			itTemp;
 	imageCell tempImageCell;
 
 	itStart=this->currentImageList.cellsList.begin();
 
-	while(!currentImagePointsList.pointsList.empty())//(itPoint!=itLastPoint)
+	while(!currentImagePointsList.pointsList->empty())//(itPoint!=itLastPoint)
 	{
 
 		posX=(*itPoint).PointNum;
@@ -1739,7 +1993,7 @@ void ViabiMicroMacro::computeCurrIm_tmin( int iter)
 			}
 		}
 		itPoint++;
-		currentImagePointsList.pointsList.pop_front();
+		currentImagePointsList.pointsList->pop_front();
 	}
 	gettimeofday(&tim,NULL);
 	t2=tim.tv_sec+(tim.tv_usec/1000000.0);
@@ -1784,14 +2038,14 @@ void ViabiMicroMacro::computeCurrIm_Lmin( int iter)
 	currentImageList.minNum=1000+grid->nbTotalCells;
 	double rho, tempL;
 
-	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList.begin(),
+	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList->begin(),
 			itTemp;
 	imageCell tempImageCell;
 
 	itStart=this->currentImageList.cellsList.begin();
 	double imageCoords[dim];
 
-	while(!currentImagePointsList.pointsList.empty())//(itPoint!=itLastPoint)
+	while(!currentImagePointsList.pointsList->empty())//(itPoint!=itLastPoint)
 	{
 
 		posX=(*itPoint).PointNum;
@@ -1846,7 +2100,7 @@ void ViabiMicroMacro::computeCurrIm_Lmin( int iter)
 		//        cout<< " \n";
 
 		itPoint++;
-		currentImagePointsList.pointsList.pop_front();
+		currentImagePointsList.pointsList->pop_front();
 	}
 
 	cout<< " parcours de base terminé\n";
@@ -1862,6 +2116,148 @@ void ViabiMicroMacro::computeCurrIm_Lmin( int iter)
 
 }
 
+
+
+
+void ViabiMicroMacro::computeCurrIm_DD( int iter)
+{
+
+	double t1,t2,elapsed_time;
+
+	timeval tim;
+	gettimeofday(&tim,NULL);
+	t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+
+
+	unsigned long long int posX;
+
+	unsigned long long int nbPointsTotal=grid->getNbTotalPoints();
+
+	unsigned long long int ** controlCoords=dynsys->getControlIntCoords();
+
+
+	/*!
+	 * \todo  introduire à ce niveau un pointeur sur la liste  des cellules images
+	 *  ce pointeur devra suivre l'insertion des cellules
+	 *  puisque elles sont dans l'ordre croissant on
+	 *  recherchera la suivant à partir du pointeur sur la derbière  qui a été ajoutée
+	 *
+	 *
+	 *  Aussi il faut faire l'insertion  de tout le bloc  des données
+	 *  pour la méme cellule
+	 *  donc former tout de méme une cellule  et aprés l'ajouter dans la liste
+	 *  ok
+	 */
+
+	currentImageList.cellsList.clear();
+	currentImageList.maxNum=-1;
+	// currentImageList.minNum=PLUS_INF;
+	currentImageList.minNum=1000+grid->nbTotalCells;
+
+	imagePointsList tempPointsList;
+	tempPointsList.maxNum =0;
+	tempPointsList.minNum =0;
+	if(this->whichPointListToUse ==1)
+	{
+		tempPointsList.pointsList= tempPointsList2;
+		tempPointsList.pointsList->clear();
+	}
+	else
+	{
+		tempPointsList.pointsList= tempPointsList1;
+		tempPointsList.pointsList->clear();
+	}
+
+
+
+	double tempL, tempMu;
+
+	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList->begin(),
+			itTemp;
+	imagePoint tempImagePoint;
+
+	list<imagePoint>::iterator itStart, itNew;
+	itStart=tempPointsList.pointsList->begin();
+	double imageCoords[dim];
+
+	while(!currentImagePointsList.pointsList->empty())//(itPoint!=itLastPoint)
+	{
+
+		posX=(*itPoint).PointNum;
+		// cout<< " posX="<<posX<<endl;
+		grid->numToIntAndDoubleCoords(posX,intPointCoords,doublePointCoords);
+		//  cout<< " rho= "<<rho;
+
+		/*!
+		 * On calcule l'image discrète  du point
+		 */
+
+		this->computeDiscreteImageOfPoint_DD(posX);
+		/*!
+		 * L'image calculée est stockée dans la structure pointDI sous forme de tableau ordonné
+		 *  de cellules
+		 */
+		unsigned long long int numPoint,numControl;
+
+
+		//cout<< "  nb cells dans l'image "<<pointDI.nbImageCells<<endl;
+
+
+		//cout<<  " analyse d'une image de point\n";
+		for(int i=0;i<pointDI_DD.nbImagePoints;i++)
+		{
+			numPoint=pointDI_DD.tabImagePoints[i];
+			tempImagePoint.PointNum = numPoint;
+			//cout<< " i= "<<i<<  "numCell= "<<numCell<<endl;
+
+			if(numPoint< nbPointsTotal)
+			{
+				tempImagePoint.minVal=PLUS_INF;
+				for(int j=pointDI_DD.tabPointsEntrees[i];j<pointDI_DD.tabPointsEntrees[i+1];j++)
+				{
+					numControl=pointDI_DD.tabImageControls[j];
+					tempL=dynsys->lFunc_fd(intPointCoords, controlCoords[numControl]);
+					tempMu=dynsys->muFunc_fd(intPointCoords, controlCoords[numControl]);
+					// cout<< " tempL = "<<tempL<< " tempL 1 = "<<tempL1<<endl;
+					tempImagePoint.minVal=min(tempImagePoint.minVal, max(tempMu, (*itPoint).minVal+tempL));
+				}
+				// cout<< " ajout  de cellule avec valeur "<< tempImageCell.minVal<<"\n ";
+				addDataToGivenPointsList(&tempPointsList,&itStart,tempImagePoint, &itNew);
+				itStart=itNew;
+				// cout<< " ares ajout  de l'image d'un point la taille de la liste est "<<currentImageList.cellsList.size()<<endl;
+			}
+		}
+
+		//        cout<< " \n";
+
+		itPoint++;
+		currentImagePointsList.pointsList->pop_front();
+	}
+
+
+	cout<< " parcours de base terminé\n";
+	currentImagePointsList.pointsList = tempPointsList.pointsList;
+
+	if(this->whichPointListToUse == 1)
+	{
+		whichPointListToUse = 2;
+	}
+	else
+	{
+		whichPointListToUse = 1;
+	}
+
+	gettimeofday(&tim,NULL);
+	t2=tim.tv_sec+(tim.tv_usec/1000000.0);
+	elapsed_time=(double)((t2-t1));
+
+	cout << "Elapsed time : " << elapsed_time << " sec." << endl << endl;
+
+
+}
+
+
+
 /*
 
 
@@ -1869,7 +2265,7 @@ void ViabiMicroMacro::computeCurrIm_Lmin( int iter)
   {
 
 
-    cout<< " toto calcul de l'image de Cn  LMIN local opti nb points Cn = "<<currentImagePointsList.pointsList.size()<<endl;
+    cout<< " toto calcul de l'image de Cn  LMIN local opti nb points Cn = "<<currentImagePointsList.pointsList->size()<<endl;
 
     double t1,t2,elapsed_time;
     double cVect[dimC];
@@ -1911,15 +2307,15 @@ void ViabiMicroMacro::computeCurrIm_Lmin( int iter)
     currentImageList.minNum=1000+grid->nbTotalCells;
     double rho, tempL;
 
-    list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList.begin(),
-        itLastPoint=currentImagePointsList.pointsList.end(),
+    list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList->begin(),
+        itLastPoint=currentImagePointsList.pointsList->end(),
         itTemp;
     imageCell tempImageCell;
 
     itStart=this->currentImageList.cellsList.begin();
 
 
-    while(!currentImagePointsList.pointsList.empty())//(itPoint!=itLastPoint)
+    while(!currentImagePointsList.pointsList->empty())//(itPoint!=itLastPoint)
       {
 
       posX=(*itPoint).PointNum;
@@ -1970,7 +2366,7 @@ void ViabiMicroMacro::computeCurrIm_Lmin( int iter)
       //        cout<< " \n";
 
       itPoint++;
-      currentImagePointsList.pointsList.pop_front();
+      currentImagePointsList.pointsList->pop_front();
       }
 
     cout<< " parcours de base terminé\n";
@@ -1992,11 +2388,11 @@ void ViabiMicroMacro::computeCurrIm_Lmin( int iter)
 
 void ViabiMicroMacro::initCnIndices(  )
 {
-  cout<< "init Cn indices   nombre de points dans Cn = "<<currentImagePointsList.pointsList.size()<<endl;
+  cout<< "init Cn indices   nombre de points dans Cn = "<<currentImagePointsList.pointsList->size()<<endl;
 
 
-  list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList.begin(),
-      itLastPoint=currentImagePointsList.pointsList.end();
+  list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList->begin(),
+      itLastPoint=currentImagePointsList.pointsList->end();
 
   this->indicesCn.clear();
   while(itPoint!=itLastPoint)
@@ -2010,7 +2406,7 @@ void ViabiMicroMacro::initCnIndices(  )
 
 void ViabiMicroMacro::computeConvexifiedImage_Lmin_omp( int iter)
 {
-	cout<< "new:  calcul de l'image convexifiee  de Cn , rho local, opti,  nombre de points dans Cn = "<<currentImagePointsList.pointsList.size()<<endl;
+	cout<< "new:  calcul de l'image convexifiee  de Cn , rho local, opti,  nombre de points dans Cn = "<<currentImagePointsList.pointsList->size()<<endl;
 	int posX;
 	list<imageCell>::iterator itStart, itNew;
 
@@ -2020,8 +2416,8 @@ void ViabiMicroMacro::computeConvexifiedImage_Lmin_omp( int iter)
 	currentImageList.minNum=1000+grid->nbTotalCells;
 	double rho, tempL;
 
-	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList.begin(),
-			itLastPoint=currentImagePointsList.pointsList.end(),
+	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList->begin(),
+			itLastPoint=currentImagePointsList.pointsList->end(),
 			itTemp;
 	imageCell tempImageCell;
 
@@ -2091,7 +2487,7 @@ void ViabiMicroMacro::computeConvexifiedImage_tmin( int iter)
 {
 
 
-	cout<< "new:  calcul de l'image convexifiee  de Cn , rho local, opti,  nombre de points dans Cn = "<<currentImagePointsList.pointsList.size()<<endl;
+	cout<< "new:  calcul de l'image convexifiee  de Cn , rho local, opti,  nombre de points dans Cn = "<<currentImagePointsList.pointsList->size()<<endl;
 
 
 
@@ -2109,8 +2505,8 @@ void ViabiMicroMacro::computeConvexifiedImage_tmin( int iter)
 	currentImageList.minNum=1000+grid->nbTotalCells;
 	double rho;
 
-	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList.begin(),
-			itLastPoint=currentImagePointsList.pointsList.end(),
+	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList->begin(),
+			itLastPoint=currentImagePointsList.pointsList->end(),
 			itTemp;
 	imageCell tempImageCell;
 
@@ -2161,6 +2557,11 @@ void ViabiMicroMacro::computeConvexifiedImage_tmin( int iter)
 }
 
 
+void ViabiMicroMacro::computeConvexifiedImage_DD( int iter)
+{
+
+}
+
 void ViabiMicroMacro::computeConvexifiedImage_Lmin( int iter)
 {
 	int posX;
@@ -2172,8 +2573,8 @@ void ViabiMicroMacro::computeConvexifiedImage_Lmin( int iter)
 	currentImageList.minNum=1000+grid->nbTotalCells;
 	double rho, tempL;
 
-	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList.begin(),
-			itLastPoint=currentImagePointsList.pointsList.end(),
+	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList->begin(),
+			itLastPoint=currentImagePointsList.pointsList->end(),
 			itTemp;
 	imageCell tempImageCell;
 
@@ -2216,11 +2617,11 @@ void ViabiMicroMacro::computeConvexifiedImage_Lmin( int iter)
 
 		//cout<< "  nb cells dans l'image "<<pointDI.nbImageCells<<endl;
 
-//		cout<< " =======================================================\n";
-//		cout<<  " analyse d'une image de point ";
-//		printVector(doublePointCoords, dim);
-//		cout<< "  point.minVal= "<<(*itPoint).minVal<<endl;
-//		cout<< " =======================================================\n";
+		//		cout<< " =======================================================\n";
+		//		cout<<  " analyse d'une image de point ";
+		//		printVector(doublePointCoords, dim);
+		//		cout<< "  point.minVal= "<<(*itPoint).minVal<<endl;
+		//		cout<< " =======================================================\n";
 
 		for(int i=0;i<pointDI.nbImageCells;i++)
 		{
@@ -2237,9 +2638,9 @@ void ViabiMicroMacro::computeConvexifiedImage_Lmin( int iter)
 					tempL=dynsys->lFunc(doublePointCoords, controlCoords[numControl]);
 					(dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[numControl], imageCoords, 1.0);
 					double tempL1=dynsys->lFunc(imageCoords, controlCoords[numControl]);
-//					cout<<  " rho= "<< rho<<" ";
-//					cout<< " image "; printVector(imageCoords, dim);
-//					cout<< " tempL = "<<tempL<< " tempL 1 = "<<tempL1<< " terme integrale "<<rho*0.5*(tempL+tempL1)<<endl;
+					//					cout<<  " rho= "<< rho<<" ";
+					//					cout<< " image "; printVector(imageCoords, dim);
+					//					cout<< " tempL = "<<tempL<< " tempL 1 = "<<tempL1<< " terme integrale "<<rho*0.5*(tempL+tempL1)<<endl;
 					tempImageCell.minVal=min(tempImageCell.minVal, (*itPoint).minVal+rho*0.5*(tempL+tempL1));
 				}
 				//cout<< "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
@@ -2266,7 +2667,7 @@ void ViabiMicroMacro::computeConvexifiedImage_tmin_omp( int iter)
 {
 
 
-  cout<< "new:  calcul de l'image convexifiee  de Cn , rho local, opti,  nombre de points dans Cn = "<<currentImagePointsList.pointsList.size()<<endl;
+  cout<< "new:  calcul de l'image convexifiee  de Cn , rho local, opti,  nombre de points dans Cn = "<<currentImagePointsList.pointsList->size()<<endl;
 
 
 
@@ -2476,12 +2877,12 @@ void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt, i
 	//cout<< " l'ajout du point numPOint "<<numnewPoint << " maxNum = "<<currentImagePointsList.maxNum<<endl;
 	list<imagePoint>::iterator itCell;
 
-	if(currentImagePointsList.pointsList.size()==0)
+	if(currentImagePointsList.pointsList->size()==0)
 	{
-		currentImagePointsList.pointsList.push_back(newPoint);
+		currentImagePointsList.pointsList->push_back(newPoint);
 		currentImagePointsList.maxNum=numnewPoint;
 		currentImagePointsList.minNum=numnewPoint;
-		(*resIt)=currentImagePointsList.pointsList.end();
+		(*resIt)=currentImagePointsList.pointsList->end();
 		(*resIt)--;
 		//cout<< " on ajoute le premier element nouveax min et max  de la liste sont "<<currentImagePointsList.minNum<< " "<<currentImagePointsList.maxNum<<endl;
 	}
@@ -2489,9 +2890,9 @@ void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt, i
 	{
 		if(numnewPoint>currentImagePointsList.maxNum)
 		{
-			currentImagePointsList.pointsList.push_back(newPoint);
+			currentImagePointsList.pointsList->push_back(newPoint);
 			currentImagePointsList.maxNum=numnewPoint;
-			(*resIt)=currentImagePointsList.pointsList.end();
+			(*resIt)=currentImagePointsList.pointsList->end();
 			(*resIt)--;
 			//cout<< " on ajoute é la fin  nouveax min et max  de la liste sont "<<currentImagePointsList.minNum<< " "<<currentImagePointsList.maxNum<<endl;
 		}
@@ -2499,9 +2900,9 @@ void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt, i
 		{
 			if(numnewPoint<currentImagePointsList.minNum)
 			{
-				currentImagePointsList.pointsList.push_front(newPoint);
+				currentImagePointsList.pointsList->push_front(newPoint);
 				currentImagePointsList.minNum=numnewPoint;
-				(*resIt)=currentImagePointsList.pointsList.begin();
+				(*resIt)=currentImagePointsList.pointsList->begin();
 				//cout<< " on ajoute au debut nouveax min et max  de la liste sont "<<currentImagePointsList.minNum<< " "<<currentImagePointsList.maxNum<<endl;
 
 			}
@@ -2520,7 +2921,7 @@ void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt, i
 					if(numnewPoint>(*itCell).PointNum)
 					{
 						itCell++;
-						currentImagePointsList.pointsList.insert(itCell,newPoint);
+						currentImagePointsList.pointsList->insert(itCell,newPoint);
 					}
 					else
 					{
@@ -2532,12 +2933,113 @@ void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt, i
 				else
 				{	while( (numnewPoint>(*itCell).PointNum))
 				{
-				//	cout<< " current point num "<<(*itCell).PointNum<< " new point  num "<<numnewPoint<<endl;
+					//	cout<< " current point num "<<(*itCell).PointNum<< " new point  num "<<numnewPoint<<endl;
 					itCell++;
 				}
 				if(numnewPoint<(*itCell).PointNum)
 				{
-					currentImagePointsList.pointsList.insert(itCell,newPoint);
+					currentImagePointsList.pointsList->insert(itCell,newPoint);
+				}
+				else
+				{
+					(this->*addDataToCurrentPoint)(itCell, newPoint);
+				}
+				(*resIt)=itCell;
+
+				}
+			}
+		}
+	}
+
+	//cout<< " l'ajout du point est terminé  on a ajouté juste avant "<<(*(*resIt)).PointNum<<endl;
+	////////system("pause");
+}
+
+void ViabiMicroMacro::addDataToGivenPointsList(imagePointsList * tempImagePointsList, list<imagePoint>::iterator *startIt, imagePoint newPoint,list<imagePoint>::iterator *resIt )
+{
+	/*!
+	 * Dans l'image  en construction de \f$ C_{n}\setminus C_{n-1}\f$ les mailles sont stockées dans l'ordre croissant
+	 * de leur numéros  et chaque maille garde la mémoire de la valeur minimale ainsi que de tous les antécédents
+	 * de cette maille c'est é dire tous les couples viables (x,u) pour lesquels f(x,u) appartient é cette maille.
+	 * En plus  on distingue les couples (x,u) minimisant la valeur  et les autres, juste viables.
+	 *
+	 * Pour ajouter une nouvelle maille dans cette liste  on doit faire dans l'ordre les choses suivantes :
+	 *
+	 *    rechercher dans la liste la place nu numéro de maille é inserrer
+	 *   deux cas de figure peuvent se présenter :
+	 *     la maille ayant le méme numéro  existe déjé: on procéde alors é la fusion des deux,  en déterminant la valeur optimale et
+	 *    en  fusionnant les rétro-actions
+	 *     la maille n'existe pas encore; alors on l'inserre simplement  dans l'ordre croissant.
+	 *
+	 */
+	//cout<< " l'ajout du point itStart pointe sur "<<(*(*startIt)).PointNum <<endl;
+
+	unsigned long long int numnewPoint=newPoint.PointNum;
+	//cout<< " l'ajout du point numPOint "<<numnewPoint << " maxNum = "<<currentImagePointsList.maxNum<<endl;
+	list<imagePoint>::iterator itCell;
+
+	if(tempImagePointsList->pointsList->size()==0)
+	{
+		tempImagePointsList->pointsList->push_back(newPoint);
+		tempImagePointsList->maxNum=numnewPoint;
+		tempImagePointsList->minNum=numnewPoint;
+		(*resIt)=tempImagePointsList->pointsList->end();
+		(*resIt)--;
+		//cout<< " on ajoute le premier element nouveax min et max  de la liste sont "<<tempImagePointsList->minNum<< " "<<tempImagePointsList->maxNum<<endl;
+	}
+	else
+	{
+		if(numnewPoint>tempImagePointsList->maxNum)
+		{
+			tempImagePointsList->pointsList->push_back(newPoint);
+			tempImagePointsList->maxNum=numnewPoint;
+			(*resIt)=tempImagePointsList->pointsList->end();
+			(*resIt)--;
+			//cout<< " on ajoute é la fin  nouveax min et max  de la liste sont "<<tempImagePointsList->minNum<< " "<<tempImagePointsList->maxNum<<endl;
+		}
+		else
+		{
+			if(numnewPoint<tempImagePointsList->minNum)
+			{
+				tempImagePointsList->pointsList->push_front(newPoint);
+				tempImagePointsList->minNum=numnewPoint;
+				(*resIt)=tempImagePointsList->pointsList->begin();
+				//cout<< " on ajoute au debut nouveax min et max  de la liste sont "<<tempImagePointsList->minNum<< " "<<tempImagePointsList->maxNum<<endl;
+
+			}
+			else
+			{
+				itCell=*startIt;
+
+				if(numnewPoint<(*itCell).PointNum)
+				{
+
+					while( (numnewPoint<(*itCell).PointNum))
+					{
+						//cout<< " current cell num "<<(*itCell).PointNum<< " new cell num "<<numnewPoint<<endl;
+						itCell--;
+					}
+					if(numnewPoint>(*itCell).PointNum)
+					{
+						itCell++;
+						tempImagePointsList->pointsList->insert(itCell,newPoint);
+					}
+					else
+					{
+						(this->*addDataToCurrentPoint)(itCell, newPoint);
+					}
+					(*resIt)=itCell;
+
+				}
+				else
+				{	while( (numnewPoint>(*itCell).PointNum))
+				{
+					//	cout<< " current point num "<<(*itCell).PointNum<< " new point  num "<<numnewPoint<<endl;
+					itCell++;
+				}
+				if(numnewPoint<(*itCell).PointNum)
+				{
+					tempImagePointsList->pointsList->insert(itCell,newPoint);
 				}
 				else
 				{
@@ -2560,6 +3062,11 @@ void ViabiMicroMacro::addDataToPoint(list<imagePoint>::iterator itCell, imagePoi
 	(*itCell).minVal=min( (*itCell).minVal, newPoint.minVal);
 }
 
+
+void ViabiMicroMacro::createPointsList_DD()
+{
+
+}
 void ViabiMicroMacro::createPointsList()
 {
 
@@ -2573,7 +3080,7 @@ void ViabiMicroMacro::createPointsList()
 	unsigned long long int posX;
 	double testV[dim];
 	unsigned long long int testI[dim];
-	currentImagePointsList.pointsList.clear();
+	currentImagePointsList.pointsList->clear();
 	currentImagePointsList.maxNum=-1;
 	currentImagePointsList.minNum=currentImageList.minNum;
 
@@ -2589,7 +3096,7 @@ void ViabiMicroMacro::createPointsList()
 
 	imagePoint tempPoint;
 	list<imagePoint>::iterator itStart, itNew;
-	itStart=this->currentImagePointsList.pointsList.begin();
+	itStart=this->currentImagePointsList.pointsList->begin();
 	for(i=0;i<nbPointsCube-1;i++)
 	{
 		while(itCell!=itLast)
@@ -2676,69 +3183,80 @@ void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt, 
 
 	list<imageCell>::iterator itCell, itLast=currentImageList.cellsList.end();
 
-
-	if((int)numNewCell>currentImageList.maxNum)
+	if(currentImageList.cellsList.size()==0)
 	{
 		currentImageList.cellsList.push_back(newCell);
 		currentImageList.maxNum=numNewCell;
-		currentImageList.minNum=min(currentImageList.maxNum,currentImageList.minNum);
+		currentImageList.minNum=numNewCell;
 		(*resIt)=currentImageList.cellsList.end();
 		(*resIt)--;
 	}
 	else
 	{
-		if((int)numNewCell<currentImageList.minNum)
+
+
+		if((int)numNewCell>currentImageList.maxNum)
 		{
-			currentImageList.cellsList.push_front(newCell);
-			currentImageList.minNum=numNewCell;
-			currentImageList.maxNum=max(currentImageList.maxNum,currentImageList.minNum);
-			(*resIt)=currentImageList.cellsList.begin();
+			currentImageList.cellsList.push_back(newCell);
+			currentImageList.maxNum=numNewCell;
+			currentImageList.minNum=min(currentImageList.maxNum,currentImageList.minNum);
+			(*resIt)=currentImageList.cellsList.end();
+			(*resIt)--;
 		}
 		else
 		{
-			itCell=*startIt;
-
-
-			if((numNewCell>(*itCell).cellNum))
+			if((int)numNewCell<currentImageList.minNum)
 			{
-				while((itCell!=itLast) && (numNewCell>(*itCell).cellNum))
-				{
-					//cout<< " current cell num "<<(*itCell).cellNum<< " new cell num "<<numNewCell<<endl;
-					itCell++;
-				}
-				if(numNewCell<(*itCell).cellNum)
-				{
-					currentImageList.cellsList.insert(itCell,newCell);
-				}
-				else
-				{
-					(this->*addDataToCurrentCell)(itCell, newCell);
-				}
-				(*resIt)=itCell;
+				currentImageList.cellsList.push_front(newCell);
+				currentImageList.minNum=numNewCell;
+				currentImageList.maxNum=max(currentImageList.maxNum,currentImageList.minNum);
+				(*resIt)=currentImageList.cellsList.begin();
 			}
 			else
 			{
-				while(  (numNewCell<(*itCell).cellNum))
+				itCell=*startIt;
+
+
+				if((numNewCell>(*itCell).cellNum))
 				{
-					//cout<< " current cell num "<<(*itCell).cellNum<< " new cell num "<<numNewCell<<endl;
-					itCell--;
-				}
-				if(numNewCell>(*itCell).cellNum)
-				{
-					itCell++;
-					currentImageList.cellsList.insert(itCell,newCell);
+					while((itCell!=itLast) && (numNewCell>(*itCell).cellNum))
+					{
+						//cout<< " current cell num "<<(*itCell).cellNum<< " new cell num "<<numNewCell<<endl;
+						itCell++;
+					}
+					if(numNewCell<(*itCell).cellNum)
+					{
+						currentImageList.cellsList.insert(itCell,newCell);
+					}
+					else
+					{
+						(this->*addDataToCurrentCell)(itCell, newCell);
+					}
+					(*resIt)=itCell;
 				}
 				else
 				{
-					(this->*addDataToCurrentCell)(itCell, newCell);
+					while(  (numNewCell<(*itCell).cellNum))
+					{
+						//cout<< " current cell num "<<(*itCell).cellNum<< " new cell num "<<numNewCell<<endl;
+						itCell--;
+					}
+					if(numNewCell>(*itCell).cellNum)
+					{
+						itCell++;
+						currentImageList.cellsList.insert(itCell,newCell);
+					}
+					else
+					{
+						(this->*addDataToCurrentCell)(itCell, newCell);
+					}
+					(*resIt)=itCell;
 				}
-				(*resIt)=itCell;
+
 			}
-
 		}
+
 	}
-
-
 }
 
 
@@ -2807,8 +3325,8 @@ void ViabiMicroMacro::showCurrentImageList()
 void ViabiMicroMacro::showCurrentImagePointsList()
 {
 	imagePoint c;
-	list<imagePoint>::iterator itCell=currentImagePointsList.pointsList.begin(),
-			itLast=currentImagePointsList.pointsList.end();
+	list<imagePoint>::iterator itCell=currentImagePointsList.pointsList->begin(),
+			itLast=currentImagePointsList.pointsList->end();
 	cout<< " image  de CN calculée  est la suivante : liste de POINTS \n";
 	cout<< "*******************************************************\n";
 	while((itCell!=itLast))
@@ -2862,8 +3380,8 @@ int ViabiMicroMacro::addNewPoints()
 
 	int nbNewPoints=0;
 
-	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList.begin(),
-			itLastPoint=currentImagePointsList.pointsList.end(),
+	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList->begin(),
+			itLastPoint=currentImagePointsList.pointsList->end(),
 			itTemp;
 
 	imagePoint tempPoint;
@@ -2881,7 +3399,7 @@ int ViabiMicroMacro::addNewPoints()
 		{
 			itTemp=itPoint;
 			itPoint++;
-			currentImagePointsList.pointsList.erase(itTemp);
+			currentImagePointsList.pointsList->erase(itTemp);
 		}
 	}
 

@@ -142,6 +142,11 @@ ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlPara
 		sp.DYN_CONSTR_FOR_TRAJ = &dynConstraintsForTraj;
 	else
 		sp.DYN_CONSTR_FOR_TRAJ = &dynConstraintsForTraj_default;
+
+	if(constraintsXUY_fd)
+			sp.MU_FUNC_FD = &constraintsXUY_fd;
+		else
+			sp.MU_FUNC_FD = &constraintsXUY_fd_default;
 	/*
 	 * Initialisation des paramètres de systèmes dynamique
 	 * Ici toutes les valeurs sont par defaut, non utilisés

@@ -241,6 +241,9 @@ private:
 	 */
 	void computeCurrIm_Lmin(int iter);
 
+	void computeCurrIm_DD( int iter);
+	void computeDiscreteImageOfPoint_DD(unsigned long long int num);
+
 	void addDataToCurrentImage(list<imageCell>::iterator *startIt, imageCell newCell,list<imageCell>::iterator *resIt );
 
 
@@ -285,7 +288,7 @@ private:
 	 */
 
 	void createPointsList();
-
+	void createPointsList_DD();
 
 
 
@@ -357,6 +360,7 @@ private:
 	 */
 
 	void  addTempDataToPointsList(list<imagePoint>::iterator *startIt, imageTempPoint newPoint,list<imagePoint>::iterator *resIt );
+	void addDataToGivenPointsList(imagePointsList * tempImagePointsList, list<imagePoint>::iterator *startIt, imagePoint newPoint,list<imagePoint>::iterator *resIt );
 
 	void addDataToPointsList(list<imagePoint>::iterator *startIt, imagePoint newPoint,list<imagePoint>::iterator *resIt );
 
@@ -369,6 +373,16 @@ private:
 	 *  Attention! Variable globale dans les méthodes de la classe!
 	 */
 	discretImageSet pointDI;
+
+	/*!
+	 *  \brief  Une structure servant à stocker les données  de l'image discréte
+	 *  d'un point au cours de parcours  de calcul  de \f$ \Phi(C_{n}\setminus C_{n-1}) \f$ .
+	 *  \see computeDiscreteImageOfPoint
+	 *  \see computeCurrentImageGlobalRho
+	 *
+	 *  Attention! Variable globale dans les méthodes de la classe!
+	 */
+	discretImageSet_DD pointDI_DD;
 
 	/*!
 	 *  \brief La liste de structures représentant  des mailles d'une image en construction
@@ -384,6 +398,10 @@ private:
 	 * \see addDataToPointsList
 	 */
 	imagePointsList currentImagePointsList;
+
+	std::list<imagePoint> * tempPointsList1;
+	std::list<imagePoint> * tempPointsList2;
+	int whichPointListToUse;
 
 	/*!
 	 * \brief Fonction qui calcule l'image discrére d'un point \f$ \Phi(x)\f$
@@ -432,7 +450,7 @@ private:
 
 	void  computeConvexifiedImage_tmin( int iter);
 	void  computeConvexifiedImage_Lmin( int iter);
-
+	void  computeConvexifiedImage_DD( int iter);
 
 	void (ViabiMicroMacro::* computeFirstConvexifiedImage)( int iter);
 

@@ -25,42 +25,44 @@ void ViabiBitSet::initialiseTarget()
 	 *    seuls les points de la  cible  ont une fonction valeur r�elle
 	 *
 	 */
-	int totalPointsC=0;
-
-	unsigned long long int dim=grid->dim;
-
-	unsigned long long int  * x=new unsigned long long int [dim];
-
-	double * xReel =new double[dim];
-
-	int totalPointsX=grid->getNbTotalPoints();
-	unsigned long long int pos ;
+	//	int totalPointsC=0;
+	//
+	//	unsigned long long int dim=grid->dim;
+	//
+	//	unsigned long long int  * x=new unsigned long long int [dim];
+	//
+	//	double * xReel =new double[dim];
+	//
+	//	int totalPointsX=grid->getNbTotalPoints();
+	//	unsigned long long int pos ;
 
 
 	/*
 	 *  on parcourt  tous les points de l'espace discret  fini
 	 *   et  on choisit les points o� la fonction cible  renvoie une faleur finie
 	 */
-	for( pos=0;pos<(unsigned long long int)totalPointsX;pos++)
-	{
-		/*
-		 * le compteur pos  ets l'unique num�ro entier du point en cours
-		 * dans la num�rotation alphab�tique : on parcourt axe par axe
-		 */
+	//for( pos=0;pos<(unsigned long long int)totalPointsX;pos++)
+	//{
+	/*
+	 * le compteur pos  ets l'unique num�ro entier du point en cours
+	 * dans la num�rotation alphab�tique : on parcourt axe par axe
+	 */
 
-		/*
-		 * on restitue les  coordonn�es neti�res  du point � partir de son num�ro
-		 * ainis que ses coordonn�es r�elles
-		 */
-		grid->numToIntAndDoubleCoords(pos,x,xReel);
+	/*
+	 * on restitue les  coordonn�es neti�res  du point � partir de son num�ro
+	 * ainis que ses coordonn�es r�elles
+	 */
+	//		grid->numToIntAndDoubleCoords(pos,x,xReel);
+	//
+	//		if((*(dynsys->target))(xReel)<PLUS_INF)
+	//		{
+	//			totalPointsC++;
+	//			grid->addPointToSet(x,1.0);
+	//		}
+	//	}
 
-		if((*(dynsys->target))(xReel)<PLUS_INF)
-		{
-			totalPointsC++;
-			grid->addPointToSet(x,1.0);
-		}
-	}
-	cout<<"Total points cible est "<<totalPointsC<<"\n";
+	initialiseTargetPointList();
+	//cout<<"Total points cible est "<<totalPointsC<<"\n";
 }
 
 void ViabiBitSet::setK0_fd()
@@ -1693,7 +1695,7 @@ void ViabiBitSet::initialiseTargetPointList()
 	int totalPointsX=grid->getNbTotalPoints();
 
 
-	currentImagePointsList.maxNum=-1;
+	currentImagePointsList.maxNum=0;
 	currentImagePointsList.minNum=0;
 	currentImagePointsList.pointsList=list<unsigned long long int >();
 
@@ -1775,7 +1777,7 @@ void ViabiBitSet::computeConvexifiedImage( int iter)
 {
 
 
-	cout<< "  calcul de l'imahe de C0   nombre de points dans Cn = "<<currentImagePointsList.pointsList.size()<<endl;
+	cout<< "  Compute First confexified  Image . Iteration num "<<iter<<" points dans Cn = "<<currentImagePointsList.pointsList.size()<<endl;
 
 
 
@@ -1788,7 +1790,7 @@ void ViabiBitSet::computeConvexifiedImage( int iter)
 
 
 	currentImageList.cellsList.clear();
-	currentImageList.maxNum=-1;
+	currentImageList.maxNum=0;
 	currentImageList.minNum=PLUS_INF;
 	unsigned long long int intPointCoords[dim];
 	double doublePointCoords[dim];
@@ -1808,7 +1810,7 @@ void ViabiBitSet::computeConvexifiedImage( int iter)
 		//printVector(doublePointCoords, dim);
 		////////system("pause");
 		rho=dynsys->calculRho_local(doublePointCoords);
-		cout<< " rho= "<<rho;
+		//cout<< " rho= "<<rho;
 
 
 
@@ -1961,63 +1963,74 @@ void ViabiBitSet::addDataToCurrentImage(list<unsigned long long int >::iterator 
 
 	list<unsigned long long int>::iterator itCell, itLast=currentImageList.cellsList.end();
 
-
-	if(numNewCell>currentImageList.maxNum)
+	if(currentImageList.cellsList.size()==0)
 	{
 		currentImageList.cellsList.push_back(newCell);
 		currentImageList.maxNum=numNewCell;
-		currentImageList.minNum=min(currentImageList.maxNum,currentImageList.minNum);
+		currentImageList.minNum=numNewCell;
 		(*resIt)=currentImageList.cellsList.end();
 		(*resIt)--;
 	}
 	else
 	{
-		if(numNewCell<currentImageList.minNum)
+
+
+		if(numNewCell>currentImageList.maxNum)
 		{
-			currentImageList.cellsList.push_front(newCell);
-			currentImageList.minNum=numNewCell;
-			currentImageList.maxNum=max(currentImageList.maxNum,currentImageList.minNum);
-			(*resIt)=currentImageList.cellsList.begin();
+			currentImageList.cellsList.push_back(newCell);
+			currentImageList.maxNum=numNewCell;
+			currentImageList.minNum=min(currentImageList.maxNum,currentImageList.minNum);
+			(*resIt)=currentImageList.cellsList.end();
+			(*resIt)--;
 		}
 		else
 		{
-			itCell=*startIt;
-
-
-			if((numNewCell>(*itCell) ))
+			if(numNewCell<currentImageList.minNum)
 			{
-				while((itCell!=itLast) && (numNewCell>(*itCell) ))
-				{
-					//cout<< " current cell num "<<(*itCell).cellNum<< " new cell num "<<numNewCell<<endl;
-					itCell++;
-				}
-				if(numNewCell<(*itCell) )
-				{
-					currentImageList.cellsList.insert(itCell,newCell);
-				}
-
-				(*resIt)=itCell;
+				currentImageList.cellsList.push_front(newCell);
+				currentImageList.minNum=numNewCell;
+				currentImageList.maxNum=max(currentImageList.maxNum,currentImageList.minNum);
+				(*resIt)=currentImageList.cellsList.begin();
 			}
 			else
 			{
-				while(  (numNewCell<(*itCell) ))
+				itCell=*startIt;
+
+
+				if((numNewCell>(*itCell) ))
 				{
-					//cout<< " current cell num "<<(*itCell).cellNum<< " new cell num "<<numNewCell<<endl;
-					itCell--;
+					while((itCell!=itLast) && (numNewCell>(*itCell) ))
+					{
+						//cout<< " current cell num "<<(*itCell).cellNum<< " new cell num "<<numNewCell<<endl;
+						itCell++;
+					}
+					if(numNewCell<(*itCell) )
+					{
+						currentImageList.cellsList.insert(itCell,newCell);
+					}
+
+					(*resIt)=itCell;
 				}
-				if(numNewCell>(*itCell) )
+				else
 				{
-					itCell++;
-					currentImageList.cellsList.insert(itCell,newCell);
+					while(  (numNewCell<(*itCell) ))
+					{
+						//cout<< " current cell num "<<(*itCell).cellNum<< " new cell num "<<numNewCell<<endl;
+						itCell--;
+					}
+					if(numNewCell>(*itCell) )
+					{
+						itCell++;
+						currentImageList.cellsList.insert(itCell,newCell);
+					}
+
+					(*resIt)=itCell;
 				}
 
-				(*resIt)=itCell;
 			}
-
 		}
+
 	}
-
-
 }
 
 
@@ -2034,7 +2047,7 @@ void ViabiBitSet::computeDiscreteImageOfPoint(double *doublePointCoords, unsigne
 	unsigned long long int cu;
 
 	list<unsigned long long int> cellsList;
-
+	double rho;
 
 	//cout<< " calcul de l'image pour le point ";
 	// printVector(doublePointCoords,dim);
@@ -2052,13 +2065,12 @@ void ViabiBitSet::computeDiscreteImageOfPoint(double *doublePointCoords, unsigne
 		 */
 		if(dynsys->constraintsXU(doublePointCoords,controlCoords[cu])<PLUS_INF)
 		{
-
-
 			//////printf("  contraintes sur U et X  ok\n");
 			//  ////printf( " x= ");
 			// printVector(doublePointCoords,dim);
+			rho=dynsys->calculRho_local(doublePointCoords);
 
-			(dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[cu], doubleVect1, 1.0);
+			(dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[cu], doubleVect1, rho);
 
 			// cout<< " retrour dnamique discrete ";
 			// printVector(doubleVect1, dim);
@@ -2082,42 +2094,7 @@ void ViabiBitSet::computeDiscreteImageOfPoint(double *doublePointCoords, unsigne
 					 * on calcule le num�ro de maille qui contient cett image
 					 */
 					imageCells[cu]=grid->localizePoint(doubleVect1);
-					/*    grid->numToIntAndDoubleCoords(unsigned long long ints[cu],testI,testV);
-                                        if(testV[0]<doublePointCoords[0])
-                                        {
-                                                cout<< " num de d�parrt "<<num<< " num de cell image "<<unsigned long long ints[cu]<<endl;
-                                                cout<< " int coords de d�part ";
-                                                for(int lm=0;lm<dim;lm++)
-                                                {
-                                                        cout<< " "<<intPointCoords[lm];
-                                                }
-                                                cout<< endl;
-                                                cout<< "double coords de d�part ";
-                                                for(int lm=0;lm<dim;lm++)
-                                                {
-                                                        cout<< " "<<doublePointCoords[lm];
-                                                }
-                                                cout<< endl;
-                                                cout<< " double coords de result ";
-                                                for(int lm=0;lm<dim;lm++)
-                                                {
-                                                        cout<< " "<<doubleVect1[lm];
-                                                }
-                                                cout<< endl;
-                                                cout<< " int coords de result projet� ";
-                                                for(int lm=0;lm<dim;lm++)
-                                                {
-                                                        cout<< " "<<testI[lm];
-                                                }
-                                                cout<< endl;
-                                                cout<< "double coords de result projet�  ";
-                                                for(int lm=0;lm<dim;lm++)
-                                                {
-                                                        cout<< " "<<testV[lm];
-                                                }
-                                                cout<< endl;
 
-                                        }*/
 					// on enregistre le numero de maille
 					cellsList.push_back( imageCells[cu] );
 					//////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,unsigned long long ints[cu]);
@@ -2470,7 +2447,68 @@ void ViabiBitSet::computeViableTrajectories()
 	}
 }
 
+
 void ViabiBitSet::CaptureBasin()
+{
+	algoViabiParams * avp=modelParams->getAlgoParameters();
+	int refine = avp->GRID_REFINMENTS_NUMBER;
+
+	ostringstream os;
+	string fileName;
+	if((dynsys->getDynType()==CC) ||(dynsys->getDynType()==DC) )
+	{
+
+		CaptureBasin_ContinuousDynamics();
+	}
+	else
+	{
+		if((dynsys->getDynType()==DD)   )
+		{
+			CaptureBasin_DiscreteDynamics();
+		}
+	}
+	os<<"OUTPUT/"<<filePrefix<<"-Capture.dat";
+	fileName=os.str();
+	os.str("");
+	grid->saveValOnGrid(fileName);
+	if(avp->SAVE_SLICE){
+		os<<"OUTPUT/"<<filePrefix<<"-CaptureSlice.dat";
+		fileName=os.str();
+		os.str("");
+		grid->saveCoupe(fileName);
+	}
+	if(avp->SAVE_SLICE_BOUND){
+		os<<"OUTPUT/"<<filePrefix<<"-CaptureSliceBound"<<".dat";
+		fileName=os.str();
+		os.str("");
+		grid->saveCoupeBoundary(fileName);
+	}
+	if(avp->SAVE_BOUNDARY){
+		os<<"OUTPUT/"<<filePrefix<<"-Capture-bound.dat";
+		fileName=os.str();
+		os.str("");
+		grid->saveBoundary(fileName);
+	}
+
+	if(avp->SAVE_PROJECTION)
+	{
+		os<<"OUTPUT/"<<filePrefix<<"-Capture-proj"<<".dat";
+		fileName=os.str();
+		os.str("");
+		/*
+		 *  calcul et sauvegarde  de la projection du  noyau
+		 */
+		grid->saveProjetion(fileName, avp->PROJECTION);
+	}
+
+
+}
+
+void ViabiBitSet::CaptureBasin_DiscreteDynamics()
+{
+
+}
+void ViabiBitSet::CaptureBasin_ContinuousDynamics()
 {
 
 
@@ -2500,8 +2538,8 @@ void ViabiBitSet::CaptureBasin()
 	 *  r�tro-action viable. On appelle pour cela la fonction addNewPoints().
 	 */
 	nbNewPoints= addNewPoints();
-	cout<< " points ajoutes =  "<<nbNewPoints<<endl;
-
+	cout<< "  Premiers point points ajoutes =  "<<nbNewPoints<<endl;
+	system("pause");
 	iter++;
 
 	/*!
@@ -2617,58 +2655,71 @@ void ViabiBitSet::addDataToPointsList(list<unsigned long long int >::iterator *s
 	unsigned long long int numnewPoint=newPoint;
 
 	list<unsigned long long int >::iterator itCell;
-	if(numnewPoint>(unsigned long long int)currentImagePointsList.maxNum)
+
+	if(currentImagePointsList.pointsList.size()==0)
 	{
 		currentImagePointsList.pointsList.push_back(newPoint);
 		currentImagePointsList.maxNum=numnewPoint;
+		currentImagePointsList.minNum=numnewPoint;
 		(*resIt)=currentImagePointsList.pointsList.end();
 		(*resIt)--;
-		//cout<< " on ajoute � la fin  nouveax min et max  de la liste sont "<<currentImagePointsList.minNum<< " "<<currentImagePointsList.maxNum<<endl;
+		//cout<< " on ajoute le premier element nouveax min et max  de la liste sont "<<currentImagePointsList.minNum<< " "<<currentImagePointsList.maxNum<<endl;
 	}
 	else
 	{
-		if(numnewPoint<(unsigned long long int)currentImagePointsList.minNum)
+		if(numnewPoint>(unsigned long long int)currentImagePointsList.maxNum)
 		{
-			currentImagePointsList.pointsList.push_front(newPoint);
-			currentImagePointsList.minNum=numnewPoint;
-			(*resIt)=currentImagePointsList.pointsList.begin();
-			//    cout<< " on ajoute au debut nouveax min et max  de la liste sont "<<currentImagePointsList.minNum<< " "<<currentImagePointsList.maxNum<<endl;
-
+			currentImagePointsList.pointsList.push_back(newPoint);
+			currentImagePointsList.maxNum=numnewPoint;
+			(*resIt)=currentImagePointsList.pointsList.end();
+			(*resIt)--;
+			//cout<< " on ajoute � la fin  nouveax min et max  de la liste sont "<<currentImagePointsList.minNum<< " "<<currentImagePointsList.maxNum<<endl;
 		}
 		else
 		{
-			itCell=*startIt;
-
-			if(numnewPoint<(*itCell))
+			if(numnewPoint<(unsigned long long int)currentImagePointsList.minNum)
 			{
+				currentImagePointsList.pointsList.push_front(newPoint);
+				currentImagePointsList.minNum=numnewPoint;
+				(*resIt)=currentImagePointsList.pointsList.begin();
+				//    cout<< " on ajoute au debut nouveax min et max  de la liste sont "<<currentImagePointsList.minNum<< " "<<currentImagePointsList.maxNum<<endl;
 
-				while( (numnewPoint<(*itCell)))
+			}
+			else
+			{
+				itCell=*startIt;
+
+				if(numnewPoint<(*itCell))
 				{
-					//cout<< " current cell num "<<(*itCell).PointNum<< " new cell num "<<numnewPoint<<endl;
-					itCell--;
+
+					while( (numnewPoint<(*itCell)))
+					{
+						//cout<< " current cell num "<<(*itCell).PointNum<< " new cell num "<<numnewPoint<<endl;
+						itCell--;
+					}
+					if(numnewPoint>(*itCell))
+					{
+						itCell++;
+						currentImagePointsList.pointsList.insert(itCell,newPoint);
+					}
+
+					(*resIt)=itCell;
+
 				}
-				if(numnewPoint>(*itCell))
+				else
+				{   while( (numnewPoint>(*itCell) ))
 				{
+					//      cout<< " current point num "<<(*itCell).PointNum<< " new point  num "<<numnewPoint<<endl;
 					itCell++;
+				}
+				if(numnewPoint<(*itCell) )
+				{
 					currentImagePointsList.pointsList.insert(itCell,newPoint);
 				}
 
 				(*resIt)=itCell;
 
-			}
-			else
-			{   while( (numnewPoint>(*itCell) ))
-			{
-				//      cout<< " current point num "<<(*itCell).PointNum<< " new point  num "<<numnewPoint<<endl;
-				itCell++;
-			}
-			if(numnewPoint<(*itCell) )
-			{
-				currentImagePointsList.pointsList.insert(itCell,newPoint);
-			}
-
-			(*resIt)=itCell;
-
+				}
 			}
 		}
 	}
@@ -2680,7 +2731,7 @@ void ViabiBitSet::computeCurrentImage( int iter)
 {
 
 
-	cout<< "  calcul de l'imahe de Cn  local rho sans opti nombre de points dans Cn = "<<currentImagePointsList.pointsList.size()<<endl;
+	cout<< "  Compute Current Image . Iteration num "<<iter<<" points dans Cn = "<<currentImagePointsList.pointsList.size()<<endl;
 
 
 	double t1,t2,elapsed_time;
@@ -2889,7 +2940,7 @@ void ViabiBitSet::noyauViabi_sansControle( bool sortieOK,int nbArret)
 
 				masque=grid->analyseTrameMasqueBis(posX,0);
 
-			//	cout<<"masque d'analyse  "<<masque<<endl;
+				//	cout<<"masque d'analyse  "<<masque<<endl;
 
 				masquePointsEnleves->set();
 

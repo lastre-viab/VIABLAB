@@ -264,10 +264,18 @@ struct algoViabiBoolParams
  */
 struct discretImageSet
 {
-	int nbImageCells;
-	int * tabImageCells;
-	int * tabImageControls;
-	int * tabCellEntrees;
+	unsigned long long int nbImageCells;
+	unsigned long long int * tabImageCells;
+	unsigned long long int * tabImageControls;
+	unsigned long long int * tabCellEntrees;
+};
+
+struct discretImageSet_DD
+{
+	unsigned long long int nbImagePoints;
+	unsigned long long int * tabImagePoints;
+	unsigned long long int * tabImageControls;
+	unsigned long long int * tabPointsEntrees;
 };
 
 struct discretImageSet_simple
@@ -368,7 +376,7 @@ struct imageTempPoint
  */
 struct imagePointsList
 {
-	std::list<imagePoint> pointsList;
+	std::list<imagePoint> *pointsList;
 	unsigned long long int minNum;
 	unsigned long long int maxNum;
 };
@@ -459,7 +467,15 @@ inline bool pairCompare(intPair p1, intPair p2)
 
 typedef  pair<unsigned long long int,unsigned long long int> uintPair;
 
-
+/*!
+ * op�rateur de comparaison des paires d'entiers utilis� pour
+ * trier les listes  de cellules par le num�ro de cellule (le premier entier)
+ * le second entier est le num�ro de contr�le  correspondant
+ */
+inline bool upairCompare(uintPair p1, uintPair p2)
+{
+	return (p1.first<=p2.first);
+}
 
 inline void printVector(double *vect, unsigned long long int dim)
 {
@@ -493,9 +509,9 @@ inline double sign(double x)
 	return (double) ((x < 0) ? -1 : (x > 0));
 }
 
-struct imageFDPoint
+struct imageDDPoint
 {
-	int PointNum;    /*!< numero de cellule */
+	unsigned long long int PointNum;    /*!< numero de cellule */
 	double val;           /*!< la valeur optimale de la fonction valeur sur cette cellule*/
 	list<intPair> dynFD;  /*!< la liste des ant�c�dents minimisant la fonction valeur*/
 	list<intPair> R_viable;   /*!< la liste des ant�c�dents viables arrivant dans cette  cellule */

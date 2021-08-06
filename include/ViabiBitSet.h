@@ -84,7 +84,8 @@ private:
 	void noyauViabi_omp( bool sortieOK,int nbArret);
 	void noyauViabi_sansControle_omp( bool sortieOK,int nbArret);
 	void noyauViabiGaranti_FD( bool sortieOK,int nbArret);
-
+	void CaptureBasin_ContinuousDynamics();
+	void CaptureBasin_DiscreteDynamics();
 
 		void computeViableTrajectories();
 	/*!
