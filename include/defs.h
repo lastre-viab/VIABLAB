@@ -18,7 +18,8 @@
 
 #define DEFS_H_
 
-
+//#include "CropData.h"
+//#include "CycleData.h"
 
 #include <stdlib.h>
 #include <vector>
@@ -33,11 +34,19 @@
 
 #include <math.h>
 #include <algorithm>
+#include <map>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
 #include <sys/types.h>
 #include "boost/dynamic_bitset/dynamic_bitset.hpp"
+
+
+#include "boost/property_tree/ptree.hpp"
+#include "boost/property_tree/detail/info_parser_error.hpp"
+#include "boost/property_tree/detail/info_parser_utils.hpp"
+#include "boost/property_tree/json_parser.hpp"
+using namespace boost::property_tree;
 /*
 #if defined(__APPLE__)
 
@@ -116,6 +125,7 @@
  */
 #define VD 1 // viable par defaut
 #define VL 2 // viable lourd
+#define OP 3 // viable lourd
 
 using namespace std;
 //using namespace Magick;
@@ -227,6 +237,9 @@ struct algoViabiParams
 	int NB_TRAJS;
 	int TYPE_TRAJ;
 	double * INIT_POINTS;
+	double * INIT_VALUES;
+	double * INIT_VALUES_FD;
+	unsigned long long int * INIT_POINTS_FD;
 	double * INIT_CONTROLS;
 	int GRID_REFINMENTS_NUMBER;
 	int INTERMEDIATE_SAVINGS;

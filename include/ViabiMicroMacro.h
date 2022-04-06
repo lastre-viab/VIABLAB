@@ -111,13 +111,20 @@ public:
 	virtual void GarantedViabilityKernel( bool sortieOK,int nbArret);
 
 	virtual	void initialiseConstraints();
-
-
-
+		void initialiseConstraints_CC();
+		void initialiseConstraints_DD();
+		void computeViableTrajectories();
+		double computeViableTrajectory(double  *initPosition,  double initValue, string fileName, bool &succes);
+		double computeViableTrajectory_DD(unsigned long long int *initPosition,  double initValue, string fileName, bool &succes);
+		unsigned long long int  findViabControl_DD(double budget, unsigned long long int *currentPos,
+				unsigned long long int *resPos,
+				double & newBudget,
+				bool &succes );
 	virtual void computeTrajectories();
 	virtual void loadViableSets();
 
 	void viabKerValFunc();
+	void viabKerValFunc_DD();
 
 	double computeOptimalCaptTrajectory(double *initPosition, string fileName, bool &succes);
 
@@ -160,6 +167,7 @@ public:
 	 *
 	 */
 	void initialiseTargetHJB() ;
+	void initialiseTargetHJB_DD() ;
 	void initCnIndices(  );
 
 	/*!
@@ -207,7 +215,7 @@ private:
 	 *  en écriture!  Attention en cas de parallélisation!
 	 *********************************************************************************************************/
 
-	unsigned long long int * intPointCoords;
+	unsigned long long int * intPointCoords, *intVect1;
 	double * doublePointCoords, *doubleVect, *doubleVect1;
 	unsigned long long int * intControlCoords;
 	double * doubleControlCoords;

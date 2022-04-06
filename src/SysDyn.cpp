@@ -24,6 +24,7 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid * grRef)
 
   if(SP.DYN_TYPE==DD)
     {
+	  cout<< " DynSYS de type DD"<<endl;
     if(SP.FD_DYN_TYPE==RETRO)
       {
       this->retroFileName=SP.RETRO_FILE_NAME;
@@ -188,7 +189,7 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid * grRef)
   if(dimC>0)
     {
     stepC=new double[dimC];
-  //  cout<<  " dim de controle "<<dimC<<"  step de controle ";
+     cout<<  " dim de controle "<<dimC<<"  step de controle ";
     for(dc=0;dc<dimC;dc++)
       {
       totalNbPointsC*=nbPointsC[dc];

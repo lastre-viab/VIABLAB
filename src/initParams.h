@@ -114,6 +114,7 @@ ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlPara
 	sp.LOCAL_DYN_BOUNDS=&localDynBounds;
 	sp.M_FUNC=&m;
 	sp.L_FUNC=&l;
+	sp.L_FUNC_FD=&l_fd;
 
 	sp.SCHEME=discret_type;
 	sp.SCALE_PARAM=false;
@@ -122,6 +123,7 @@ ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlPara
 		sp.SCALE_PARAM|=scaling[i];
 	}
 	sp.TARGET=&target;
+	sp.TARGET_FD=&target_fd;
 	if(constraintsXU_fd)
 		sp.CONSTR_XU_fd = &constraintsXU_fd;
 	else
@@ -159,6 +161,10 @@ ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlPara
 	avp.NB_TRAJS = nbTrajs;
 	avp.TYPE_TRAJ = typeTraj;
 	avp.INIT_POINTS = initPoints;
+	avp.INIT_POINTS_FD = initPoints_fd;
+	avp.INIT_VALUES = initValues;
+	avp.INIT_VALUES_FD = initValues_fd;
+
 	avp.INIT_CONTROLS = initControls;
 	avp.GRID_REFINMENTS_NUMBER = refine;
 	avp.INTERMEDIATE_SAVINGS = intermediate_savings;

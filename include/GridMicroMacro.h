@@ -46,6 +46,7 @@ public:
   virtual bool isInSet(unsigned long long int * coords );
   virtual void savePointsList(string fileName);
   virtual void saveValOnGrid(string fileName);
+  void saveValOnGrid_DD(string fileName);
 
   void printFoncValVox_fd(string fileName, double scaleVal, int epi) ;
   void  addPointToSet_withData(unsigned long long int *pos, double val, void * dataBuff, int dataLength) ;
@@ -56,6 +57,7 @@ public:
   void copyGrid( double *grIn, double *grOut);
 
   void saveSubLevelset(double level, string fileName );
+  void saveSubLevelset_DD(double level, string fileName );
   int nbOMPThreads;
 private:
 
