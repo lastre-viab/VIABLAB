@@ -27,23 +27,20 @@
 
 //#include  "../data/zermelo_tmin_data.h"  //-- a jour, non reg OK
 //#include  "../data/zermelo_Lmin_data.h"  //-- a jour, non reg OK
-#include  "../data/testZermelo_bitSet.h"  //-- a jour, non reg OK
+//#include  "../data/testZermelo_bitSet.h"  //-- a jour, non reg OK
 
 
 //#include  "../data/ex4_Viabi2D_data.h"
-//#include  "../data/ex3Dim_Viabi2D_data.h"
-//#include  "../data/ex1_Viabi_multiDim_data.h"
-//#include  "../data/ex3bis_Viabi2D_data.h"
-//#include "../data/ex2_EcoPolut_data.h"
+#include "../data/ex2_EcoPolut_data.h"
 
-//#include "../data/userModel.h"
-//#include "../data/test_capt_discret_data.h"
-//#include "../data/corentin_no_control_feed_synth_data_funct_traj_v3.h"
-
-//#include "../data/corentin_no_control_feed_synth_data_funct_traj_v3.h"
 /*
  * Code de la fonction d'initialisation de paramètres
  */
+
+//#include "../data/dataAgroEcoDivMultiParcels.h"
+//#include "../data/dataAgroEcoDivMultiParcelsD4.h"
+
+//#include "../data/dataAgroEcoDivTest.h"
 #include "../src/initParams.h"
 
 
@@ -71,7 +68,9 @@ int main( int argc, char** argv){
 	/**********************************
 	 * IMPORTANT : appeler la fonction load_data ICI avant TOUT le reste
 	 */
+	cout<< " load model data commence \n";
 	loadModelData();
+
 	/*==========================================================*/
 
 

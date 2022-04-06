@@ -114,7 +114,14 @@ ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlPara
 	sp.LOCAL_DYN_BOUNDS=&localDynBounds;
 	sp.M_FUNC=&m;
 	sp.L_FUNC=&l;
-	sp.L_FUNC_FD=&l_fd;
+	if(l_fd)
+	{
+		sp.L_FUNC_FD=&l_fd;
+	}
+	else
+	{
+		sp.L_FUNC_FD=&l_fd_default;
+	}
 
 	sp.SCHEME=discret_type;
 	sp.SCALE_PARAM=false;
@@ -123,7 +130,14 @@ ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlPara
 		sp.SCALE_PARAM|=scaling[i];
 	}
 	sp.TARGET=&target;
-	sp.TARGET_FD=&target_fd;
+	if(target_fd)
+	{
+		sp.TARGET_FD=&target_fd;
+	}
+	else
+	{
+		sp.TARGET_FD=&target_fd_default;
+	}
 	if(constraintsXU_fd)
 		sp.CONSTR_XU_fd = &constraintsXU_fd;
 	else
