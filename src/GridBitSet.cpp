@@ -17,7 +17,7 @@ Grid_BitSet::Grid_BitSet(gridParams gp):Grid() {
 	ostringstream os;
 
 
-	os <<"OUTPUT/"<<filePrefix<<"-grid_data.dat";
+	os <<"../OUTPUT/"<<filePrefix<<"-grid_data.dat";
 	dataFileName = os.str();
 	os.str("");
 

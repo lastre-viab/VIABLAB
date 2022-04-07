@@ -686,7 +686,7 @@ void ViabiMicroMacro::computeOptimalTrajectories()
 		bool success[nbTrajs];
 		for(int tr=0;tr<nbTrajs;tr++)
 		{
-			os<<"OUTPUT/"<<filePrefix<<"-traj-"<<tr+1<<".dat";
+			os<<"../OUTPUT/"<<filePrefix<<"-traj-"<<tr+1<<".dat";
 			fileName=os.str();
 			os.str("");
 
@@ -1140,7 +1140,7 @@ void ViabiMicroMacro::loadViableSets()
 	string fileName;
 	// on charge dans la mémoire l'ensemble calculé et enregistré
 	// correspondant au dernier raffinement
-	os<<"OUTPUT/"<<filePrefix<<"-valFunc.dat";
+	os<<"../OUTPUT/"<<filePrefix<<"-valFunc.dat";
 	fileName=os.str();
 	os.str("");
 	grid->loadSet(fileName);
@@ -1148,7 +1148,7 @@ void ViabiMicroMacro::loadViableSets()
 
 	if(avp->SAVE_PROJECTION)
 	{
-		os<<"OUTPUT/"<<filePrefix<<"-proj"<<".dat";
+		os<<"../OUTPUT/"<<filePrefix<<"-proj"<<".dat";
 		fileName=os.str();
 		os.str("");
 		/*

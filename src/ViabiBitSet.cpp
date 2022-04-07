@@ -2429,7 +2429,7 @@ void ViabiBitSet::computeViableTrajectories()
 		{
 			if(typeTraj==VD)
 			{
-				os<<"OUTPUT/"<<filePrefix<<"-traj-"<<tr+1<<".dat";
+				os<<"../OUTPUT/"<<filePrefix<<"-traj-"<<tr+1<<".dat";
 				fileName=os.str();
 				os.str("");
 
@@ -2437,7 +2437,7 @@ void ViabiBitSet::computeViableTrajectories()
 			}
 			if(typeTraj==VL)
 			{
-				os<<"OUTPUT/"<<filePrefix<<"-traj-H-"<<tr+1<<".dat";
+				os<<"../OUTPUT/"<<filePrefix<<"-traj-H-"<<tr+1<<".dat";
 				fileName=os.str();
 				os.str("");
 
@@ -2467,24 +2467,24 @@ void ViabiBitSet::CaptureBasin()
 			CaptureBasin_DiscreteDynamics();
 		}
 	}
-	os<<"OUTPUT/"<<filePrefix<<"-Capture.dat";
+	os<<"../OUTPUT/"<<filePrefix<<"-Capture.dat";
 	fileName=os.str();
 	os.str("");
 	grid->saveValOnGrid(fileName);
 	if(avp->SAVE_SLICE){
-		os<<"OUTPUT/"<<filePrefix<<"-CaptureSlice.dat";
+		os<<"../OUTPUT/"<<filePrefix<<"-CaptureSlice.dat";
 		fileName=os.str();
 		os.str("");
 		grid->saveCoupe(fileName);
 	}
 	if(avp->SAVE_SLICE_BOUND){
-		os<<"OUTPUT/"<<filePrefix<<"-CaptureSliceBound"<<".dat";
+		os<<"../OUTPUT/"<<filePrefix<<"-CaptureSliceBound"<<".dat";
 		fileName=os.str();
 		os.str("");
 		grid->saveCoupeBoundary(fileName);
 	}
 	if(avp->SAVE_BOUNDARY){
-		os<<"OUTPUT/"<<filePrefix<<"-Capture-bound.dat";
+		os<<"../OUTPUT/"<<filePrefix<<"-Capture-bound.dat";
 		fileName=os.str();
 		os.str("");
 		grid->saveBoundary(fileName);
@@ -2492,7 +2492,7 @@ void ViabiBitSet::CaptureBasin()
 
 	if(avp->SAVE_PROJECTION)
 	{
-		os<<"OUTPUT/"<<filePrefix<<"-Capture-proj"<<".dat";
+		os<<"../OUTPUT/"<<filePrefix<<"-Capture-proj"<<".dat";
 		fileName=os.str();
 		os.str("");
 		/*
@@ -3113,19 +3113,19 @@ void ViabiBitSet::loadViableSets()
 	string fileName;
 	// on charge dans la mémoire l'ensemble calculé et enregistré
 	// correspondant au dernier raffinement
-	os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<".dat";
+	os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<".dat";
 	fileName=os.str();
 	os.str("");
 	grid->loadSet(fileName);
 
 	if(avp->SAVE_SLICE){
-		os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-Slice"<<".dat";
+		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-Slice"<<".dat";
 		fileName=os.str();
 		os.str("");
 		grid->saveCoupe(fileName);
 	}
 	if(avp->SAVE_SLICE_BOUND){
-		os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-SliceBound"<<".dat";
+		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-SliceBound"<<".dat";
 		fileName=os.str();
 		os.str("");
 		grid->saveCoupeBoundary(fileName);
@@ -3134,7 +3134,7 @@ void ViabiBitSet::loadViableSets()
 
 	if(avp->SAVE_PROJECTION)
 	{
-		os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-proj"<<".dat";
+		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-proj"<<".dat";
 		fileName=os.str();
 		os.str("");
 		/*
@@ -3175,25 +3175,25 @@ void ViabiBitSet::ViabilityKernel( bool sortieOK,int nbArret)
 		 */
 		if(avp->INTERMEDIATE_SAVINGS)
 		{
-			os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<".dat";
+			os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<".dat";
 			fileName=os.str();
 			os.str("");
 			grid->saveValOnGrid(fileName);
 
 			if(avp->SAVE_SLICE){
-				os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-Slice"<<".dat";
+				os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-Slice"<<".dat";
 				fileName=os.str();
 				os.str("");
 				grid->saveCoupe(fileName);
 			}
 			if(avp->SAVE_SLICE_BOUND){
-				os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-SliceBound"<<".dat";
+				os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-SliceBound"<<".dat";
 				fileName=os.str();
 				os.str("");
 				grid->saveCoupeBoundary(fileName);
 			}
 			if(avp->SAVE_BOUNDARY){
-				os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-bound.dat";
+				os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-bound.dat";
 				fileName=os.str();
 				os.str("");
 				grid->saveBoundary(fileName);
@@ -3201,7 +3201,7 @@ void ViabiBitSet::ViabilityKernel( bool sortieOK,int nbArret)
 
 			if(avp->SAVE_PROJECTION)
 			{
-				os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-proj"<<".dat";
+				os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-proj"<<".dat";
 				fileName=os.str();
 				os.str("");
 				/*
@@ -3224,13 +3224,13 @@ void ViabiBitSet::ViabilityKernel( bool sortieOK,int nbArret)
 			grid->refine();
 
 
-			os<<"OUTPUT/"<<filePrefix<<"-viab-Refined"<<refIter<<".dat";
+			os<<"../OUTPUT/"<<filePrefix<<"-viab-Refined"<<refIter<<".dat";
 			fileName=os.str();
 			os.str("");
 			grid->saveValOnGrid(fileName);
 
 			if(avp->SAVE_BOUNDARY){
-				os<<"OUTPUT/"<<filePrefix<<"-viab-Refined"<<refIter<<"-bound.dat";
+				os<<"../OUTPUT/"<<filePrefix<<"-viab-Refined"<<refIter<<"-bound.dat";
 				fileName=os.str();
 				os.str("");
 				grid->saveBoundary(fileName);
@@ -3239,24 +3239,24 @@ void ViabiBitSet::ViabilityKernel( bool sortieOK,int nbArret)
 	}
 	if(!avp->INTERMEDIATE_SAVINGS)
 	{
-		os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<".dat";
+		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<".dat";
 		fileName=os.str();
 		os.str("");
 		grid->saveValOnGrid(fileName);
 		if(avp->SAVE_SLICE){
-			os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-Slice"<<".dat";
+			os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-Slice"<<".dat";
 			fileName=os.str();
 			os.str("");
 			grid->saveCoupe(fileName);
 		}
 		if(avp->SAVE_SLICE_BOUND){
-			os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-SliceBound"<<".dat";
+			os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-SliceBound"<<".dat";
 			fileName=os.str();
 			os.str("");
 			grid->saveCoupeBoundary(fileName);
 		}
 		if(avp->SAVE_BOUNDARY){
-			os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-bound.dat";
+			os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-bound.dat";
 			fileName=os.str();
 			os.str("");
 			grid->saveBoundary(fileName);
@@ -3264,7 +3264,7 @@ void ViabiBitSet::ViabilityKernel( bool sortieOK,int nbArret)
 
 		if(avp->SAVE_PROJECTION)
 		{
-			os<<"OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-proj"<<".dat";
+			os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-proj"<<".dat";
 			fileName=os.str();
 			os.str("");
 			/*

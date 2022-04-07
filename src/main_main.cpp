@@ -24,6 +24,7 @@
 //#include  "../data/ex1Viabi2D_data.h"   //-- a jour, non reg OK
 
 //#include  "../data/julia2D_data.h"  //-- a jour, non reg OK
+#include  "../data/ex1Viabi2D_data.h"  //-- a jour, non reg OK
 
 //#include  "../data/zermelo_tmin_data.h"  //-- a jour, non reg OK
 //#include  "../data/zermelo_Lmin_data.h"  //-- a jour, non reg OK
@@ -31,7 +32,7 @@
 
 
 //#include  "../data/ex4_Viabi2D_data.h"
-#include "../data/ex2_EcoPolut_data.h"
+//#include "../data/ex2_EcoPolut_data.h"
 
 /*
  * Code de la fonction d'initialisation de paramètres
