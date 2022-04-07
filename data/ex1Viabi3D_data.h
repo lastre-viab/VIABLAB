@@ -58,6 +58,8 @@ const int dim=3;
 /*! \var dimc
  *  \brief Control variable   dimension
  */
+
+
 const int dimc=1;
 /*! \var dicret_type
  *  \brief the  type of discretization scheme used  for the dynamics

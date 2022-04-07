@@ -19,17 +19,18 @@
  * inclusion des déclarations du modèle
  */
 
-#include "../data/WeakDeclarations.h"
+//#include "../data/WeakDeclarations.h"
+#include "../data/DefaultValues.h"
 //#include  "../data/equilibres4D_data.h"  //-- a jour, non reg OK
-//#include  "../data/ex1Viabi2D_data.h"   //-- a jour, non reg OK
+#include  "../data/ex1Viabi2D_data.h"   //-- a jour, non reg OK
 
 //#include  "../data/julia2D_data.h"  //-- a jour, non reg OK
-#include  "../data/ex1Viabi2D_data.h"  //-- a jour, non reg OK
+//#include  "../data/ex1Viabi2D_data.h"  //-- a jour, non reg OK
 
 //#include  "../data/zermelo_tmin_data.h"  //-- a jour, non reg OK
 //#include  "../data/zermelo_Lmin_data.h"  //-- a jour, non reg OK
 //#include  "../data/testZermelo_bitSet.h"  //-- a jour, non reg OK
-
+//#include  "../data/maupertuis_data.h"
 
 //#include  "../data/ex4_Viabi2D_data.h"
 //#include "../data/ex2_EcoPolut_data.h"
@@ -74,14 +75,8 @@ int main( int argc, char** argv){
 
 	/*==========================================================*/
 
-
-
 	Viabi *viabProblem;
 	// déclaration de structures pour les paramètres
-	gridParams gp;
-	algoViabiParams avp;
-	controlParams cp;
-	systemParams sp;
 	//initialisation des structures à partir des données de l'utilisateur
 	ParametersManager *PM= initParams(gp, avp, cp, sp);
 	ViabProblemFactory * vpf=new ViabProblemFactory(PM);

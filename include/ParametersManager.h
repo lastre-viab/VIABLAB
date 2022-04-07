@@ -14,10 +14,13 @@ class ParametersManager {
 public:
 	ParametersManager();
 	ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp,systemParams *sp);
-	gridParams * getGridParameters();
+	ParametersManager(gridParams *gp, algoViabiParams *avp,  controlParams * cp, string cpFile,systemParams *sp);
+		gridParams * getGridParameters();
 	algoViabiParams * getAlgoParameters();
 	controlParams * getControlParameters();
 	systemParams * getSystemParameters();
+	void readControlParametersFromJson( string file);
+
 	virtual ~ParametersManager();
 
 private:
@@ -25,6 +28,8 @@ private:
 	algoViabiParams *algoParameters;
 	controlParams *controlParameters;
 	systemParams *systemParameters;
+	void readTabData (ptree *dataRoot, double * target, string label, int nbElements );
+	void readTabData (ptree *dataRoot, unsigned long long int * target, string label, int nbElements );
 };
 
 #endif /* SRC_PARAMETERSMANAGER_H_ */

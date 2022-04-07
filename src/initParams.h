@@ -14,6 +14,17 @@
 ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlParams &cp,systemParams &sp);
 ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlParams &cp,systemParams &sp)
 {
+
+	string input_tempfile="../INPUT/"+ controlParamsFile;
+	ptree dataRoot;
+	read_json(input_tempfile, dataRoot);
+	int dimc = dataRoot.get<int>("CONTROL_DIMENSION", 1);
+
+	 initControls = new double[dimc*nbTrajs];
+	 initControls[0]=0.0;
+	 initControls[1]=0.0;
+
+
 	gp.DIM=dim;
 	gp.GRID_TYPE=0;
 	gp.LIMINF=STATE_MIN;
@@ -41,22 +52,6 @@ ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlPara
 	gp.SLICE_VALUES=sliceVals;
 	gp.SORTIE_OK_INF=sortieOKinf;
 	gp.SORTIE_OK_SUP=sortieOKsup;
-
-
-	/*
-	 * initialisation des paramètres des contrôles
-	 */
-	cp.DIMC=dimc;
-	/*
-	 * paramètres par défaut. Non utilisés ici
-	 */
-	cp.LIMINFC=CONTROL_MIN;
-	cp.LIMSUPC=CONTROL_MAX;
-	cp.NBPOINTSC=nbPointsControl;
-	cp.DIM_TY=dimc_ty;
-	cp.LIMINF_TY=CONTROL_MIN_ty;
-	cp.LIMSUP_TY=CONTROL_MAX_ty;
-	cp.NBPOINTS_TY=nbPointsControl_ty;
 
 	sp.COMPUTE_LC=computeLC;
 	sp.COMPUTE_MF=computeM;
@@ -200,7 +195,7 @@ ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlPara
 		sp.L_LIP=l_Lip;
 		sp.L_MF=l_max;
 	}
-	return new ParametersManager(&gp, &avp, &cp, &sp);
+	return new ParametersManager(&gp, &avp, &cp, controlParamsFile, &sp);
 
 }
 
