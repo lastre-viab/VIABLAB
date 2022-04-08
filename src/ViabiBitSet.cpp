@@ -3239,7 +3239,7 @@ void ViabiBitSet::ViabilityKernel( bool sortieOK,int nbArret)
 	}
 	if(!avp->INTERMEDIATE_SAVINGS)
 	{
-		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<".dat";
+		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refIter<<".dat";
 		fileName=os.str();
 		os.str("");
 		grid->saveValOnGrid(fileName);

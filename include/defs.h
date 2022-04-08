@@ -125,7 +125,7 @@ using namespace boost::property_tree;
  */
 #define VD 1 // viable par defaut
 #define VL 2 // viable lourd
-#define OP 3 // viable lourd
+#define OP 3 // optimale
 
 using namespace std;
 //using namespace Magick;
@@ -161,6 +161,8 @@ struct gridParams
 	int * SORTIE_OK_INF;
 	int * SORTIE_OK_SUP;
 	int OMP_THREADS;
+	int GRID_METHOD;
+
 };
 
 /*!
@@ -228,7 +230,8 @@ struct systemParams
 struct algoViabiParams
 {
 
-
+	int SET_TYPE;
+	int COMPUTE_SET;
 	int NB_OMP_THREADS;
 	int COMPUTE_TMIN;
 

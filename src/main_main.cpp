@@ -48,16 +48,17 @@
 
 int main( int argc, char** argv){
 
+	int nbOmpThreads = 1;
 	if(argc>=3){
 		if(strcmp(argv[1], "-t") == 0){
-			ompThreads = atoi(argv[2]);
+			nbOmpThreads = atoi(argv[2]);
 		}
 		else{
 			printf("Incorrect arguments. Ignored\n");
 		}
 	}
 
-
+	cout<< "main nb threads :"<<nbOmpThreads<<" \n";
 	ostringstream os;
 	string fileName;
 	double t1,t2,elapsed_time, t1_glob, t2_glob, elapsed_time_glob;
@@ -67,34 +68,39 @@ int main( int argc, char** argv){
 	char cCurrentPath[FILENAME_MAX];
 	cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */
 
+	//initialisation des structures à partir des données de l'utilisateur
+
+	ParametersManager *PM= initParams(gp, avp, cp, sp, nbOmpThreads);
 	/**********************************
 	 * IMPORTANT : appeler la fonction load_data ICI avant TOUT le reste
 	 */
+
 	cout<< " load model data commence \n";
-	loadModelData();
+	if(loadModelData)
+	{
+		loadModelData();
+	}
 
 	/*==========================================================*/
 
 	Viabi *viabProblem;
-	// déclaration de structures pour les paramètres
-	//initialisation des structures à partir des données de l'utilisateur
-	ParametersManager *PM= initParams(gp, avp, cp, sp);
+
 	ViabProblemFactory * vpf=new ViabProblemFactory(PM);
 
-	viabProblem=vpf->constructViabilityProblem(gridMethod);
+	viabProblem=vpf->constructViabilityProblem(gp.GRID_METHOD);
 
-	if(computeSet){
+	if(avp.COMPUTE_SET){
 		// l'ensemble doit être  recalculé
 		gettimeofday(&tim_glob,NULL);              //mesure le temps d'execution
 		t1_glob=tim_glob.tv_sec+(tim_glob.tv_usec/1000000.0);
 
-		if(setType==VIAB) { // option de calcul de noyau de viabilité a été choisie
+		if(avp.SET_TYPE==VIAB) { // option de calcul de noyau de viabilité a été choisie
 			// Initialisation de l'ensemble de contraintes
 			cout<< " initialise constr \n";
 			viabProblem->initialiseConstraints();
 			viabProblem->ViabilityKernel( true, 1);
 		}
-		if(setType==CAPT) { // option de calcul de noyau de viabilité a été choisie
+		if(avp.SET_TYPE==CAPT) { // option de calcul de noyau de viabilité a été choisie
 			// Initialisation de l'ensemble de contraintes
 			cout<< " initialise target  \n";
 			viabProblem->initialiseTarget();

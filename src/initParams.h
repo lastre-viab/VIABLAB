@@ -11,71 +11,30 @@
 #include "../include/defs.h"
 #include "../include/ParametersManager.h"
 
-ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlParams &cp,systemParams &sp);
-ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlParams &cp,systemParams &sp)
+ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlParams &cp,systemParams &sp, int nbOmpThreads);
+ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlParams &cp,systemParams &sp, int nbOmpThreads)
 {
 
-	string input_tempfile="../INPUT/"+ controlParamsFile;
-	ptree dataRoot;
-	read_json(input_tempfile, dataRoot);
-	int dimc = dataRoot.get<int>("CONTROL_DIMENSION", 1);
+	cout<< " initialization of parameter manager\n";
+	ParametersManager * pm = new ParametersManager(&gp, &avp, &cp, &sp, nbOmpThreads, paramsFile);
 
-	 initControls = new double[dimc*nbTrajs];
-	 initControls[0]=0.0;
-	 initControls[1]=0.0;
-
-
-	gp.DIM=dim;
-	gp.GRID_TYPE=0;
-	gp.LIMINF=STATE_MIN;
-	gp.LIMSUP=STATE_MAX;
-	if((computeSet==0)  & (refine >0))
-	{
-		for(int k=0;k<dim;k++)
-		{
-			for(int j=0;j<refine;j++)
-			{
-				nbPointsState[k]=2*nbPointsState[k]-1;
-			}
-		}
-	}
-	gp.NBPOINTS=nbPointsState;
-	gp.PERIODIC=periodic;
-	gp.FILE_PREFIX=prefix;
-	gp.GRID_MAIN_DIR=dirTramage;
-	gp.OMP_THREADS=ompThreads;
-
-	/*
-	 * paramètres par défaut. Non utilisés ici
-	 */
-	gp.SLICE_DIRS=sliceDirs;
-	gp.SLICE_VALUES=sliceVals;
-	gp.SORTIE_OK_INF=sortieOKinf;
-	gp.SORTIE_OK_SUP=sortieOKsup;
-
-	sp.COMPUTE_LC=computeLC;
-	sp.COMPUTE_MF=computeM;
-
-	sp.LIP=LC;
-	sp.MF=M;
-
-	sp.CONSTR_XU=&constraintsXU;
-	sp.CONSTR_X=&constraintsX;
-	/*
-	 * Initialisation des paramètres de systèmes dynamique
-	 */
-	sp.DYN_TYPE=dynType;
-	switch(dynType)
-	{
-	case 1:
+	if(dynamics)
 	{
 		sp.DYNAMICS=&dynamics;
-
-		break;
 	}
+	else
+	{
+		sp.DYNAMICS=&dynamics_default;
+	}
+	if(sp.DYN_TYPE == 4)
+	{
+		sp.DYNAMICS=&dynamics_hybrid;
+	}
+
+	switch(sp.DYN_TYPE)
+	{
 	case 2:
 	{
-		sp.DYNAMICS=&dynamics;
 		sp.COMPUTE_LC=0.0;
 		sp.COMPUTE_MF=0.0;
 		sp.LIP=1.0;
@@ -84,31 +43,72 @@ ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlPara
 	}
 	case 3:
 	{
-		sp.DYNAMICS=&dynamics;
-
 		sp.COMPUTE_LC=0.0;
 		sp.COMPUTE_MF=0.0;
 		sp.LIP=1.0;
 		sp.MF=1.0;
 		break;
 	}
-	case 4:
+	}
+	if(constraintsX)
 	{
-		sp.DYNAMICS=&dynamics_hybrid;
-		break;
+		sp.CONSTR_X = &constraintsX;
 	}
+	else
+	{
+		sp.CONSTR_X = &constraintsX_default;
+	}
+
+	if(constraintsXU)
+		{
+			sp.CONSTR_XU = &constraintsXU;
+		}
+		else
+		{
+			sp.CONSTR_XU = &constraintsXU_default;
+		}
+	if(jacobian)
+	{
+		sp.JACOBIAN=&jacobian;
+	}
+	else
+	{
+		sp.JACOBIAN=&jacobian_default;
+	}
+	if(localDynBounds)
+	{
+		sp.LOCAL_DYN_BOUNDS=&localDynBounds;
+	}
+	else
+	{
+		sp.LOCAL_DYN_BOUNDS=&localDynBounds_default;
+	}
+	if(m)
+	{
+		sp.M_FUNC=&m;
+	}
+	else
+	{
+		sp.M_FUNC=&m_default;
+	}
+	if(l)
+	{
+		sp.L_FUNC=&l;
+	}
+	else
+	{
+		sp.L_FUNC=&l_default;
+	}
+	if(target)
+	{
+		sp.TARGET=&target;
+	}
+	else
+	{
+		sp.TARGET=&target_default;
 	}
 
 
-	/*
-	 * paramètres par défaut. Non utilisés ici
-	 */
-	sp.globDeltat=globalDeltaT;
-	sp.maxTime=T;
-	sp.JACOBIAN=&jacobian;
-	sp.LOCAL_DYN_BOUNDS=&localDynBounds;
-	sp.M_FUNC=&m;
-	sp.L_FUNC=&l;
 	if(l_fd)
 	{
 		sp.L_FUNC_FD=&l_fd;
@@ -118,13 +118,7 @@ ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlPara
 		sp.L_FUNC_FD=&l_fd_default;
 	}
 
-	sp.SCHEME=discret_type;
-	sp.SCALE_PARAM=false;
-	for(int i=0;i<dim;i++)
-	{
-		sp.SCALE_PARAM|=scaling[i];
-	}
-	sp.TARGET=&target;
+
 	if(target_fd)
 	{
 		sp.TARGET_FD=&target_fd;
@@ -155,47 +149,15 @@ ParametersManager * initParams(gridParams &gp, algoViabiParams &avp, controlPara
 		sp.DYN_CONSTR_FOR_TRAJ = &dynConstraintsForTraj_default;
 
 	if(constraintsXUY_fd)
-			sp.MU_FUNC_FD = &constraintsXUY_fd;
-		else
-			sp.MU_FUNC_FD = &constraintsXUY_fd_default;
+		sp.MU_FUNC_FD = &constraintsXUY_fd;
+	else
+		sp.MU_FUNC_FD = &constraintsXUY_fd_default;
 	/*
 	 * Initialisation des paramètres de systèmes dynamique
 	 * Ici toutes les valeurs sont par defaut, non utilisés
 	 */
-	avp.NB_OMP_THREADS=ompThreads;
 
-	avp.FILE_PREFIX=prefix;
-	avp.TARGET_OR_DEPARTURE=target_or_departure_problem;
-	avp.COMPUTE_TMIN=compute_tmin;
-	avp.NB_TRAJS = nbTrajs;
-	avp.TYPE_TRAJ = typeTraj;
-	avp.INIT_POINTS = initPoints;
-	avp.INIT_POINTS_FD = initPoints_fd;
-	avp.INIT_VALUES = initValues;
-	avp.INIT_VALUES_FD = initValues_fd;
-
-	avp.INIT_CONTROLS = initControls;
-	avp.GRID_REFINMENTS_NUMBER = refine;
-	avp.INTERMEDIATE_SAVINGS = intermediate_savings;
-	avp.SAVE_BOUNDARY = saveBoundary;
-	avp.SAVE_PROJECTION = saveProjection;
-	avp.SAVE_SLICE = saveCoupe;
-	avp.SAVE_SLICE_BOUND = saveCoupeBound;
-	avp.PROJECTION = projection;
-	avp.SAVE_SUBLEVEL = saveSubLevel;
-	avp.LEVEL=level;
-
-
-	if(avp.COMPUTE_TMIN)
-	{
-		sp.L_LIP=1.0;
-		sp.L_MF=sp.maxTime;
-	}
-	else{
-		sp.L_LIP=l_Lip;
-		sp.L_MF=l_max;
-	}
-	return new ParametersManager(&gp, &avp, &cp, controlParamsFile, &sp);
+	return pm;
 
 }
 
