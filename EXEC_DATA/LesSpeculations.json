@@ -1,0 +1,22 @@
+{
+"CROPS_LIST" : 
+  {
+    "CROP": "Aubergine",
+    "CROP": "Carotte",
+	"CROP": "Banane",
+	"CROP": "Canne",
+	"CROP": "JachereCourte",
+	"CROP": "JachereLongue",
+    "CROP": "JachereMiLongue",
+	"CROP": "Chou",
+	"CROP": "Haricot",
+	"CROP": "Concombre",
+	"CROP": "Giromon",
+	"CROP": "Manioc", 
+	"CROP": "IgnamGrosseCaille",
+	"CROP": "IgnamJaune", 
+	"CROP": "Tomate",
+	"CROP": "Chou",
+	"CROP": "Laitue"
+  }
+}

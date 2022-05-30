@@ -1,0 +1,38 @@
+{
+    "IBQS_MIN"          : 0.0, 
+	"IBQS_MAX"          : 1.0,
+	"IBQS_TARGET"       : 0.9,      
+	"NB_POINTS_IBQS"    : 150,        
+	"NB_POINTS_VALEUR"  :  50,              
+	"SURFACE"           :  1.0,   
+	"DEFICITE_MAX"      :  0.0,        
+	"COUTFIXE_PAR_HA"   :  200.0,          
+	"HORIZON"           : 240,
+    "TRAJECTOIRES" : 
+    {
+		"INIT_POINT" :
+        {
+         "IBQS" : 0.15,
+         "DATE_DEBUT" : 0,
+         "BUDGET" : 1000.0
+        },
+      "INIT_POINT" :
+        {
+         "IBQS" : 0.25,
+         "DATE_DEBUT" : 0,
+         "BUDGET" : 1000.0
+        },
+		"INIT_POINT" :
+        {
+         "IBQS" : 0.4,
+         "DATE_DEBUT" : 0,
+         "BUDGET" : 1000.0
+        },
+		"INIT_POINT" :
+        {
+         "IBQS" : 0.6,
+         "DATE_DEBUT" : 0,
+         "BUDGET" : 1000.0
+        }
+    }
+}
