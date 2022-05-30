@@ -3299,7 +3299,7 @@ void ViabiBitSet::ViabilityKernelSimple( bool sortieOK,int nbArret)
 			}
 			else
 			{
-				noyauViabi_omp(sortieOK, nbArret);
+				noyauViabi(sortieOK, nbArret);
 			}
 		}
 		else
@@ -3401,7 +3401,12 @@ void ViabiBitSet::noyauViabi( bool sortieOK,int nbArret)
 
 					if(masquePointsEnleves->count()<(unsigned long long int)longTrame)
 					{
+						//cout<< " on enleve sur posX = "<<posX<<endl;
+						//cout<< " grid tab ici    "<< *gridTab[posX] << endl;
+						//cout<< " masque          "	<< 	*masquePointsEnleves <<endl;
 						*gridTab[posX]&=(*masquePointsEnleves);
+						//cout<< " grid tab  APRES "<< *gridTab[posX] << endl;
+						//cout<< " =========================================================\n";
 					}
 
 
@@ -3426,16 +3431,6 @@ void ViabiBitSet::noyauViabi( bool sortieOK,int nbArret)
 
 void ViabiBitSet::noyauViabi_omp( bool sortieOK,int nbArret)
 {
-
-	// vrai si  pendant l'iteration en cours on a enleve au moins un point du noyau en construction
-	//parcours de trame monodirectionnel
-
-
-	//cout<<"dim etat  " <<dim<< " taille de trame est " <<tailleTrame<<"\n";
-
-
-	//    cout<<"masque points enleves cree"<<masquePointsEnleves;
-
 	boost::dynamic_bitset<> ** gridTab=grid->getGridTab();
 	boost::dynamic_bitset<> ** gridTabNew=grid->getGridTabNew();
 	unsigned long long int subGridSize=grid->getNbPointsTotalSubGrid();
@@ -3458,7 +3453,7 @@ void ViabiBitSet::noyauViabi_omp( bool sortieOK,int nbArret)
 #pragma omp parallel for num_threads(nbOMPThreads)  reduction(+:comptEnleves) private(posX)  shared( gridTab, gridTabNew,subGridSize) default(none)
 		for( posX=0;posX< subGridSize;posX++)
 		{
-			int  tid = omp_get_thread_num();
+			//int  tid = omp_get_thread_num();
 
 			int dirTramage=grid->getDirTram();
 
@@ -3469,34 +3464,30 @@ void ViabiBitSet::noyauViabi_omp( bool sortieOK,int nbArret)
 
 			double * limInf=grid->limInf;
 			double * gridStep=grid->step;
-			unsigned long long int   indice[dim];
-
-
-			double xCoordsDouble[dim];
-			bool testNonVide;
 			// printf("thread numero %d nouvelle boucle while\n", nbTh);
-			boost::dynamic_bitset<> masque;
-			boost::dynamic_bitset<> * masquePointsEnleves=new boost::dynamic_bitset<>(longTrame,0);
 
-			//  cout<< " posX="<<posX<< " size "<<gridTab->size()<<endl;
 			if(!gridTab[posX]->none())
 			{
-				numToIntCoords_gen(posX,dim-1,nbPointsSub, indice);
-
 				// cout<<  (*gridTab[posX])<<endl;
 
-				masque=grid->analyseTrameMasqueBis(posX,1-tid);
+				boost::dynamic_bitset<> masque=grid->analyseTrameMasqueBis(posX,false);
 
 				//   cout<<"masque d'analyse  "<<masque<<endl;
 
-				masquePointsEnleves->set();
-
 				if(!masque.none() )
 				{
+					unsigned long long int   indice[dim];
+					double xCoordsDouble[dim];
+					bool testNonVide;
+
+					boost::dynamic_bitset<> * masquePointsEnleves=new boost::dynamic_bitset<>(longTrame,0);
+					numToIntCoords_gen(posX,dim-1,nbPointsSub, indice);
+
+					masquePointsEnleves->set();
+
 					for( int j=0; j<dirTramage;j++)
 					{
 						xCoordsDouble[j]=limInf[j]+indice[j]*gridStep[j];
-
 					}
 
 					for(int j=dirTramage+1; j< dim;j++)
@@ -3515,7 +3506,6 @@ void ViabiBitSet::noyauViabi_omp( bool sortieOK,int nbArret)
 							//cout<< " fini\n";
 							if(!testNonVide)
 							{
-
 								masquePointsEnleves->set(k,false);
 								comptEnleves++;
 							}
@@ -3524,14 +3514,13 @@ void ViabiBitSet::noyauViabi_omp( bool sortieOK,int nbArret)
 
 					if(masquePointsEnleves->count()<(unsigned long long int)longTrame)
 					{
-
 						(*gridTabNew[posX])&=(*masquePointsEnleves);
 					}
 				}
 			}//fin de if la trame n'est pas vide
 
 		}//fin de for OMP
-
+		//cout<<"Itération "<<nbIter<< " AVANT COPIE "<<comptEnleves<<"\n";
 		grid->copyGrid(gridTabNew, gridTab);
 
 		cout<<"Itération "<<nbIter<< " terminée. Nombre de points  points enlevés: "<<comptEnleves<<"\n";

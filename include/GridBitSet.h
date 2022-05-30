@@ -21,7 +21,6 @@ public:
   void addPointToSet(unsigned long long int pos, double value)  ;
 
   virtual bool isInSet(unsigned long long int * coords );
-  bool isPointInGridWithConstr(double * coords);
 
   void findNearestViabPointInCell(double *startPoint, double * currentPoint, double * newPoint, double (*dynConstraints)(double *, double *));
   virtual void savePointsList(string fileName);
@@ -50,7 +49,6 @@ public:
   void copyGrid( boost::dynamic_bitset<>   **grIn, boost::dynamic_bitset<>  **grOut);
 
   void refine();
-  bool unboundedDomain;
 
 private:
   int cp1; //pas de calcul des d�riv�es partielles: x+hx/pas1 , y+hy/p1
@@ -61,9 +59,6 @@ private:
 
   int pas1;       //pas de calcul des d�riv�es partielles: x+hhx/pas1
 
-
-  int * sortieOKinf;
-  int * sortieOKsup;
 
 
 

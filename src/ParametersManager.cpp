@@ -177,6 +177,9 @@ void ParametersManager::readGridParametersFromJson()
 			gridParameters->SORTIE_OK_SUP[tabIndice]=0;//valeurs par default
 		}
 	}
+ cout<< " LECTURe SORTIE PARAMS finie test"<< endl;
+ printVector(gridParameters->SORTIE_OK_SUP, dim);
+ printVector(gridParameters->SORTIE_OK_INF, dim);
 
 	cout<< "  REad grig params : FINISHED \n";
 }

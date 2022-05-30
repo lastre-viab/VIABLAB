@@ -261,6 +261,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 				}
 				else
 				{
+
 					/*!
 					 * Si l'image n'est pas dans  \f$ K \f$ on enregistre un numéro de maille factice qui signifie que
 					 * cette image est rejetée
@@ -280,8 +281,19 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 				 * \todo prévoir la gestion des autorisations de sortie  par axe pour les variables qui peuvent
 				 * se trouver dans des intervalles non bornés
 				 */
-				imageCells[cu]=nbCellsTotal+1; // sinon on enregistre un nombre convenu reconnaissanble
-				cellsList.push_back(intPair(imageCells[cu],cu));
+				if(grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1) && (dynsys->constraintsX(doubleVect1)<PLUS_INF))
+				{
+					// cout<< " sortie autorisee " <<  " on est dans " ;
+					// printVector(doubleVect1, dim);
+					imageCells[cu]=nbCellsTotal; // sinon on enregistre un nombre convenu reconnaissanble
+					cellsList.push_back(intPair(imageCells[cu],cu));
+				}
+				else
+				{
+					imageCells[cu]=nbCellsTotal+1; // sinon on enregistre un nombre convenu reconnaissanble
+					cellsList.push_back(intPair(imageCells[cu],cu));
+				}
+
 				//////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,imageCells[cu]);
 			}
 
@@ -328,7 +340,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 	cu=0;
 	unsigned long long int iControlTab=0, iCellsTab=0, iEntreesTab=0;
 	// cout<< " juste avant while de parcours de la liste  first "<<(*itCell).first<< " nb cells total "<<(int)nbCellsTotal<<endl;
-	while((itCell!=cellsList.end()) &( (*itCell).first<(int)nbCellsTotal))
+	while((itCell!=cellsList.end()) &( (*itCell).first<=(int)nbCellsTotal))
 	{
 
 		currentCell=(*itCell).first;
@@ -1283,6 +1295,22 @@ void ViabiMicroMacro::viabKerValFunc()
 							tempVal=(vTab[cellNum+indicesDecalCell[iCell]]+rho*tempL)/(1-rho*tempM);
 							minValCell=min(minValCell, tempVal);
 						}
+					}
+				}
+				else if(cellNum == nbCellsTotal)
+				{
+					for(int j=pointDI.tabCellEntrees[compteComm];j<pointDI.tabCellEntrees[compteComm+1];j++)
+					{
+						numControl=pointDI.tabImageControls[j];
+						(dynsys->*(dynsys->discretDynamics))(rCoords, controlCoords[numControl], doubleVect1, 1.0);
+						//cout<< " sortie autoris�e pour control num "<<numControl << "  image "<<endl;
+						//printVector(doubleVect1, dim);
+						tempL=dynsys->lFunc(rCoords, controlCoords[numControl]);
+						tempM=dynsys->mFunc(rCoords, controlCoords[numControl]);
+						double tempV = dynsys->constraintsX(doubleVect1);
+						//cout<< " value  estimee dans ce point "<< tempV << endl;
+						tempVal=(tempV+rho*tempL)/(1-rho*tempM);
+						minValCell=min(minValCell, tempVal);
 					}
 				}
 

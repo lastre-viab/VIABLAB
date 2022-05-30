@@ -67,7 +67,19 @@ GridMicroMacro::GridMicroMacro(   gridParams gp) {
 		}
 	}
 
+	sortieOKinf=gp.SORTIE_OK_INF;
+	sortieOKsup=gp.SORTIE_OK_SUP;
 
+int d = 0;
+	unboundedDomain=false;
+
+	while (d<dim && !unboundedDomain)
+	{
+		unboundedDomain |= (sortieOKinf[d]==1) | (sortieOKsup[d]==1);
+		d++;
+	}
+
+ cout<< " grid micro macro sortie autorisée : " << unboundedDomain << endl;
 	gridDataFile<< dim<<endl;
 	for(int k=0;k<dim;k++)
 	{
@@ -102,7 +114,7 @@ GridMicroMacro::GridMicroMacro(   gridParams gp) {
 
 	step=new double[dim];
 	if(DEV_PRINT)  cout<< " le pas est \n";
-	int d;
+	d = 0;
 	maxStep=0;
 	nbTotalPoints=1;
 	nbTotalCells=1;

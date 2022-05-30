@@ -283,6 +283,11 @@ public:
 
 
 
+  int * sortieOKinf;
+  int * sortieOKsup;
+  bool isPointInGridWithConstr(double * coords);
+
+  bool unboundedDomain;
 
 
 

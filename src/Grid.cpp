@@ -420,3 +420,20 @@ unsigned long long int *Grid:: getNbPoints()
 {
   return nbPoints;
 }
+
+
+bool Grid::isPointInGridWithConstr(double * coords)
+{
+
+	bool isInGrid=true;
+	int i=0;
+
+	while(isInGrid & (i<dim) )
+	{
+		isInGrid &= (( (coords[i]<=limSup[i]) | (sortieOKsup[i])  ) & ( (coords[i]>=limInf[i]) | (sortieOKinf[i])  )  );
+		i++;
+	}
+	return isInGrid;
+
+}
+

@@ -22,7 +22,8 @@
 //#include "../data/WeakDeclarations.h"
 #include "../data/DefaultValues.h"
 //#include  "../data/equilibres4D_data.h"  //-- a jour, non reg OK
-#include  "../data/ex1Viabi2D_data.h"   //-- a jour, non reg OK
+//#include  "../data/ex1Viabi2D_data.h"   //-- a jour, non reg OK
+#include  "../data/PSP_data.h"   //-- a jour, non reg OK
 
 //#include  "../data/julia2D_data.h"  //-- a jour, non reg OK
 //#include  "../data/ex1Viabi2D_data.h"  //-- a jour, non reg OK
@@ -98,7 +99,7 @@ int main( int argc, char** argv){
 			// Initialisation de l'ensemble de contraintes
 			cout<< " initialise constr \n";
 			viabProblem->initialiseConstraints();
-			viabProblem->ViabilityKernel( true, 1);
+			viabProblem->ViabilityKernel( true, 50);
 		}
 		if(avp.SET_TYPE==CAPT) { // option de calcul de noyau de viabilité a été choisie
 			// Initialisation de l'ensemble de contraintes

@@ -1435,21 +1435,6 @@ bool Grid_BitSet::isInSet(unsigned long long int * coords )
 	return (*gridTab[posX])[coords[dirTramage]];
 }
 
-bool Grid_BitSet::isPointInGridWithConstr(double * coords)
-{
-
-	bool isInGrid=true;
-	int i=0;
-
-	while(isInGrid & (i<dim) )
-	{
-		isInGrid &= (( (coords[i]<=limSup[i]) | (sortieOKsup[i])  ) & ( (coords[i]>=limInf[i]) | (sortieOKinf[i])  )  );
-		i++;
-	}
-	return isInGrid;
-
-}
-
 void savePointsList(string fileName)
 {
 
