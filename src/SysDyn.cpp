@@ -583,7 +583,7 @@ double  SysDyn::calculRho_local(double * x   )
     }
 
   rho1=  sqrt(( 2.0*h)/(LL*MFF));
- // cout << "x= "<<x[0]<< " "<<x[1]<< " L= "<<LL<< "  M= "<< MFF<<  " h= "<<h<<" rho= "<<rho1<<endl;
+ // if(rho>0.1) cout << "x= "<<x[0]<< " "<<x[1]<< " L= "<<LL<< "  M= "<< MFF<<  " h= "<<h<<" rho= "<<rho1<<endl;
   return rho1;
 }
 
@@ -773,7 +773,7 @@ double SysDyn::calculMF_local_num(double * x )
     MF1=max(MF1,normeImage);
 
     }
-
+  //cout<< " calcul local num MF= "<<MF1<< " lfunc_MF = " << lfunc_MF<<endl;
   return max(MF1, lfunc_MF);
 }
 
@@ -793,7 +793,7 @@ double SysDyn::calculMF_local_ana(double * x )
     }
   double   MF1=normeImage;
 
-  //cout<< " MF= "<<MF1<< " lfunc_MF = " << lfunc_MF<<endl;
+ //  cout<< " calcul local ana MF= "<<MF1<< " lfunc_MF = " << lfunc_MF<<endl;
   return max(MF1, lfunc_MF);
 }
 

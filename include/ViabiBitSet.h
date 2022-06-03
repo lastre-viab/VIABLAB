@@ -44,7 +44,7 @@ public:
 	virtual void computeTrajectories();
 
 	virtual void loadViableSets();
-
+	virtual void saveViableSets();
 
 	void setK0();
 	void setK0_fd();

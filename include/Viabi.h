@@ -44,6 +44,7 @@ public:
 	virtual void  GarantedViabilityKernel( bool sortieOK,int nbArret)  =0;
 	virtual void computeTrajectories() =0;
 	virtual void loadViableSets() =0;
+	virtual void saveViableSets() =0;
 
 protected:
 	ParametersManager* modelParams;

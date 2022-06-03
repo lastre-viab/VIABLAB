@@ -70,7 +70,7 @@ GridMicroMacro::GridMicroMacro(   gridParams gp) {
 	sortieOKinf=gp.SORTIE_OK_INF;
 	sortieOKsup=gp.SORTIE_OK_SUP;
 
-int d = 0;
+	int d = 0;
 	unboundedDomain=false;
 
 	while (d<dim && !unboundedDomain)
@@ -79,7 +79,7 @@ int d = 0;
 		d++;
 	}
 
- cout<< " grid micro macro sortie autorisée : " << unboundedDomain << endl;
+	cout<< " grid micro macro sortie autorisée : " << unboundedDomain << endl;
 	gridDataFile<< dim<<endl;
 	for(int k=0;k<dim;k++)
 	{
@@ -316,6 +316,48 @@ void GridMicroMacro::saveValOnGrid(string fileName)
 	else  // sinon
 		cerr << "Erreur de  l'ouverture !" << endl;
 }
+
+void GridMicroMacro::saveCoupeBoundary(string fileName)
+{
+	bool test;
+
+	//cout<<"ecriture  de l'ensemble dans un fichier \n";
+	unsigned long long int * x = new unsigned long long int[dim] ;
+	double *xReel=new double[dim];
+
+	ofstream fichierB(fileName.c_str());
+	if(fichierB)  // si l'ouverture a rï¿½ussi
+	{
+		int   compteB=0;
+		for (unsigned long long int pos=0;pos<nbTotalPoints; pos++)
+		{
+			numToIntAndDoubleCoords(pos, x,xReel);
+			test=true;
+			for(int k=0;k<(int)dirs.size();k++)
+			{
+				test=test&(abs(xReel[dirs[k]]-values[k])<=step[dirs[k]]);
+			}
+			if(test)
+			{
+				compteB++;
+
+				for(int l1=0;l1<dim;l1++)
+				{
+					fichierB<<   xReel[l1]<<" ";
+				}
+				fichierB<<gridPtr[pos]<<"\n";
+			}
+
+		}
+
+		fichierB.close();
+	}
+	else  // sinon
+		cerr << "Erreur de  l'ouverture !" << endl;
+}
+
+
+
 
 void GridMicroMacro::saveValOnGrid_DD(string fileName)
 {

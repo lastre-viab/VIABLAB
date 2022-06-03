@@ -58,6 +58,7 @@ public:
 
   void saveSubLevelset(double level, string fileName );
   void saveSubLevelset_DD(double level, string fileName );
+  void saveCoupeBoundary(string nomFichier);
   int nbOMPThreads;
 private:
 

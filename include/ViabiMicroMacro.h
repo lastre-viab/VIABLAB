@@ -122,9 +122,11 @@ public:
 				bool &succes );
 	virtual void computeTrajectories();
 	virtual void loadViableSets();
+	virtual void saveViableSets();
 
 	void viabKerValFunc();
 	void viabKerValFunc_DD();
+	void viabKerValFuncOld();
 
 	double computeOptimalCaptTrajectory(double *initPosition, string fileName, bool &succes);
 

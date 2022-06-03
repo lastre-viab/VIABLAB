@@ -235,6 +235,16 @@ void ParametersManager::readSystemParametersFromJson()
 
 	systemParameters->SCHEME=dataRoot.get<int>("TIME_DISCRETIZATION_SCHEME", 1);
 	systemParameters->SCALE_PARAM=dataRoot.get<bool>("SCALING", false);
+	if(algoParameters->COMPUTE_TMIN)
+	{
+		systemParameters->L_LIP=1.0;
+		systemParameters->L_MF=systemParameters->maxTime;
+	}
+	else{
+		systemParameters->L_LIP=dataRoot.get<double>("COST_LIPSCHITZ_CONSTANT", 1.0);
+		systemParameters->L_MF=dataRoot.get<double>("COST_BOUND_CONSTANT", 1.0);
+		 cout<< "  lu cost constants "<<  systemParameters->L_LIP <<  " and " << systemParameters->L_MF << endl;
+	}
 
 	cout<< "  Read SYSTEM params  : FINISHED\n";
 }
@@ -366,15 +376,6 @@ void ParametersManager::readAlgoParametersFromJson()
 	algoParameters->LEVEL=dataRoot.get<int>("LEVEL", 0);
 
 
-	if(algoParameters->COMPUTE_TMIN)
-	{
-		systemParameters->L_LIP=1.0;
-		systemParameters->L_MF=systemParameters->maxTime;
-	}
-	else{
-		systemParameters->L_LIP=dataRoot.get<double>("COST_LIPSCHITZ_CONSTANT", 1.0);
-		systemParameters->L_MF=dataRoot.get<double>("COST_BOUND_CONSTANT", 1.0);
-	}
 	cout<< "  Read algo params  : finished\n";
 }
 void ParametersManager::readControlParametersFromJson()

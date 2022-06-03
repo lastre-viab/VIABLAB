@@ -23,8 +23,9 @@
 #include "../data/DefaultValues.h"
 //#include  "../data/equilibres4D_data.h"  //-- a jour, non reg OK
 //#include  "../data/ex1Viabi2D_data.h"   //-- a jour, non reg OK
-#include  "../data/PSP_data.h"   //-- a jour, non reg OK
-
+//#include  "../data/testPendule_data.h"   //-- a jour, non reg OK
+//#include  "../data/resilience_data.h"   //-- a jour, non reg OK
+#include "../data/PSP_dataBis.h"
 //#include  "../data/julia2D_data.h"  //-- a jour, non reg OK
 //#include  "../data/ex1Viabi2D_data.h"  //-- a jour, non reg OK
 
@@ -126,7 +127,10 @@ int main( int argc, char** argv){
 	 */
 
 	viabProblem->computeTrajectories();
-
+if(avp.SAVE_PROJECTION | avp.SAVE_SLICE_BOUND)
+{
+	viabProblem->saveViableSets();
+}
 	delete viabProblem;
 	cout<< " viab detruit retour main\n";
 	postProcess();
