@@ -12,8 +12,6 @@
 #include "../include/FarmDataGardener.h"
 
 FarmData_Gardener * modelData;
-unsigned long long int ***IB, **Delta, **dpr, **perRec;
-double  ***bilan, ****bilan_ty,   **sensiR,**ct, **ac, **cIn,**cr,**cie, **rendM, ****maxDeficit, *minMaxDeficit, **sp, **sa, **pv;
 string prefix;
 double globalMaxDeficit;
 double IStar=0.5;

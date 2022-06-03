@@ -18,7 +18,7 @@
 	{
 		"POINT" :
 		{
-			"POINT_COORDINATES" : [50.0, 10.0, 40.0]
+			"POINT_COORDINATES" : [50.0, 10.0, 0.0]
 		}
 	},
 	"INTERMEDIATE_SAVINGS" :0,

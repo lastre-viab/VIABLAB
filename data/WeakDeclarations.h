@@ -19,7 +19,7 @@ unsigned long long int * initPoints_fd;
 double *initValues_fd;
 double *initValues;
 
-void loadModelData() __attribute__((weak));
+void loadModelData(ParametersManager *PM) __attribute__((weak));
 
 double  constraintsXU_fd( unsigned long long int * x, unsigned long long int * u ) __attribute__((weak));
 void dynamics_tych_fd(unsigned long long int  * x, unsigned long long int *u,unsigned long long int *v, unsigned long long int * image) __attribute__((weak));

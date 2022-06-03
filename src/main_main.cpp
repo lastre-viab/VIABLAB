@@ -25,7 +25,9 @@
 //#include  "../data/ex1Viabi2D_data.h"   //-- a jour, non reg OK
 //#include  "../data/testPendule_data.h"   //-- a jour, non reg OK
 //#include  "../data/resilience_data.h"   //-- a jour, non reg OK
-#include "../data/PSP_dataBis.h"
+//#include "../data/PSP_dataBis.h"
+#include "../data/dataAgroEcoDivMultiParcelsD4_new.h"
+
 //#include  "../data/julia2D_data.h"  //-- a jour, non reg OK
 //#include  "../data/ex1Viabi2D_data.h"  //-- a jour, non reg OK
 
@@ -80,7 +82,7 @@ int main( int argc, char** argv){
 	cout<< " load model data commence \n";
 	if(loadModelData)
 	{
-		loadModelData();
+		loadModelData( PM);
 	}
 
 	/*==========================================================*/

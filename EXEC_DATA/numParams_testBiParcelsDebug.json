@@ -2,9 +2,9 @@
     "IBQS_MIN"          : 0.0, 
 	"IBQS_MAX"          : 1.0,
 	"IBQS_TARGET"       : 0.9,      
-	"NB_POINTS_IBQS"    : 50,        
-	"NB_POINTS_VALEUR"  :  50,          
-	"HORIZON"           : 120,
+	"NB_POINTS_IBQS"    : 10,        
+	"NB_POINTS_VALEUR"  :  10,          
+	"HORIZON"           : 30,
     "TRAJECTOIRES" : 
     {
 		"INIT_POINT" :

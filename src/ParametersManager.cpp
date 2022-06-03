@@ -177,9 +177,9 @@ void ParametersManager::readGridParametersFromJson()
 			gridParameters->SORTIE_OK_SUP[tabIndice]=0;//valeurs par default
 		}
 	}
- cout<< " LECTURe SORTIE PARAMS finie test"<< endl;
- printVector(gridParameters->SORTIE_OK_SUP, dim);
- printVector(gridParameters->SORTIE_OK_INF, dim);
+	cout<< " LECTURe SORTIE PARAMS finie test"<< endl;
+	printVector(gridParameters->SORTIE_OK_SUP, dim);
+	printVector(gridParameters->SORTIE_OK_INF, dim);
 
 	cout<< "  REad grig params : FINISHED \n";
 }
@@ -243,7 +243,7 @@ void ParametersManager::readSystemParametersFromJson()
 	else{
 		systemParameters->L_LIP=dataRoot.get<double>("COST_LIPSCHITZ_CONSTANT", 1.0);
 		systemParameters->L_MF=dataRoot.get<double>("COST_BOUND_CONSTANT", 1.0);
-		 cout<< "  lu cost constants "<<  systemParameters->L_LIP <<  " and " << systemParameters->L_MF << endl;
+		cout<< "  lu cost constants "<<  systemParameters->L_LIP <<  " and " << systemParameters->L_MF << endl;
 	}
 
 	cout<< "  Read SYSTEM params  : FINISHED\n";
@@ -288,17 +288,22 @@ void ParametersManager::readAlgoParametersFromJson()
 	}
 
 	algoParameters->NB_TRAJS = dataRoot.get<int>("NUMBER_OF_TRAJECTORIES", 0);
+
 	algoParameters->TYPE_TRAJ = dataRoot.get<int>("TRAJECTORY_TYPE", 1);
 	double * initPoints = new double[gridParameters->DIM * algoParameters->NB_TRAJS];
-	if(dataRoot.find("INITIAL_POINTS")!=dataRoot.not_found())
+	if(algoParameters->NB_TRAJS >0)
 	{
-		ptree  pointsTree=dataRoot.find("INITIAL_POINTS")->second;
-		int pointCounter = 0;
-		for (ptree::value_type &point : pointsTree.get_child(""))
+		if(dataRoot.find("INITIAL_POINTS")!=dataRoot.not_found())
 		{
-			ptree pointRoot = point.second;
-			this->readTabData(&pointRoot, initPoints+pointCounter * gridParameters->DIM, "POINT_COORDINATES", gridParameters->DIM);
-			pointCounter++;
+			ptree  pointsTree=dataRoot.find("INITIAL_POINTS")->second;
+			int pointCounter = 0;
+			for (ptree::value_type &point : pointsTree.get_child(""))
+			{
+				ptree pointRoot = point.second;
+				cout<< " readig point coordinates with dimension "<< gridParameters->DIM<<endl;
+				this->readTabData(&pointRoot, initPoints+pointCounter * gridParameters->DIM, "POINT_COORDINATES", gridParameters->DIM);
+				pointCounter++;
+			}
 		}
 	}
 	algoParameters->INIT_POINTS = initPoints;
@@ -366,11 +371,11 @@ void ParametersManager::readAlgoParametersFromJson()
 	algoParameters->SAVE_SLICE =dataRoot.get<int>("SAVE_SLICE", 0);
 	algoParameters->SAVE_SLICE_BOUND = dataRoot.get<int>("SAVE_SLICE_BOUND", 0);
 	algoParameters->PROJECTION=new unsigned long long int[gridParameters->DIM];
-		for(unsigned long long int tabIndice=0;tabIndice<gridParameters->DIM;tabIndice++)
-		{
-			algoParameters->PROJECTION[tabIndice]=0;//valeurs par default
-		}
-		this->readTabData(&dataRoot, algoParameters->PROJECTION, "PROJECTION_AXIS", gridParameters->DIM);
+	for(unsigned long long int tabIndice=0;tabIndice<gridParameters->DIM;tabIndice++)
+	{
+		algoParameters->PROJECTION[tabIndice]=0;//valeurs par default
+	}
+	this->readTabData(&dataRoot, algoParameters->PROJECTION, "PROJECTION_AXIS", gridParameters->DIM);
 
 	algoParameters->SAVE_SUBLEVEL = dataRoot.get<int>("SAVE_SUBLEVEL", 0);
 	algoParameters->LEVEL=dataRoot.get<int>("LEVEL", 0);
