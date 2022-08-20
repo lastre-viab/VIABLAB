@@ -43,7 +43,7 @@ double alpha=1.0;
 
 
 
-void loadModelData()
+void loadModelData(ParametersManager *PM)
 {
 	sp.LIP = 2.0*max(1.0, alpha);
 
