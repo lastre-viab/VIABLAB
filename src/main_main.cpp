@@ -12,41 +12,13 @@
 
 #include "../include/defs.h"
 #include "../include/ViabProblemFactory.h"
-
-
-
-/*
- * inclusion des déclarations du modèle
- */
-
-//#include "../data/WeakDeclarations.h"
 #include "../data/DefaultValues.h"
-//#include  "../data/equilibres4D_data.h"  //-- a jour, non reg OK
-//#include  "../data/ex1Viabi2D_data.h"   //-- a jour, non reg OK
-//#include  "../data/testPendule_data.h"   //-- a jour, non reg OK
-//#include  "../data/resilience_data.h"   //-- a jour, non reg OK
-//#include "../data/PSP_dataBis.h"
-#include "../data/dataAgroEcoDivMultiParcelsD4_new.h"
 
-//#include  "../data/julia2D_data.h"  //-- a jour, non reg OK
-//#include  "../data/ex1Viabi2D_data.h"  //-- a jour, non reg OK
 
-//#include  "../data/zermelo_tmin_data.h"  //-- a jour, non reg OK
-//#include  "../data/zermelo_Lmin_data.h"  //-- a jour, non reg OK
-//#include  "../data/testZermelo_bitSet.h"  //-- a jour, non reg OK
-//#include  "../data/maupertuis_data.h"
 
-//#include  "../data/ex4_Viabi2D_data.h"
-//#include "../data/ex2_EcoPolut_data.h"
+#include "../data/ModelDataInclusion.h"
 
-/*
- * Code de la fonction d'initialisation de paramètres
- */
 
-//#include "../data/dataAgroEcoDivMultiParcels.h"
-//#include "../data/dataAgroEcoDivMultiParcelsD4.h"
-
-//#include "../data/dataAgroEcoDivTest.h"
 #include "../src/initParams.h"
 
 
@@ -102,7 +74,7 @@ int main( int argc, char** argv){
 			// Initialisation de l'ensemble de contraintes
 			cout<< " initialise constr \n";
 			viabProblem->initialiseConstraints();
-			viabProblem->ViabilityKernel( true, 50);
+			viabProblem->ViabilityKernel( true, avp.INTERATION_STOP_LEVEL);
 		}
 		if(avp.SET_TYPE==CAPT) { // option de calcul de noyau de viabilité a été choisie
 			// Initialisation de l'ensemble de contraintes

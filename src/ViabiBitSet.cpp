@@ -3405,7 +3405,7 @@ void ViabiBitSet::noyauViabi( bool sortieOK,int nbArret)
 
 				// cout<<  (*gridTab[posX])<<endl;
 
-				masque=grid->analyseTrameMasqueBis(posX,0);
+				masque=grid->analyseTrameMasque(posX);
 
 				// cout<<"masque d'analyse  "<<masque<<endl;
 

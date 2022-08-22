@@ -31,7 +31,7 @@
 
 
 
-string paramsFile = "testPSPBis.json";
+
 
 //	    A = autre cas de la forme f(x,u,v)
 //		    ou u=(u[1],u[2],u[3],u[4],u[5]) in [alphamin,alphamax]x[betamin,betamax]x[gammamin,gammamax] }

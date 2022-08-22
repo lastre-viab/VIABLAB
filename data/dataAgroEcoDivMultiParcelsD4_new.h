@@ -25,7 +25,7 @@
 
 
 
-string paramsFile = "agroEcoDiv_D4.json";
+
 
 void optimTrajConvert(string fileNameBis, string fileName, int W2, double lScale);
 

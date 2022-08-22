@@ -275,6 +275,7 @@ void ParametersManager::readAlgoParametersFromJson()
 	algoParameters->GRID_REFINMENTS_NUMBER = dataRoot.get<int>("GRID_REFINMENTS_NUMBER", 0);
 	algoParameters->COMPUTE_SET = dataRoot.get<int>("COMPUTE_VIABLE_SET", 1);
 	algoParameters->SET_TYPE = dataRoot.get<int>("SET_TYPE", 1);
+	algoParameters->INTERATION_STOP_LEVEL = dataRoot.get<int>("ITERATION_STOP_LEVEL", 0);
 
 	if((algoParameters->COMPUTE_SET==0)  & (algoParameters->GRID_REFINMENTS_NUMBER >0))
 	{

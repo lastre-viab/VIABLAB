@@ -253,7 +253,7 @@ struct algoViabiParams
 	int SAVE_SUBLEVEL;
 	int LEVEL;
 	unsigned long long int* PROJECTION;
-
+	int INTERATION_STOP_LEVEL;
 
 };
 
