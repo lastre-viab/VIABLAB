@@ -1,0 +1,47 @@
+{
+    "IBQS_MIN"          : 0.0, 
+	"IBQS_MAX"          : 1.0,
+	"IBQS_TARGET"       : 0.9,        
+	"NB_POINTS_IBQS"    : 201,        
+	"NB_POINTS_VALEUR"  :  10,          
+	"HORIZON"           : 240,
+    "TRAJECTOIRES" : 
+    {
+       "INIT_POINT" :
+        {
+         "IBQS" : 0.05,
+         "DATE_DEBUT" : 0,
+         "BUDGET" : 10000.0
+        },
+      "INIT_POINT" :
+        {
+         "IBQS" : 0.1,
+         "DATE_DEBUT" : 0,
+         "BUDGET" : 4000.0
+        },
+		"INIT_POINT" :
+        {
+         "IBQS" : 0.15,
+         "DATE_DEBUT" : 0,
+         "BUDGET" : 3000.0
+        },
+		"INIT_POINT" :
+        {
+         "IBQS" : 0.25,
+         "DATE_DEBUT" : 0,
+         "BUDGET" : 8000.0
+        },
+        "INIT_POINT" :
+        {
+         "IBQS" : 0.4,
+         "DATE_DEBUT" : 0,
+         "BUDGET" : 48000.0
+        },
+        "INIT_POINT" :
+        {
+         "IBQS" : 0.55,
+         "DATE_DEBUT" : 0,
+         "BUDGET" : 22000.0
+        }
+    }
+}

@@ -16,7 +16,7 @@
 	"CROP": "IgnamGrosseCaille",
 	"CROP": "IgnamJaune", 
 	"CROP": "Tomate",
-	"CROP": "Chou",
-	"CROP": "Laitue"
+	"CROP": "Laitue",
+    "CROP": "PatateDouce"
   }
 }
