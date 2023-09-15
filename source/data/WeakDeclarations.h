@@ -44,7 +44,7 @@ double target (double * x)  __attribute__((weak));
 double l(double * x, double * u )  __attribute__((weak));
 double m(double * x, double * u )  __attribute__((weak));
 void dynamics_hybrid(double * x, double *u, double * image)  __attribute__((weak));
-void postProcess()  __attribute__((weak));
+void postProcess(ParametersManager *PM)  __attribute__((weak));
 
 inline double l_default(double * x, double * u )
 {
@@ -59,7 +59,7 @@ inline double m_default(double * x, double * u )
 {
 
 }
-void postProcess_default()
+void postProcess_default(ParametersManager *PM)
 {
 
 }

@@ -139,6 +139,16 @@ GridMicroMacro::GridMicroMacro(   gridParams gp) {
 		exit(1);
 	}
 
+	if(nbOMPThreads>1)
+	{
+		try{
+				gridPtr_tmp=new double [nbTotalPoints];
+			}
+			catch (const std::bad_alloc& e) {
+				std::cout << "Allocation failed: in initialisation of the  temp value function tab nbTotalPoints = " << nbTotalPoints<<e.what() << '\n';
+				exit(1);
+			}
+	}
 
 	vectUnsigIntTemp=new unsigned long long int [dim];
 	vectInt=new int unsigned long long [dim];
@@ -180,6 +190,10 @@ GridMicroMacro::~GridMicroMacro() {
 	// TODO Auto-generated destructor stub
 	//fermeture de la base
 	delete [] gridPtr;
+	if(nbOMPThreads>1)
+	{
+		delete [] gridPtr_tmp;
+	}
 	cout<<" grid detruit \n";
 
 }
@@ -188,9 +202,9 @@ void GridMicroMacro::loadSet(string fileName)
 {
 	string line;
 	ifstream * userDataFile= new ifstream();
-	double xCoords[dim], val;
+	double   val;
 	istringstream sstr;
-
+	double *xCoords = new double[dim];
 
 	userDataFile->open(fileName);
 	if (userDataFile->good())
@@ -210,6 +224,7 @@ void GridMicroMacro::loadSet(string fileName)
 
 		}
 	}
+	delete [] xCoords;
 }
 
 void GridMicroMacro::printGrid(void)
@@ -245,8 +260,9 @@ double * GridMicroMacro::getGridPtr_tmp()
 
 void GridMicroMacro::copyGrid(  double *grIn,  double *grOut)
 {
-#pragma omp parallel for num_threads(nbOMPThreads)  shared( grIn, grOut) default(none)
-	for( unsigned long long int posX=0;posX< nbTotalPoints;posX++)
+	unsigned long long int posX=0;
+#pragma omp parallel for num_threads(nbOMPThreads) private (posX) shared( grIn, grOut) default(none)
+	for(posX=0;posX< nbTotalPoints;posX++)
 	{
 		grOut[posX]=grIn[posX];
 	}
@@ -285,6 +301,9 @@ void GridMicroMacro::savePointsList(string fileName)
 	}
 	else  // sinon
 		cerr << "Erreur de  l'ouverture !" << endl;
+
+	delete [] x;
+	delete [] xReel;
 }
 
 
@@ -316,6 +335,8 @@ void GridMicroMacro::saveValOnGrid(string fileName)
 	}
 	else  // sinon
 		cerr << "Erreur de  l'ouverture !" << endl;
+	delete [] x;
+	delete [] xReel;
 }
 
 void GridMicroMacro::saveCoupeBoundary(string fileName)
@@ -355,6 +376,8 @@ void GridMicroMacro::saveCoupeBoundary(string fileName)
 	}
 	else  // sinon
 		cerr << "Erreur de  l'ouverture !" << endl;
+	delete [] x;
+	delete [] xReel;
 }
 
 void GridMicroMacro::saveCoupeBoundary_DD(string fileName)

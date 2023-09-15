@@ -123,6 +123,7 @@ public:
 	virtual void saveViableSets();
 
 	void viabKerValFunc(unsigned long long int  nbArret);
+	void viabKerValFunc_omp(unsigned long long int  nbArret);
 	void viabKerValFunc_DD(unsigned long long int  nbArret);
 	void viabKerGarantiValFunc_DD(unsigned long long int  nbArret);
 	void viabKerValFuncOld();

@@ -1,4 +1,4 @@
-/*! \file  ModelDataInclusion.h
+ /*! \file  ModelDataInclusion.h
  *
  *  *
  *    VIABLAB : a numerical library for Mathematical Viability Computations
@@ -32,33 +32,34 @@
 
 
 
+string paramsFile = "pareto_params.json";
 //string paramsFile = "zermelo_tmin_params.json";
-
 //string paramsFile = "zermelo_Lmin_params.json";
 //string paramsFile = "testPSP.json";
 //string paramsFile = "testPSPBis.json";
 //string paramsFile = "resilience.json";
 //string paramsFile = "testPendule.json";
 //string paramsFile = "allParams.json";
-//string paramsFile = "agroEcoDiv_D4.json";
+//string paramsFile = "agroEcoDiv_D4.json";//
 //string paramsFile = "agroEcoDiv_MonoParcelle.json";
-string paramsFile = "agroEcoDiv_MonoParcelleAnnex.json";
+//string paramsFile = "agroEcoDiv_MonoParcelleAnnex.json";
 //string paramsFile = "agroEcoDiv_MonoParcelleAnnexIncert.json";
 
 /************************************************************************************************
  * inclusion des déclarations du modèle
  */
-//#include  "../data/ex1Viabi2D_data.h"   //--exemple 2D basique
-//#include  "../data/zermelo_tmin_new.h"   //-- Zermelo temps minimum
-//#include  "../data/zermelo_Lmin_new.h"   //-- Zermelo crit�re int�gral
+#include  "../data/pareto_data.h"   //--exemple 2D basique
+//#include  "../data/zermelo_tmin.h" // Zermelo temps minimum
+//#include  "../data/zermelo_Lmin.h"   //-- Zermelo crit�re int�gral
 
 //#include  "../data/testPendule_data.h"   //-- Bassin de capture, pendule
 //#include  "../data/resilience_data.h"   //-- Noyeu de viabilit� resilience
 //#include "../data/PSP_dataBis.h"           // economie
 //#include "../data/dataAgroEcoDivMultiParcelsD4_new.h" // agro ecodiv bi parcelle
+//#include "../data/equite.h"           // economie
 
 //#include "../data/dataAgroEcoDivMonoParcelle.h" // agro ecodiv bi parcelle
-#include "../data/dataAgroEcoDivMonoParcelleAnnex.h" // agro ecodiv bi parcelle
+//#include "../data/dataAgroEcoDivMonoParcelleAnnex.h" // agro ecodiv bi parcelle
 //#include "../data/dataAgroEcoDivMonoParcelleAnnexIncert.h" // agro ecodiv bi parcelle
 
 

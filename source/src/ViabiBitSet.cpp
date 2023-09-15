@@ -3148,42 +3148,42 @@ void ViabiBitSet::loadViableSets()
 void ViabiBitSet::saveViableSets()
 {
 	ostringstream os;
-		string fileName;
+	string fileName;
 	algoViabiParams * avp=modelParams->getAlgoParameters();
-		int refine = avp->GRID_REFINMENTS_NUMBER;
-		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<".dat";
+	int refine = avp->GRID_REFINMENTS_NUMBER;
+	os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<".dat";
+	fileName=os.str();
+	os.str("");
+	grid->saveValOnGrid(fileName);
+	if(avp->SAVE_SLICE){
+		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-Slice"<<".dat";
 		fileName=os.str();
 		os.str("");
-		grid->saveValOnGrid(fileName);
-		if(avp->SAVE_SLICE){
-			os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-Slice"<<".dat";
-			fileName=os.str();
-			os.str("");
-			grid->saveCoupe(fileName);
-		}
-		if(avp->SAVE_SLICE_BOUND){
-			os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-SliceBound"<<".dat";
-			fileName=os.str();
-			os.str("");
-			grid->saveCoupeBoundary(fileName);
-		}
-		if(avp->SAVE_BOUNDARY){
-			os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-bound.dat";
-			fileName=os.str();
-			os.str("");
-			grid->saveBoundary(fileName);
-		}
+		grid->saveCoupe(fileName);
+	}
+	if(avp->SAVE_SLICE_BOUND){
+		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-SliceBound"<<".dat";
+		fileName=os.str();
+		os.str("");
+		grid->saveCoupeBoundary(fileName);
+	}
+	if(avp->SAVE_BOUNDARY){
+		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-bound.dat";
+		fileName=os.str();
+		os.str("");
+		grid->saveBoundary(fileName);
+	}
 
-		if(avp->SAVE_PROJECTION)
-		{
-			os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-proj"<<".dat";
-			fileName=os.str();
-			os.str("");
-			/*
-			 *  calcul et sauvegarde  de la projection du  noyau
-			 */
-			grid->saveProjetion(fileName, avp->PROJECTION);
-		}
+	if(avp->SAVE_PROJECTION)
+	{
+		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-proj"<<".dat";
+		fileName=os.str();
+		os.str("");
+		/*
+		 *  calcul et sauvegarde  de la projection du  noyau
+		 */
+		grid->saveProjetion(fileName, avp->PROJECTION);
+	}
 }
 
 

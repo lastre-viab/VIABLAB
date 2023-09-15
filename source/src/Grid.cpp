@@ -157,7 +157,7 @@ unsigned long long int Grid::localizePoint(double *coords )
     numCell=numCell*(nbPoints[i+1])+indiceCell[i+1];
 
     }
-
+delete [] indiceCell;
   return  numCell;
 }
 
@@ -271,6 +271,7 @@ void Grid::computeGridShifts()
 
     Pow2*=2;
     }
+  delete [] indiceTemp;
 
   /*//cout<< "v�rif des indices de decalage axe";
 	for(int k=0;k<dim;k++)

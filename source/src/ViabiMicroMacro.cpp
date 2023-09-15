@@ -99,6 +99,7 @@ void ViabiMicroMacro::InitViabiMicroMacro(algoViabiParams avp) {
 	doubleVect1=new double[dim];
 	intControlCoords=new unsigned long long int[dimC];
 	doubleControlCoords=new double[dimC];
+	cout<< " taille imageCells sera " << dynsys->getTotalNbPointsC()<<endl;
 	imageCells=new unsigned long long int[dynsys->getTotalNbPointsC()];
 
 	filePrefix=avp.FILE_PREFIX;
@@ -191,12 +192,23 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 
 
 	grid->numToIntAndDoubleCoords(num,intPointCoords,doublePointCoords);
-	double rho=dynsys->calculRho_local(doublePointCoords);
+	double rho;
+	try
+	{
+		rho=dynsys->calculRho_local(doublePointCoords);
+	}
+	catch (const std::bad_alloc& e)
+	{
+		std::cout << "Allocation failed dans calculRho: " << e.what() << '\n';
+		cout<<  " doublePointCoords = ";
+		printVector(doublePointCoords,dim);
+		exit(1);
+	}
 	// cout<<  " compute DI  pos = "<<num<< " juste apres num to int double coords\n";
 	// printVector(doublePointCoords, dim);
 	unsigned long long int cu;
 
-	list<intPair> cellsList;
+	list<intPair> cellsList = list<intPair>();
 	//double dv[dim];
 	for(cu=0;cu<nbCTotal;cu++)
 	{
@@ -204,7 +216,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 		//
 
 		// cout<< "  controle numero "<<cu<<endl;
-		//  	printVector(controlCoords[cu],dimC);
+		//	printVector(controlCoords[cu],dimC);
 		/*!
 		 * on calcule les coordonnées réelles de l'image du point par la dynamique discrete
 		 * elles sont stockes dans le tableau doubleVect
@@ -218,8 +230,17 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 			// printf("  contraintes sur U et X  ok\n");
 			//  printf( " x= ");
 			//  printVector(doublePointCoords,dim);
-
-			(dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[cu], doubleVect1, rho);
+			try
+			{
+				(dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[cu], doubleVect1, rho);
+			}
+			catch (const std::bad_alloc& e)
+			{
+				std::cout << "Allocation failed dans discrete dyn: " << e.what() << '\n';
+				cout<<  " doublePointCoords = ";
+				printVector(doublePointCoords,dim);
+				exit(1);
+			}
 
 			// cout<< " retrour dnamique discrete ";
 			//printVector(doubleVect1, dim);
@@ -236,7 +257,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 				{
 					//////printf( "   contraintes Xu ok\n " );
 
-					//	 ////printf("  contraintes sur   X  ok\n");
+					//	printf("  contraintes sur   X  ok\n");
 
 					/*!
 					 * Si l'image  est dans l'ensemble de contraintes sur l'état \f$ K \f$
@@ -366,7 +387,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 
 	cu=0;
 	unsigned long long int iControlTab=0, iCellsTab=0, iEntreesTab=0;
-	// cout<< " juste avant while de parcours de la liste  first "<<(*itCell).first<< " nb cells total "<<(int)nbCellsTotal<<endl;
+	//cout<< " juste avant while de parcours de la liste  first "<<(*itCell).first<< " nb cells total "<<(int)nbCellsTotal<<endl;
 	while((itCell!=cellsList.end()) &( (*itCell).first<=(int)nbCellsTotal))
 	{
 
@@ -420,7 +441,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 	 * é la derniére cellule
 	 */
 	pointDI.tabCellEntrees[iCellsTab]=iControlTab;
-	// cout<<  " compute DI  FINFINFINF pos = "<<num<< " double coords\n";
+
 	//  printVector(doublePointCoords, dim);
 }
 
@@ -1620,19 +1641,45 @@ void ViabiMicroMacro::viabKerValFunc( unsigned long long int  nbArret)
 		 *  on parcourt  tous les points de l'espace discret  fini
 		 *   et  on choisit les points oé la fonction cible  renvoie une faleur finie
 		 */
+		cout<< " nb points de grille = " << totalPointsX<<endl;
 		for( pos=0;pos<(unsigned long long int)totalPointsX;pos++)
 		{
+			if(pos%50000 == 0)
+			{
+				cout<< " pos = "<<pos<<endl;
+			}
 			double tempVal, tempL, tempM;
 			valAtPos = vTab[pos];
 			if(valAtPos < PLUS_INF)
 			{
 				grid->numToIntAndDoubleCoords(pos,iCoords,rCoords);
-				rho=dynsys->calculRho_local(rCoords);
+				try
+				{
+					rho=dynsys->calculRho_local(rCoords);
+				}
+				catch (const std::bad_alloc& e)
+				{
+					std::cout << "Allocation failed dans calculRho: " << e.what() << '\n';
+					cout<< " pos = "<<pos << " rcoords = ";
+					printVector(rCoords,dim);
+					exit(1);
+				}
+
 				bool testNonVide = false;
 				//cout<< " pos = "<< pos<< " taille image discrete du point "<< pointDI_DD.nbImagePoints<<endl;
 
+				try
+				{
+					this->computeDiscreteImageOfPoint(pos);
+				}
+				catch (const std::bad_alloc& e)
+				{
+					std::cout << "Allocation failed dans computeDiscrete inmage: " << e.what() << '\n';
+					cout<< " pos = "<<pos << " rcoords = ";
+					printVector(rCoords,dim);
+					exit(1);
+				}
 
-				this->computeDiscreteImageOfPoint(pos);
 				compteComm=0;
 				minValCell=PLUS_INF;
 
@@ -1644,6 +1691,10 @@ void ViabiMicroMacro::viabKerValFunc( unsigned long long int  nbArret)
 
 						for(int iCell=0;iCell<nbPointsCube-1;iCell++)
 						{
+							if(cellNum+indicesDecalCell[iCell] > totalPointsX)
+							{
+								cout<< " CellNum = "<<cellNum <<  " decale "<< cellNum+indicesDecalCell[iCell]<<  " total " <<totalPointsX << endl;
+							}
 							double imageVal = vTab[cellNum+indicesDecalCell[iCell]];
 							//double imageVal = vTab[cellNum];
 
@@ -1697,12 +1748,161 @@ void ViabiMicroMacro::viabKerValFunc( unsigned long long int  nbArret)
 				if(vTab[pos]< minValCell)
 				{
 					cptChanged++;
+					//cout<< " valeur avant "<< vTab[pos] << " apr�s "<< minValCell<<endl;
 
 				}
 				vTab[pos]=max(vTab[pos], minValCell);
 			}
 		}
 
+		nbIter++;
+		cout<< " iteration  "<<nbIter<<"  parcours de base   fini  nb  de valeurs changées  est "<<cptChanged<<endl;
+		//
+	}
+	cout<< " calculFini. Sauvegarde\n";
+	saveValFunctions();
+}
+
+
+
+void ViabiMicroMacro::viabKerValFunc_omp( unsigned long long int  nbArret)
+{
+	unsigned long long int cptChanged=20000000, nbIter=0;
+
+
+	cout<< " Viab kernel OMP  for continuous systems num threads "<< nbOMPThreads <<endl;
+
+
+	int totalPointsX=grid->getNbTotalPoints();
+
+
+
+	double *gridTab = grid->getGridPtr();
+	double *gridTabNew = grid->getGridPtr_tmp();
+	grid->copyGrid(gridTab,  gridTabNew);
+
+	while((cptChanged>nbArret) & (nbIter<15000))
+	{
+		cptChanged=0;
+
+		//cout<< "  curseur en place \n";
+		/*
+		 *  on parcourt  tous les points de l'espace discret  fini
+		 *   et  on choisit les points oé la fonction cible  renvoie une faleur finie
+		 */
+		unsigned long long int pos=0;
+#pragma omp parallel for num_threads(nbOMPThreads)  reduction(+:cptChanged) private(pos)  shared( gridTab, gridTabNew, totalPointsX) default(none)
+		for( pos=0;pos<(unsigned long long int)totalPointsX;pos++)
+		{
+
+			double ** controlCoords=dynsys->getControlCoords();
+			double minValCell, valAtPos;
+
+			double rCoords[dim];
+			long long  int * indicesDecalCell=grid->getIndicesDecalCell();
+			int  nbPointsCube=(int) pow(2.0,dim);
+			unsigned long long int nbCellsTotal=grid->getNbTotalPoints();
+			unsigned long long int iCoords[dim];
+			unsigned long long int compteComm, cellNum, numControl, cu;
+			unsigned long long int nbCTotal=dynsys->getTotalNbPointsC();
+			double rho;
+			double *doubleVect1 = new double[dim];
+			uintPair image;
+			double tempVal, tempL, tempM;
+			valAtPos = gridTab[pos];
+			if(valAtPos < PLUS_INF)
+			{
+				grid->numToIntAndDoubleCoords(pos,iCoords,rCoords);
+				try
+				{
+					rho=dynsys->calculRho_local(rCoords);
+				}
+				catch (const std::bad_alloc& e)
+				{
+
+					printVector(rCoords,dim);
+					exit(1);
+				}
+
+				bool testNonVide = false;
+				//cout<< " pos = "<< pos<< " taille image discrete du point "<< pointDI_DD.nbImagePoints<<endl;
+
+				try
+				{
+					this->computeDiscreteImageOfPoint(pos);
+				}
+				catch (const std::bad_alloc& e)
+				{
+
+					printVector(rCoords,dim);
+					exit(1);
+				}
+
+				compteComm=0;
+				minValCell=PLUS_INF;
+
+				while( (int)compteComm<pointDI.nbImageCells && !testNonVide)
+				{
+					cellNum=pointDI.tabImageCells[compteComm];
+					if(cellNum< nbCellsTotal)
+					{
+
+						for(int iCell=0;iCell<nbPointsCube-1;iCell++)
+						{
+							double imageVal = gridTab[cellNum+indicesDecalCell[iCell]];
+							//double imageVal = vTab[cellNum];
+
+							for(int j=pointDI.tabCellEntrees[compteComm];j<pointDI.tabCellEntrees[compteComm+1] && !testNonVide;j++)
+							{
+								numControl=pointDI.tabImageControls[j];
+								tempL=dynsys->lFunc(rCoords, controlCoords[numControl]);
+								tempM=dynsys->mFunc(rCoords, controlCoords[numControl]);
+								if(tempL < PLUS_INF && tempM < PLUS_INF)
+								{
+									tempVal=(imageVal+rho*tempL)/(1-rho*tempM);
+									testNonVide = tempVal < valAtPos;
+									minValCell=min(minValCell, tempVal);
+
+								}
+								if(testNonVide) break;
+							}
+							if(testNonVide) break;
+						}
+					}
+					else if(cellNum == nbCellsTotal)
+					{
+						for(int j=pointDI.tabCellEntrees[compteComm];j<pointDI.tabCellEntrees[compteComm+1];j++)
+						{
+							numControl=pointDI.tabImageControls[j];
+							(dynsys->*(dynsys->discretDynamics))(rCoords, controlCoords[numControl], doubleVect1, 1.0);
+							//cout<< " sortie autoris�e pour control num "<<numControl << "  image "<<endl;
+							//printVector(doubleVect1, dim);
+							tempL=dynsys->lFunc(rCoords, controlCoords[numControl]);
+							tempM=dynsys->mFunc(rCoords, controlCoords[numControl]);
+
+							double tempV = dynsys->constraintsX(doubleVect1);
+							//cout<< " value  estimee dans ce point "<< tempV << endl;
+							tempVal=(tempV+rho*tempL)/(1-rho*tempM);
+							testNonVide = tempVal < valAtPos;
+							minValCell=min(minValCell, tempVal);
+							if(testNonVide) break;
+						}
+					}
+
+					compteComm++;
+				}
+
+				if(gridTab[pos]< minValCell)
+				{
+					cptChanged++;
+					//cout<< " valeur avant "<< vTab[pos] << " apr�s "<< minValCell<<endl;
+
+				}
+				gridTabNew[pos]=max(gridTab[pos], minValCell);
+			}
+			delete [] doubleVect1;
+		}
+		grid->copyGrid(gridTabNew, gridTab);
 		nbIter++;
 		cout<< " iteration  "<<nbIter<<"  parcours de base   fini  nb  de valeurs changées  est "<<cptChanged<<endl;
 		//
@@ -5416,7 +5616,15 @@ void ViabiMicroMacro::ViabilityKernel( bool sortieOK,int nbArret)
 {
 	if(!(dynsys->getDynType()==DD)   )
 	{
-		viabKerValFunc(nbArret);
+		if(nbOMPThreads>1)
+		{
+			viabKerValFunc_omp(nbArret);
+		}
+		else
+		{
+			viabKerValFunc(nbArret);
+		}
+
 	}
 	else
 	{

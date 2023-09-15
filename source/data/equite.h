@@ -42,34 +42,38 @@
 double alpha=0.75;
 double beta = 0.25;
 
-double c = 1.0;
-double r = 5.0;
-
-void loadModelData()
-{
-
-
-}
-
 void dynamics(double * x, double *u, double * image)
 {
-	if(u[0]<=0.0)
+	double p = x[0], q= x[1], r = x[2], sig = u[0], v = u[1];
+	double k = -log(1 - p), s = -log(1 - q), c = -log(1 - r);
+	double kprime = pow(k, alpha)*pow( sig * s, beta) - c;
+	double sprime = -sig * s;
+	double cprime = v * c;
+	if(p >=1.0)
 	{
-		image[0]=   - x[2]; //k'
+		image[0]=   0.0; //k'
 	}
 	else
 	{
-		if(x[0]<=0.0)
-		{
-			image[0]=   - x[2]; //k'
-		}
-		else
-		{
-			image[0]=  pow(x[0], alpha)*pow(r*u[0], beta) - x[2]; //k'
-		}
+		image[0]=  (1.0 - p) * kprime; //k'
 	}
-	image[1]=  -r*u[0]; //m'
-	image[2] = c*u[1]; //c'
+	if(q >=1.0)
+	{
+		image[1]=   0.0; //k'
+	}
+	else
+	{
+		image[1]=  (1-q) * sprime;
+	}
+	//m'
+	if(r >=1.0)
+	{
+		image[2]=   0.0; //k'
+	}
+	else
+	{
+		image[2]=   (1-r) * cprime;
+	}
 	//cout<< " dynamique renvoie "<<image[0]<< " "<<image[1]<<endl;
 }
 
@@ -78,63 +82,63 @@ void dynamics(double * x, double *u, double * image)
  * @param[in] x  the state variable
  * @param[out] res  the result
  */
+
 inline void localDynBounds(double * x, double * res)
 {
-	if(x[0]<=0.0)
+	double p = x[0], q= x[1], r = x[2];
+
+	if(p>=1.0)
 	{
-		res[0] = x[2];
+		res[0] = 0.0;
 	}
 	else
 	{
-		res[0]= max(x[2], abs( pow(r,beta)*pow(x[0], alpha) - x[2])); //k'
+		double k = -log(1 - p), s = -log(1 - q), c = -log(1 - r);
+				double kprime1 = abs( pow(k, alpha)*pow( s, beta) - c);
+				double kprime0 = abs( -c);
+		res[0]=  (1.0 - p) * max(kprime0, kprime1);
 	}
-	res[1]=  r;
-	res[2] = c;
+
+	res[1]=  abs((1-q) * log( 1 - q));
+	res[2] = abs((1-r) * log( 1 - r));
 }
 
 inline void jacobian(double *x, double *u , double ** jacob)
 {
+	double p = x[0], q= x[1], r = x[2], sig = u[0], v = u[1];
+	if(p>=1.0)
+	{
+		jacob[0][0]= 0.0;
+		jacob[0][1]=  0.0;
+		jacob[0][2]= 0.0;
+	}
+	else
+	{
+		double fact = pow(-log(1-p), alpha) * pow(-sig * log(1 - q), beta) + log(1 - r);
 
-	if(u[0]<=0.0)
-		{
-			jacob[0][0]=0.0;
-				jacob[0][1]=0.0;
-				jacob[0][2]=-1.0;
-		}
-		else
-		{
-			if(x[0]<=0.0)
-			{
-				jacob[0][0]=0.0;
-				jacob[0][1]=0.0;
-				jacob[0][2]=-1.0;
-			}
-			else
-			{
-				jacob[0][0]=alpha/pow(x[0], 1.0-alpha)*pow(r*u[0], beta);
-				jacob[0][1]=0.0;
-				jacob[0][2]=-1.0;
-			}
-		}
+		jacob[0][0]= - fact + alpha *  pow(sig * log(1-q) /  log(1.0 - p), beta);
+		jacob[0][1]=  sig * beta * (( 1.0 - p) / (1-q) ) * pow(sig * log(1-p) /  log(1.0 - q), alpha);
+		jacob[0][2]= (1.0 - p) / (1.0 - r );
+	}
 
 	jacob[1][0]=0.0;
-	jacob[1][1]=0.0;
+	jacob[1][1]=-u[0]*(1.0 + log(1.0 - q));
 	jacob[1][2]=0.0;
 
 	jacob[2][0]=0.0;
 	jacob[2][1]=0.0;
-	jacob[2][2]=0.0;
+	jacob[2][2]= u[1]*(1.0 + log(1.0 - r));
 
 }
 
 inline double l(double * x, double * u )
 {
-  return 0.0;
+	return 0.0;
 }
 
 inline double constraintsX( double * x )
 {
-  return -x[2];
+	return 1.0;
 }
 
 #endif /* TESTDATA_H_ */
