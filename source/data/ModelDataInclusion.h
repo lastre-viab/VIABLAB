@@ -32,13 +32,16 @@
 
 
 
-string paramsFile = "pareto_params.json";
+//string paramsFile = "pareto_params.json";
+//string paramsFile = "testPendule.json";
+string paramsFile = "ExempleMultiDim_params.json";
+//string paramsFile = "JuliaSets_params.json";
 //string paramsFile = "zermelo_tmin_params.json";
 //string paramsFile = "zermelo_Lmin_params.json";
 //string paramsFile = "testPSP.json";
 //string paramsFile = "testPSPBis.json";
 //string paramsFile = "resilience.json";
-//string paramsFile = "testPendule.json";
+
 //string paramsFile = "allParams.json";
 //string paramsFile = "agroEcoDiv_D4.json";//
 //string paramsFile = "agroEcoDiv_MonoParcelle.json";
@@ -48,19 +51,15 @@ string paramsFile = "pareto_params.json";
 /************************************************************************************************
  * inclusion des déclarations du modèle
  */
-#include  "../data/pareto_data.h"   //--exemple 2D basique
+//#include  "../data/pareto_data.h"   //--exemple 2D basique
+#include  "../data/Exemple_multiDim_data.h"   //--exemple 2D basique
 //#include  "../data/zermelo_tmin.h" // Zermelo temps minimum
 //#include  "../data/zermelo_Lmin.h"   //-- Zermelo crit�re int�gral
+//#include  "../data/Julia2D_tmin.h" // Zermelo temps minimum
 
 //#include  "../data/testPendule_data.h"   //-- Bassin de capture, pendule
 //#include  "../data/resilience_data.h"   //-- Noyeu de viabilit� resilience
 //#include "../data/PSP_dataBis.h"           // economie
-//#include "../data/dataAgroEcoDivMultiParcelsD4_new.h" // agro ecodiv bi parcelle
-//#include "../data/equite.h"           // economie
-
-//#include "../data/dataAgroEcoDivMonoParcelle.h" // agro ecodiv bi parcelle
-//#include "../data/dataAgroEcoDivMonoParcelleAnnex.h" // agro ecodiv bi parcelle
-//#include "../data/dataAgroEcoDivMonoParcelleAnnexIncert.h" // agro ecodiv bi parcelle
 
 
 #endif /* MODELDATA_H_ */

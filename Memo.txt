@@ -1,0 +1,37 @@
+\var dicret_type
+ *  \brief the  type of discretization scheme used  for the dynamics
+ *  EE or 1 = Euler Explicit  scheme
+ *  EI or 2 = Euler Implicit
+ *  RK2I or 3 = RK2 Implicit (RK2 for -F)
+ *  RK2E or 4 = RK2 Explicit (RK2 for F)
+ *  RK4I or 5 = RK2 Implicit (RK4 for -F)
+ *  RK4E or 6 = RK2 Explicit (RK4 for F)
+ 
+ \var dynType  defines the type of dynamics in the model
+ *      1 or CC : continuous in time and space
+ *      2 or DC : discrete time continuous space
+ *      2 or DD : discrete time discrete space
+ *      4 or HD : hybrid \todo
+ 
+ 
+  \var periodic[dim]
+ * \brief indicator of periodicity
+ * 1= periodic variable
+ * 0=non periodic variable
+ * \see gridParams
+ 
+ Ã©lection de la mÃ©thode de reprÃ©sentation de l'ensemble
+ * CeparamÃ¨tre dÃ©termine quelle classe sera utilisÃ©e pour les calculs
+ *
+ *    - BS = BitSet, reprÃ©sentation par fonction caractÃ©ristique , pour
+ *                   tout type de calculs
+ *    - MM = MicroMacro, reprÃ©sentation par valeurs rÃ©elles, pour les calculs
+ *          d'ensembles Ã©pigraphiques , associÃ©s aux systÃ¨me micro-macro
+ */
+ 
+ int setType=VIAB;
+ 
+  \var computeLC : indicates which method  to use to copute Lipschitz constant
+ * 0= analytic  global value used
+ * 1= local calculation using the jacobian matrix
+ * 2= local calculation using the finite differences

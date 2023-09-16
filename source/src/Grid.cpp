@@ -100,12 +100,17 @@ void Grid::numToIntCoords(unsigned long long int num,unsigned long long int *res
 }
 void Grid::numToIntAndDoubleCoords(unsigned long long int num,unsigned long long int *resI, double * resD)
 {
+	bool print = false;//(num == 5100);
   unsigned long long int temp=num;
   for(  int d=(int)dim-1;d>=0;d--)
     {
+	  if(print) cout<<"  temp = " << temp<< " nbPoints[d] = "<<nbPoints[d];
     resI[d]=temp%nbPoints[d];  // coordonn�es enti�res du point
+    if(print) cout<< " resI = " << resI[d];
     resD[d]=limInf[d]+step[d]*resI[d]+0.5*gridType*step[d];
+    if(print) cout<<"  gridType = " << gridType<< " resD = " << resD[d];
     temp=(temp-resI[d])/nbPoints[d];
+    if(print) cout<<"  temp = " << temp<<endl;
     }
 
 }
@@ -133,7 +138,7 @@ void Grid::intCoordsToNum( unsigned long long int * coords, unsigned long long i
  */
 unsigned long long int Grid::localizePoint(double *coords )
 {
-  unsigned long long  int indiceCell[dim];
+  unsigned long long  int *indiceCell = new  unsigned long long  int[dim];
 
   //int *indiceCell =vectInt;
  // cout<< " indice Cell dans localize ";

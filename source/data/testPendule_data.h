@@ -39,17 +39,10 @@
 /*
  * Some model specific parameters can be defined here
  */
-double a = 0.01;
-double b = 0.0;
+double a = 0.9;
+double b = 1.5;
 double c = 9.81;
 
-
-
-void loadModelData()
-{
-
-
-}
 
 void dynamics(double * x, double *u, double * image)
 {
@@ -78,7 +71,7 @@ inline void jacobian(double *x, double *u , double ** jacob)
 	jacob[1][1]=-a;
 }
 
-double eps = 0.1;
+double eps = 0.025;
 inline  double target (double * x)
 {
 	double res;

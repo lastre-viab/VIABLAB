@@ -99,7 +99,7 @@ void ViabiMicroMacro::InitViabiMicroMacro(algoViabiParams avp) {
 	doubleVect1=new double[dim];
 	intControlCoords=new unsigned long long int[dimC];
 	doubleControlCoords=new double[dimC];
-	cout<< " taille imageCells sera " << dynsys->getTotalNbPointsC()<<endl;
+	//cout<< " taille imageCells sera " << dynsys->getTotalNbPointsC()<<endl;
 	imageCells=new unsigned long long int[dynsys->getTotalNbPointsC()];
 
 	filePrefix=avp.FILE_PREFIX;
@@ -135,7 +135,7 @@ void ViabiMicroMacro::InitViabiMicroMacro(algoViabiParams avp) {
 		//  ViabiMicroMacro::computeFirstConvexifiedImage_omp=&ViabiMicroMacro::computeConvexifiedImage_Lmin_omp;
 		if((dynsys->getDynType()==DD)   )
 		{
-			cout<< " on est en mode DD et Lmin "<<endl;
+			//cout<< " on est en mode DD et Lmin "<<endl;
 			ViabiMicroMacro::computeCurrentImage=&ViabiMicroMacro::computeCurrIm_DD;
 			ViabiMicroMacro::computeFirstConvexifiedImage=&ViabiMicroMacro::computeConvexifiedImage_DD;
 		}
@@ -399,14 +399,14 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 			pointDI.tabImageCells[iCellsTab]=currentCell;
 			iEntreesTab++;
 			iCellsTab++;
-
+//cout<< " ientreetab = "<< iEntreesTab << " icellstab = "<< iCellsTab<< endl;
 			while((itDouble!=cellsList.end() )& ((*itDouble).first==currentCell))
 			{
-
+//cout<< " iControlTab = "<< iControlTab << " itDouble = "<<(*itDouble).first << " "<< (*itDouble).second << endl;
 				pointDI.tabImageControls[iControlTab]=(*itDouble).second;
 				iControlTab++;
-
 				itDouble++;
+
 			}
 			/*!
 			 * la boucle s'arrete au premier different
@@ -440,6 +440,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 	 * La derniére valeur  du tableau des controles indique la fin  de la liste des controles associés
 	 * é la derniére cellule
 	 */
+	//cout<< " icellstab = "<<iCellsTab<<endl;
 	pointDI.tabCellEntrees[iCellsTab]=iControlTab;
 
 	//  printVector(doublePointCoords, dim);
@@ -1369,7 +1370,7 @@ void ViabiMicroMacro::initialiseTargetHJB()
 	for( pos=0;pos<(unsigned long long int)totalPointsX;pos++)
 	{
 
-		//cout<< " pos= "<<pos<<endl;
+
 		/*!
 		 * le compteur pos  ets l'unique numéro entier du point en cours
 		 * dans la numérotation alphabétique : on parcourt axe par axe
@@ -1381,7 +1382,16 @@ void ViabiMicroMacro::initialiseTargetHJB()
 		 */
 		grid->numToIntAndDoubleCoords(pos,x,xReel);
 
+
 		c=max( (*(dynsys->target))(xReel),(*(dynsys->constraintsX))(xReel)) ;
+		if((*(dynsys->target))(xReel) < PLUS_INF)
+		{
+			cout<< " pos= "<<pos<<endl;
+			cout<< " xreel = ";
+			printVector(xReel, dim);
+			cout<< " target = "<< (*(dynsys->target))(xReel) << " contraints = "<< (*(dynsys->constraintsX))(xReel) << endl;
+			cout<< "  c = "<< c<<endl;
+		}
 
 		vTab[pos]=c;
 		if(c<PLUS_INF)
@@ -1644,10 +1654,6 @@ void ViabiMicroMacro::viabKerValFunc( unsigned long long int  nbArret)
 		cout<< " nb points de grille = " << totalPointsX<<endl;
 		for( pos=0;pos<(unsigned long long int)totalPointsX;pos++)
 		{
-			if(pos%50000 == 0)
-			{
-				cout<< " pos = "<<pos<<endl;
-			}
 			double tempVal, tempL, tempM;
 			valAtPos = vTab[pos];
 			if(valAtPos < PLUS_INF)
@@ -4667,8 +4673,9 @@ void ViabiMicroMacro::computeConvexifiedImage_tmin( int iter)
 				//cout<< " ajout  de cellule \n ";
 				addDataToCurrentImage(&itStart,tempImageCell, &itNew);
 				itStart=itNew;
+				//cout<< " ajout  de combinaisons \n ";
 				addConvexCombinations(itPoint, numCell, &tempImageCell, rho,&itStart);
-				// cout<< " ares ajout  de l'image d'un point la taille de la liste est "<<currentImageList.cellsList.size()<<endl;
+				//cout<< " ares ajout  de l'image d'un point la taille de la liste est "<<currentImageList.cellsList.size()<<endl;
 
 				tempImageCell.minVal=(*itPoint).minVal+rho;
 			}
@@ -4893,7 +4900,7 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint, 
 	double LVal=(newCellVal-pointVal)/rho;
 
 
-	//cout<< "add convex comnbin  posX= "<<posX<< " rho ="<<rho<<endl;
+	//cout<< "add convex comnbin  posX= "<<posX<< " rho ="<<rho<< " LVal = "<<LVal<<endl;
 	grid->numToIntAndDoubleCoords(posX,intPointCoords,doublePointCoords);
 	//cout<< " point de départ ";
 	//	printVector(doublePointCoords, dim);
@@ -4924,7 +4931,7 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint, 
 	 * avec pour valeur une partie du pas de temps \f$\rho\f$ .
 	 */
 	double deltat=min(0.1, grid->getMaxStep()/(2.0*sqrt(dist)));
-	//  cout<< " valeu depart "<<pointVal<< " valeur arrivee "<<newCellVal<<  " deltat= "<<deltat<< " Lval= "<<LVal<<endl;
+	  //cout<< " valeu depart "<<pointVal<< " valeur arrivee "<<newCellVal<<  " deltat= "<<deltat<< " Lval= "<<LVal<<endl;
 	//	cout<< "   norme de difference "<<sqrt(dist)<< " pas maxi "<<grid->getMaxStep()<<endl<< " difference vecteur ";
 	//printVector(doubleVect, dim);
 	double t=deltat;
@@ -4937,31 +4944,33 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint, 
 			doubleVect1[i]=doublePointCoords[i]+t*doubleVect[i];
 		}
 
-		// cout<< "  point intermediaire  ";
+		 //cout<< "  point intermediaire  ";
 		// printVector(doubleVect1, dim);
 		if(grid->isPointInGrid(doubleVect1) )
 		{
 			//cout<< " le point est das la grlle\n";
+			//printVector(doubleVect1, dim);
 			/*!
 			 * Si l'image est  dans les limites de la grille on étudie si elle vérifie les contraintes
 			 */
 
 			if( dynsys->constraintsX(doubleVect1)<PLUS_INF)
 			{
-				// cout<< "  contraintes sur   X  ok\n";
+				 //cout<< "  contraintes sur   X  ok\n";
 
 				/*!
 				 * Si l'image  est dans l'ensemble de contraintes sur l'état \f$ K \f$
 				 * on calcule le numéro de maille qui contient cette image
 				 */
-				newCellNum=grid->localizePoint(doubleVect1); // on enregistre le numero de maille
+				newCellNum=grid->localizePoint(doubleVect1);
+				//cout<< " maille visee est "<<newCellNum<<endl;// on enregistre le numero de maille
 				if(newCellNum!=lastVisitCellNum)
 				{
-					//cout<< " maille visee est "<<newCellNum<<endl;
+
 					(*tempImageCell).cellNum=newCellNum;
 					(*tempImageCell).minVal=  pointVal+t*rho*LVal;
 					//itStart=this->currentImageList.cellsList.begin();
-					//   cout<<  "  ajout de celule "<<newCellNum<< " avec val = "<<t*rho*LVal<<endl;
+					  // cout<<  "  ajout de celule "<<newCellNum<< " avec val = "<<t*rho*LVal<<endl;
 					this->addDataToCurrentImage(itStart,(*tempImageCell), &itNew);
 					lastVisitCellNum=newCellNum;
 					(*itStart)=itNew;
@@ -4971,10 +4980,10 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint, 
 			}
 		}
 		t=t+deltat;
-
+//cout<< " t = "<<t<<endl;
 	}
 	////////system("pause");
-
+//cout<< " fin des combinaisons\n";
 }
 void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt, imagePoint newPoint,list<imagePoint>::iterator *resIt )
 {
@@ -5307,6 +5316,7 @@ void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt, 
 
 	if(currentImageList.cellsList.size()==0)
 	{
+		//cout<< " c1"<<endl;
 		currentImageList.cellsList.push_back(newCell);
 		currentImageList.maxNum=numNewCell;
 		currentImageList.minNum=numNewCell;
@@ -5315,10 +5325,11 @@ void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt, 
 	}
 	else
 	{
-
+		//cout<< " c2"<<endl;
 
 		if((int)numNewCell>currentImageList.maxNum)
 		{
+			//cout<< " c3"<<endl;
 			currentImageList.cellsList.push_back(newCell);
 			currentImageList.maxNum=numNewCell;
 			currentImageList.minNum=min(currentImageList.maxNum,currentImageList.minNum);
@@ -5329,6 +5340,7 @@ void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt, 
 		{
 			if((int)numNewCell<currentImageList.minNum)
 			{
+				//cout<< " c4"<<endl;
 				currentImageList.cellsList.push_front(newCell);
 				currentImageList.minNum=numNewCell;
 				currentImageList.maxNum=max(currentImageList.maxNum,currentImageList.minNum);
@@ -5352,6 +5364,7 @@ void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt, 
 					}
 					else
 					{
+						//cout<< " c6"<<endl;
 						(this->*addDataToCurrentCell)(itCell, newCell);
 					}
 					(*resIt)=itCell;
@@ -5365,11 +5378,13 @@ void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt, 
 					}
 					if(numNewCell>(*itCell).cellNum)
 					{
+						//cout<< " c7"<<endl;
 						itCell++;
 						currentImageList.cellsList.insert(itCell,newCell);
 					}
 					else
 					{
+						//cout<< " c8"<<endl;
 						(this->*addDataToCurrentCell)(itCell, newCell);
 					}
 					(*resIt)=itCell;
@@ -5492,7 +5507,7 @@ int ViabiMicroMacro::addNewPoints()
 	 *
 	 */
 
-	cout<< " ajout de nouveaux points\n";
+	//cout<< " ajout de nouveaux points\n";
 
 	double t1,t2,elapsed_time;
 
@@ -5529,7 +5544,7 @@ int ViabiMicroMacro::addNewPoints()
 	t2=tim.tv_sec+(tim.tv_usec/1000000.0);
 	elapsed_time=(double)((t2-t1));
 
-	cout << "Elapsed time : " << elapsed_time << " sec." << endl << endl;
+	//cout << "Elapsed time : " << elapsed_time << " sec." << endl << endl;
 	return nbNewPoints;
 }
 
@@ -5538,7 +5553,7 @@ bool ViabiMicroMacro::testConstraintesForCell(unsigned long long int numCell)
 {
 	bool res=true;
 	long long  int * indicesDecalCell=grid->getIndicesDecalCell();
-	double doublePointCoords[dim];
+	double *doublePointCoords = new double[dim];
 
 
 	int  nbPointsCube=(int) pow(2.0,dim);//pow(2.0, dim);
@@ -5556,7 +5571,7 @@ bool ViabiMicroMacro::testConstraintesForCell(unsigned long long int numCell)
 
 	}
 
-
+delete [] doublePointCoords;
 
 	return res;
 

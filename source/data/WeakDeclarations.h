@@ -71,12 +71,12 @@ inline  double target_default (double * x)
 
 inline double constraintsX_default( double * x )
 {
-  return 1.0;
+  return 0.0;
 }
 
 inline double constraintsXU_default( double * x, double * u )
 {
-  return 1.0;
+  return 0.0;
 }
 inline void localDynBounds_default(double * x, double * res)
 {
@@ -85,7 +85,7 @@ inline void localDynBounds_default(double * x, double * res)
 
 inline double  constraintsXU_fd_default( unsigned long long int * x, unsigned long long int * u )
 {
-	return 1.0;
+	return 0.0;
 }
 inline void jacobian_default(double *x, double *u , double ** jacob)
 {

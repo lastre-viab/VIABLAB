@@ -56,7 +56,7 @@
 /source/data/ex3Dim_Viabi2D_data.h
 /source/data/ex3Dim_Viabi2D_unused.h
 /source/data/ex4_Viabi2D_data.h
-build/
+build/*
 OUTPUT/
 CMakeFiles/
 Default/

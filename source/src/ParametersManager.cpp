@@ -422,28 +422,40 @@ void ParametersManager::readControlParametersFromJson()
 	/*
 	 * initialisation des paramètres des contrôles
 	 */
-	int dimc = dataRoot.get<int>("CONTROL_DIMENSION", 1);
-	controlParameters->DIMC=(unsigned long long int) dimc;
-	/*
-	 * paramètres par défaut. Non utilisés ici
-	 */
-	controlParameters->LIMINFC = new double [dimc];
-	controlParameters->LIMSUPC = new double [dimc];
-	for(unsigned long long int tabIndice=0;tabIndice<dimc;tabIndice++)
+	int dimc = 0;
+	if(dataRoot.find("CONTROL_DIMENSION")!=dataRoot.not_found())
 	{
-		controlParameters->LIMINFC[tabIndice]=0.0;//valeurs par default
-		controlParameters->LIMSUPC[tabIndice]=1.0;//valeurs par default
-	}
-	this->readTabData(&dataRoot, controlParameters->LIMSUPC, "CONTROL_MAX_VALUES", dimc);
-	this->readTabData(&dataRoot, controlParameters->LIMINFC, "CONTROL_MIN_VALUES", dimc);
+		dimc = dataRoot.get<int>("CONTROL_DIMENSION", 1);
 
-	controlParameters->NBPOINTSC=new unsigned long long int[dimc];
-	for(unsigned long long int tabIndice=0;tabIndice<dimc;tabIndice++)
+		controlParameters->DIMC=(unsigned long long int) dimc;
+		/*
+		 * paramètres par défaut. Non utilisés ici
+		 */
+		controlParameters->LIMINFC = new double [dimc];
+		controlParameters->LIMSUPC = new double [dimc];
+		for(unsigned long long int tabIndice=0;tabIndice<dimc;tabIndice++)
+		{
+			controlParameters->LIMINFC[tabIndice]=0.0;//valeurs par default
+			controlParameters->LIMSUPC[tabIndice]=1.0;//valeurs par default
+		}
+		this->readTabData(&dataRoot, controlParameters->LIMSUPC, "CONTROL_MAX_VALUES", dimc);
+		this->readTabData(&dataRoot, controlParameters->LIMINFC, "CONTROL_MIN_VALUES", dimc);
+
+		controlParameters->NBPOINTSC=new unsigned long long int[dimc];
+		for(unsigned long long int tabIndice=0;tabIndice<dimc;tabIndice++)
+		{
+			controlParameters->NBPOINTSC[tabIndice]=1;//valeurs par default
+		}
+		this->readTabData(&dataRoot, controlParameters->NBPOINTSC, "CONTROL_GRID_POINTS", dimc);
+	}
+	else
 	{
-		controlParameters->NBPOINTSC[tabIndice]=1;//valeurs par default
+		dimc = 0;
+		controlParameters->DIMC=0;
+		controlParameters->LIMINFC = new double [dimc];
+		controlParameters->LIMSUPC = new double [dimc];
+		controlParameters->NBPOINTSC=new unsigned long long int[dimc];
 	}
-	this->readTabData(&dataRoot, controlParameters->NBPOINTSC, "CONTROL_GRID_POINTS", dimc);
-
 	int dimc_ty;
 	if(dataRoot.find("CONTROL_TYCHASTIC_DIMENSION")!=dataRoot.not_found())
 	{
