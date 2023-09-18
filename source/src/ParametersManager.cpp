@@ -129,6 +129,7 @@ void ParametersManager::readGridParametersFromJson()
 	gridParameters->SLICE_DIRS   =  new int [dim];
 	if(dataRoot.find("SLICE_DIRECTIONS")!=dataRoot.not_found())
 	{
+		cout<< " on lit les slice directions\n";
 		this->readTabData(&dataRoot, gridParameters->SLICE_DIRS, "SLICE_DIRECTIONS", dim);
 	}
 	else
@@ -292,6 +293,7 @@ void ParametersManager::readAlgoParametersFromJson()
 	algoParameters->INTERATION_STOP_LEVEL = dataRoot.get<int>("ITERATION_STOP_LEVEL", 0);
 	algoParameters->SAVE_SUBLEVEL = dataRoot.get<int>("SAVE_SUBLEVEL", 0);
 	algoParameters->LEVEL=dataRoot.get<double>("LEVEL", 0.0);
+	algoParameters->SAVE_VIAB_LIGHT = dataRoot.get<int>("SAVE_VIABSET_LIGHT", 0);
 
 	if((algoParameters->COMPUTE_SET==0)  & (algoParameters->GRID_REFINMENTS_NUMBER >0))
 	{

@@ -142,12 +142,12 @@ GridMicroMacro::GridMicroMacro(   gridParams gp) {
 	if(nbOMPThreads>1)
 	{
 		try{
-				gridPtr_tmp=new double [nbTotalPoints];
-			}
-			catch (const std::bad_alloc& e) {
-				std::cout << "Allocation failed: in initialisation of the  temp value function tab nbTotalPoints = " << nbTotalPoints<<e.what() << '\n';
-				exit(1);
-			}
+			gridPtr_tmp=new double [nbTotalPoints];
+		}
+		catch (const std::bad_alloc& e) {
+			std::cout << "Allocation failed: in initialisation of the  temp value function tab nbTotalPoints = " << nbTotalPoints<<e.what() << '\n';
+			exit(1);
+		}
 	}
 
 	vectUnsigIntTemp=new unsigned long long int [dim];
@@ -339,6 +339,41 @@ void GridMicroMacro::saveValOnGrid(string fileName)
 	delete [] xReel;
 }
 
+void GridMicroMacro::saveValOnGridLight(string fileName)
+{
+	cout<<"ecriture  de l'ensemble light  dans un fichier \n";
+	unsigned long long int * x = new unsigned long long int[dim] ;
+	double *xReel=new double[dim];
+
+	ofstream fichierB(fileName.c_str());
+
+	if(fichierB)  // si l'ouverture a r�ussi
+	{
+		int   compteB=0;
+		for (unsigned long long int pos=0;pos<nbTotalPoints; pos++)
+		{
+			if(gridPtr[pos] < PLUS_INF)
+			{
+				numToIntAndDoubleCoords(pos, x,xReel);
+
+				compteB++;
+
+				for(int l1=0;l1<dim;l1++)
+				{
+					fichierB<<   xReel[l1]<<" ";
+				}
+				fichierB<<gridPtr[pos]<<"\n";
+			}
+		}
+
+		fichierB.close();
+	}
+	else  // sinon
+		cerr << "Erreur de  l'ouverture !" << endl;
+	delete [] x;
+	delete [] xReel;
+}
+
 void GridMicroMacro::saveCoupeBoundary(string fileName)
 {
 	bool test;
@@ -398,8 +433,8 @@ void GridMicroMacro::saveCoupeBoundary_DD(string fileName)
 			test=true;
 			for(int k=0;k<(int)dirs.size();k++)
 			{
-			//cout<< " dirs[k] "<<dirs[k]<< " "<<x[dirs[k]]<< " "<<values_fd[k]<<endl;
-			test=test&(x[dirs[k]] == values_fd[k]);
+				//cout<< " dirs[k] "<<dirs[k]<< " "<<x[dirs[k]]<< " "<<values_fd[k]<<endl;
+				test=test&(x[dirs[k]] == values_fd[k]);
 			}
 			//test = test && (x[0] == x[1]);
 			if(test)

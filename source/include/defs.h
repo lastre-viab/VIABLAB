@@ -258,6 +258,7 @@ struct algoViabiParams
 	int SAVE_BOUNDARY;
 	int SAVE_PROJECTION;
 	int SAVE_SUBLEVEL;
+	int SAVE_VIAB_LIGHT;
 	double LEVEL;
 	unsigned long long int* PROJECTION;
 	int INTERATION_STOP_LEVEL;

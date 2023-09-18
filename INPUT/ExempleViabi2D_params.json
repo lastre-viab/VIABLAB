@@ -14,7 +14,7 @@
 	"GRID_MAIN_DIR" : 1,
 	"STATE_MIN_VALUES" :[ 0.1, -2.0],	
     "STATE_MAX_VALUES" :[ 2.1, 2.0],
-    "STATE_GRID_POINTS" :[ 41, 81]
+    "STATE_GRID_POINTS" :[ 201, 401]
 },
 "SYSTEM_PARAMETERS" : 
 {
@@ -34,31 +34,32 @@
 	{
 		"POINT" :
 		{
-			"POINT_COORDINATES" : [0.0]
+			"POINT_COORDINATES" : [1.5, -0.5]
 		},
         "POINT" :
 		{
-			"POINT_COORDINATES" : [0.0]
+			"POINT_COORDINATES" : [0.6, 0.5]
 		}
 	},
     "INITIAL_CONTROLS" :
     {
       "POINT" :
 		{
-			"CONTROL_COORDINATES" : [1.5, -0.5]
+			"CONTROL_COORDINATES" : [0.0]
 		},
         "POINT" :
 		{
-			"CONTROL_COORDINATES" : [0.6, 0.5]
+			"CONTROL_COORDINATES" : [0.0]
 		}  
     },
-	"GRID_REFINMENTS_NUMBER" : 5,
+	"GRID_REFINMENTS_NUMBER" : 2,
 	"SET_TYPE" : 1,
 	"INTERATION_STOP_LEVEL" : 0,
 	"INTERMEDIATE_SAVINGS" :0,
 	"SAVE_BOUNDARY" :1,
 	"SAVE_PROJECTION" : 0,
 	"SAVE_SLICE_BOUND" : 1,
-	"SAVE_SLICE" : 1
+	"SAVE_SLICE" : 0,
+	"SAVE_VIABSET_LIGHT" : 1
 }
 }

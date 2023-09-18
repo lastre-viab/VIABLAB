@@ -200,15 +200,14 @@ Grid_BitSet::Grid_BitSet(gridParams gp):Grid() {
 		gridTab[i]=(new boost::dynamic_bitset<>(longTrame));
 	}
 
-	if(nbOMPThreads>1)
-	{
-		gridTabNew= new boost::dynamic_bitset<>*[nbPointsTotalSubGrid];
 
-		for(unsigned long long int i=0;i<nbPointsTotalSubGrid;i++)
-		{
-			gridTabNew[i]=(new boost::dynamic_bitset<>(longTrame));
-		}
+	gridTabNew= new boost::dynamic_bitset<>*[nbPointsTotalSubGrid];
+
+	for(unsigned long long int i=0;i<nbPointsTotalSubGrid;i++)
+	{
+		gridTabNew[i]=(new boost::dynamic_bitset<>(longTrame));
 	}
+
 	gridDataFile<< dim<<endl;
 	for(int k=0;k<dim;k++)
 	{
@@ -298,7 +297,7 @@ void Grid_BitSet::refine()
 	unsigned long long int pos;
 	unsigned long long int indiceTemp[dim-1];
 	unsigned long long int parite[dim-1];
-
+cout<< " Starting grid refinement\n";
 #pragma omp parallel for num_threads(nbOMPThreads) private(pos) shared( nbgrille) default(none)
 
 	for(pos=0;pos<nbgrille;pos++)
@@ -332,7 +331,7 @@ void Grid_BitSet::refine()
 		trameTemp|=(trameDecalee5);
 		trameTemp|=(trameDecalee6);
 		gridTab[pos]->resize(lTrameNew);
-		// cout<<"les ralonges des anciens avec decalage="<<trameTemp<<"\n";
+		//cout<<"les ralonges des anciens avec decalage="<<trameTemp<<"\n";
 		*gridTab[pos]=trameTemp;
 	}
 
@@ -344,13 +343,13 @@ void Grid_BitSet::refine()
 	boost::dynamic_bitset<> trameTemp(lTrameNew);
 	longTrame=lTrameNew;
 	trameTemp.reset();
-	// cout<< " suppression de grid tab new ....";
+	//cout<< " suppression de grid tab new ....";
 	for(unsigned long long int i=0;i<nbPointsTotalSubGrid;i++)
 	{
 		delete  gridTabNew[i];
 	}
 	delete [] gridTabNew;
-	//	 cout<< " ok \n";
+	//cout<< " ok \n";
 
 	unsigned long long int *nbPointsSubGridNew=new unsigned long long int[dim-1];
 	unsigned long long int totalPointsSubgridNew=1;
@@ -359,7 +358,7 @@ void Grid_BitSet::refine()
 		nbPointsSubGridNew[kl]=2*nbPointsSubGrid[kl]-1;
 		totalPointsSubgridNew*=nbPointsSubGridNew[kl];
 	}
-	// cout<< " allocation grid tab new.......";
+	//cout<< " allocation grid tab new.......";
 	gridTabNew= new boost::dynamic_bitset<>*[totalPointsSubgridNew];
 #pragma omp parallel for num_threads(nbOMPThreads)   shared( totalPointsSubgridNew) default(none)
 	for(unsigned long long int i=0;i<totalPointsSubgridNew;i++)
@@ -367,11 +366,11 @@ void Grid_BitSet::refine()
 		gridTabNew[i]=(new boost::dynamic_bitset<>(longTrame));
 		gridTabNew[i]->reset();
 	}
-	// cout<< " fini\n";
+	//cout<< " fini\n";
 
-	// cout<< " nbGrille "<<nbgrille<<endl;
+	//cout<< " nbGrille "<<nbgrille<<endl;
 
-	//	cout<< " nbPoints "; printVector(nbPoints, dim);
+	//cout<< " nbPoints "; printVector(nbPoints, dim);
 #pragma omp parallel for num_threads(nbOMPThreads)  private(pos) shared( nbgrille,nbPointsSubGridNew) default(none)
 
 	for(pos=0;pos<nbgrille;pos++)
@@ -399,7 +398,7 @@ void Grid_BitSet::refine()
 	delete [] gridTab;
 
 	//cout<< " fini\n";
-	// cout<<"ici rafinage size de grid tab "<<nbPointsTotalSubGrid<<" \n";
+	//cout<<"ici rafinage size de grid tab "<<nbPointsTotalSubGrid<<" \n";
 	for(int i=0;i<dim-1;i++)
 	{
 		nbPointsSubGrid[i]=nbPointsSubGrid[i]*2-1;
@@ -420,7 +419,7 @@ void Grid_BitSet::refine()
 	}
 
 	//cout<<  " Rafine:  nb total de points de la grile "<<  nbTotalPoints<< "   nb points de grille complet = ";
-	// printVector(nbPoints, dim);
+	//printVector(nbPoints, dim);
 
 	//cout<<  "step grille     = ";
 	//printVector(step, dim);
@@ -440,7 +439,7 @@ void Grid_BitSet::refine()
   printVector(nbPointsSubGrid, dim-1);
 	 */
 
-	// cout<< " allocation de gridTab \n";
+	//cout<< " allocation de gridTab \n";
 
 	gridTab= new boost::dynamic_bitset<>*[nbPointsTotalSubGrid];
 
@@ -453,7 +452,7 @@ void Grid_BitSet::refine()
 
 	computeGridShifts();
 	computeSubGridShifts();
-	//  cout<< "  compute grid shifts ok\n";
+	//cout<< "  compute grid shifts ok\n";
 	pos=0;
 
 	//traitement des impaires (nouveaux) � partir des paires (anciens)
@@ -519,7 +518,7 @@ void Grid_BitSet::refine()
 
 		pos++;
 	}
-
+cout<< " Grid refinement finished\n";
 }
 
 
@@ -598,11 +597,11 @@ unsigned long long int  Grid_BitSet::getDirTram()
 }
 
 boost::dynamic_bitset<>  Grid_BitSet::analyseTrameMasqueBis(  unsigned long long int posX, bool print)
-								{
+																		{
 	print=false;
 	int i=0;
 
-	unsigned long long int indice[dim-1];
+	unsigned long long int *indice = new unsigned long long int[dim-1];
 	numToIntCoords_gen(posX,  dim-1,  nbPointsSubGrid,indice);
 	if(print )
 	{
@@ -635,7 +634,7 @@ boost::dynamic_bitset<>  Grid_BitSet::analyseTrameMasqueBis(  unsigned long long
 		testBord=testBord|((indice[i]==nbPointsSubGrid[i]-1 )| (indice[i]==0));
 		i++;
 	}
-
+	delete [] indice;
 
 	if(testBord)
 	{
@@ -768,15 +767,14 @@ boost::dynamic_bitset<>  Grid_BitSet::analyseTrameMasqueBis(  unsigned long long
 			if(print) cout<< " masque final "<<masque<<endl;
 			return(masque);}
 	}
-								}
+																		}
 
 boost::dynamic_bitset<>  Grid_BitSet::analyseTrameMasque( unsigned long long int posX)
-								{
-
+				{
 	int i=0;
 	double x= limInf[0]+step[0];
-	unsigned long long int indice[dim-1];
-	numToIntCoords_gen(posX,  dim-1,  nbPointsSubGrid,indice);
+	unsigned long long int *indice = new unsigned long long int[dim-1];
+	numToIntCoords_gen(posX,  dim-1,  nbPointsSubGrid, indice);
 	/*  cout<<"analyse dirTramage "<<dirTramage<<"indice size= "<<dim-1<<"indice=";
         for(int jj=0;jj<dim-1;jj++)
         {
@@ -799,7 +797,7 @@ boost::dynamic_bitset<>  Grid_BitSet::analyseTrameMasque( unsigned long long int
 		testBord=testBord|((indice[i]==nbPointsSubGrid[i]-1 )| (indice[i]==0));
 		i++;
 	}
-
+	delete [] indice;
 
 	if(testBord)
 	{
@@ -891,9 +889,10 @@ boost::dynamic_bitset<>  Grid_BitSet::analyseTrameMasque( unsigned long long int
 					iFront=iNext;
 				}
 			}
-			return(masque);}
+			return(masque);
+		}
 	}
-								}
+				}
 
 
 
@@ -1056,6 +1055,59 @@ void Grid_BitSet::saveValOnGrid(string fileName)
 	else  // sinon
 		cerr << "Erreur � l'ouverture !" << endl;
 }
+
+
+void Grid_BitSet::saveValOnGridLight(string fileName)
+{
+	//cout<<"ecriture  de l'ensemble dans un fichier \n";
+	// instructions
+
+
+	unsigned long long int   indice[dim-1];
+	double xCoordsDouble[dim];
+	ofstream fichierB(fileName.c_str());
+
+	if(fichierB)  // si l'ouverture a r�ussi
+	{
+
+		//        cout<<"dim etat  " <<dim<< " taille de trame est " <<nbPointsTotalSubGrid<<"\n";
+
+		for( unsigned long long  int posX=0;posX<nbPointsTotalSubGrid;posX++)
+		{
+			//cout<< " posx = "<<posX<<endl;
+			numToIntCoords_gen(posX,  dim-1,  nbPointsSubGrid,indice);
+
+
+			for( int j=0; j<dirTramage;j++)
+			{
+				xCoordsDouble[j]=limInf[j]+indice[j]*step[j];
+			}
+
+			for(int j=dirTramage+1; j<(int)dim;j++)
+			{
+				xCoordsDouble[j]=limInf[j]+indice[j-1]*step[j];
+			}
+
+			for(unsigned long long int k=0;k<longTrame;k++)
+			{
+				xCoordsDouble[dirTramage]=limInf[dirTramage]+k*step[dirTramage];
+
+				if((*gridTab[posX])[k])
+				{
+					for(int l1=0;l1<dim;l1++)
+					{
+						fichierB<<   xCoordsDouble[l1]<<" ";
+					}
+					fichierB<<"1.0 \n";
+				}
+			}
+		}// fin de for de parcours de la trame
+		fichierB.close();
+		// je referme le fichier
+	}
+	else  // sinon
+		cerr << "Erreur � l'ouverture !" << endl;
+}
 void Grid_BitSet::intCoordsToNum_dm1( unsigned long long int * coords, unsigned long long int * res)
 {
 	if(dirTramage>0)
@@ -1170,15 +1222,15 @@ unsigned long long int Grid_BitSet::getLongTrame()
 }
 
 boost::dynamic_bitset<>  ** Grid_BitSet:: getGridTab()
-								{
+																		{
 	return gridTab;
-								}
+																		}
 
 
 boost::dynamic_bitset<>  ** Grid_BitSet:: getGridTabNew()
-								{
+																		{
 	return  gridTabNew;
-								}
+																		}
 
 void Grid_BitSet::saveProjetion(string fileName, unsigned long long int * projection)
 {

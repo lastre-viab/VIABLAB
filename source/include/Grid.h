@@ -119,6 +119,23 @@ public:
    */
   virtual void saveValOnGrid(string fileName);
   /*!
+     * \fn virtual void saveValOnGridLight(string fileName) const=0
+     *
+     * fonction abstraite permettant  d'enregistrer dans un fichier
+     * la valeur définissant l'ensemble sur la grille
+     * La version light permet d'enregistrer seulement les points
+     * appartenant au noyau de viabilit�
+     * Dans le cal d'ensemble minces par exemple
+     * cela permet de diminuer la taille des fichiers
+     * Dans le cas de l'ensemble épigraphique la valeur réelle est enregistrée
+     * Dans le cas d'ensemble booléen, la fonction caractéristique est enregistrée
+     *
+     * \param[in] fileName : chaine de caracteres, le nom du fichier
+     * pour l'enregistrement
+     * Doit être impéematée par chaque classe qui hérite
+     */
+    virtual void saveValOnGridLight(string fileName);
+  /*!
    * \brief Fonction générique qui permet de calculer les coordonnées entiéres d'un point de la grille é
    * partir de son numéro
    * @param[in] num numéro du point

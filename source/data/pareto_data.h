@@ -55,13 +55,13 @@ void dynamics(double * x, double *u, double * image)
 
   image[0]=  (1.0-alpha-beta)*prodFunc(K)-a*K;
   image[1]=  (1-beta*d)*prodFunc(K)-b*P;
-  image[2]=  0.0;//+utility(alpha*prodFunc(K));
+  image[2]=  rho*x[2];//+utility(alpha*prodFunc(K));
   //cout<< " dynamique renvoie "<<image[0]<< " "<<image[1]<<endl;
 }
 
 inline double l(double * x, double * u )
 {
-   return -pow(x[1], 1.1)/1.1;
+   return pow(x[1], 1.1)/1.1;
 }
 
 
@@ -125,7 +125,6 @@ inline double constraintsXU( double * x, double * u )
 {
   double alpha=u[0];
   double K=x[0];
-  double beta=u[1];
 double res=max( -utility(alpha*prodFunc(K))-x[2],u[0]+u[1]-1.0);
   return (res<=0)?1.0:PLUS_INF;
 }
@@ -134,7 +133,7 @@ double res=max( -utility(alpha*prodFunc(K))-x[2],u[0]+u[1]-1.0);
 
 inline double constraintsX( double * x )
 {
-  return 1.0;
+	return 0.0;
 }
 
 

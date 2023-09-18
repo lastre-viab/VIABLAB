@@ -81,6 +81,10 @@ void Grid::saveValOnGrid(string fileName)
 {
 
 }
+void Grid::saveValOnGridLight(string fileName)
+{
+
+}
 unsigned long long int  Grid::getDim()
 {
   return dim;

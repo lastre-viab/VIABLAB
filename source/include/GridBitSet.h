@@ -25,6 +25,7 @@ public:
   void findNearestViabPointInCell(double *startPoint, double * currentPoint, double * newPoint, double (*dynConstraints)(double *, double *));
   virtual void savePointsList(string fileName);
    virtual void saveValOnGrid(string fileName);
+   virtual void saveValOnGridLight(string fileName);
 
   boost::dynamic_bitset<>  analyseTrameMasque( unsigned long long int posX);
   unsigned long long int getDirTram();

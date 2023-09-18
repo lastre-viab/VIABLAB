@@ -46,6 +46,7 @@ public:
   virtual bool isInSet(unsigned long long int * coords );
   virtual void savePointsList(string fileName);
   virtual void saveValOnGrid(string fileName);
+  virtual void saveValOnGridLight(string fileName);
   void saveValOnGrid_DD(string fileName);
 
   void printFoncValVox_fd(string fileName, double scaleVal, int epi) ;

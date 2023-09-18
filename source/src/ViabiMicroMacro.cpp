@@ -399,10 +399,10 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 			pointDI.tabImageCells[iCellsTab]=currentCell;
 			iEntreesTab++;
 			iCellsTab++;
-//cout<< " ientreetab = "<< iEntreesTab << " icellstab = "<< iCellsTab<< endl;
+			//cout<< " ientreetab = "<< iEntreesTab << " icellstab = "<< iCellsTab<< endl;
 			while((itDouble!=cellsList.end() )& ((*itDouble).first==currentCell))
 			{
-//cout<< " iControlTab = "<< iControlTab << " itDouble = "<<(*itDouble).first << " "<< (*itDouble).second << endl;
+				//cout<< " iControlTab = "<< iControlTab << " itDouble = "<<(*itDouble).first << " "<< (*itDouble).second << endl;
 				pointDI.tabImageControls[iControlTab]=(*itDouble).second;
 				iControlTab++;
 				itDouble++;
@@ -1550,7 +1550,14 @@ void ViabiMicroMacro::saveValFunctions()
 			os<<"../OUTPUT/"<<filePrefix<<"-valFunc.dat";
 			fileName=os.str();
 			os.str("");
-			grid->saveValOnGrid_DD(fileName);
+			if(avp->SAVE_VIAB_LIGHT)
+			{
+				grid->saveValOnGridLight(fileName);
+			}
+			else
+			{
+				grid->saveValOnGrid(fileName);
+			}
 		}
 
 		if(avp->SAVE_PROJECTION)
@@ -1588,7 +1595,14 @@ void ViabiMicroMacro::saveValFunctions()
 			os<<"../OUTPUT/"<<filePrefix<<"-valFunc.dat";
 			fileName=os.str();
 			os.str("");
-			grid->saveValOnGrid(fileName);
+			if(avp->SAVE_VIAB_LIGHT)
+			{
+				grid->saveValOnGridLight(fileName);
+			}
+			else
+			{
+				grid->saveValOnGrid(fileName);
+			}
 		}
 
 		if(avp->SAVE_PROJECTION)
@@ -1610,6 +1624,7 @@ void ViabiMicroMacro::saveValFunctions()
 			/*
 			 *  calcul et sauvegarde  de la projection du  noyau
 			 */
+			cout<< " save clice "<<endl;
 			grid->saveCoupeBoundary(fileName);
 		}
 	}
@@ -4931,7 +4946,7 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint, 
 	 * avec pour valeur une partie du pas de temps \f$\rho\f$ .
 	 */
 	double deltat=min(0.1, grid->getMaxStep()/(2.0*sqrt(dist)));
-	  //cout<< " valeu depart "<<pointVal<< " valeur arrivee "<<newCellVal<<  " deltat= "<<deltat<< " Lval= "<<LVal<<endl;
+	//cout<< " valeu depart "<<pointVal<< " valeur arrivee "<<newCellVal<<  " deltat= "<<deltat<< " Lval= "<<LVal<<endl;
 	//	cout<< "   norme de difference "<<sqrt(dist)<< " pas maxi "<<grid->getMaxStep()<<endl<< " difference vecteur ";
 	//printVector(doubleVect, dim);
 	double t=deltat;
@@ -4944,7 +4959,7 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint, 
 			doubleVect1[i]=doublePointCoords[i]+t*doubleVect[i];
 		}
 
-		 //cout<< "  point intermediaire  ";
+		//cout<< "  point intermediaire  ";
 		// printVector(doubleVect1, dim);
 		if(grid->isPointInGrid(doubleVect1) )
 		{
@@ -4956,7 +4971,7 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint, 
 
 			if( dynsys->constraintsX(doubleVect1)<PLUS_INF)
 			{
-				 //cout<< "  contraintes sur   X  ok\n";
+				//cout<< "  contraintes sur   X  ok\n";
 
 				/*!
 				 * Si l'image  est dans l'ensemble de contraintes sur l'état \f$ K \f$
@@ -4970,7 +4985,7 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint, 
 					(*tempImageCell).cellNum=newCellNum;
 					(*tempImageCell).minVal=  pointVal+t*rho*LVal;
 					//itStart=this->currentImageList.cellsList.begin();
-					  // cout<<  "  ajout de celule "<<newCellNum<< " avec val = "<<t*rho*LVal<<endl;
+					// cout<<  "  ajout de celule "<<newCellNum<< " avec val = "<<t*rho*LVal<<endl;
 					this->addDataToCurrentImage(itStart,(*tempImageCell), &itNew);
 					lastVisitCellNum=newCellNum;
 					(*itStart)=itNew;
@@ -4980,10 +4995,10 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint, 
 			}
 		}
 		t=t+deltat;
-//cout<< " t = "<<t<<endl;
+		//cout<< " t = "<<t<<endl;
 	}
 	////////system("pause");
-//cout<< " fin des combinaisons\n";
+	//cout<< " fin des combinaisons\n";
 }
 void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt, imagePoint newPoint,list<imagePoint>::iterator *resIt )
 {
@@ -5571,7 +5586,7 @@ bool ViabiMicroMacro::testConstraintesForCell(unsigned long long int numCell)
 
 	}
 
-delete [] doublePointCoords;
+	delete [] doublePointCoords;
 
 	return res;
 

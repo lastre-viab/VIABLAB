@@ -1235,8 +1235,8 @@ bool ViabiBitSet::findViabImagePoint(double *xCoordsDouble, bool print)
 	 * tableaux temporaires pour récupérer les indices du point dans la
 	 * grille
 	 */
-	unsigned long long int   testI[dim];
-	double testV[dim];
+	unsigned long long int   *testI = new unsigned long long int[dim];
+	double *testV = new double[dim];
 	/*
 	 * tableau de coordonnées  définissant
 	 * la grille de contrôles
@@ -1269,7 +1269,7 @@ bool ViabiBitSet::findViabImagePoint(double *xCoordsDouble, bool print)
 	 */
 	bool testNonVide=false;
 
-	double doubleVect1[dim];
+	double *doubleVect1 = new double[dim];
 
 	double hMax=grid->maxStep;
 
@@ -1428,6 +1428,9 @@ bool ViabiBitSet::findViabImagePoint(double *xCoordsDouble, bool print)
 		}
 	}
 
+	delete [] doubleVect1;
+	delete [] testV;
+	delete [] testI;
 
 
 	return testNonVide;
@@ -2470,7 +2473,14 @@ void ViabiBitSet::CaptureBasin()
 	os<<"../OUTPUT/"<<filePrefix<<"-Capture.dat";
 	fileName=os.str();
 	os.str("");
-	grid->saveValOnGrid(fileName);
+	if(avp->SAVE_VIAB_LIGHT)
+	{
+		grid->saveValOnGridLight(fileName);
+	}
+	else
+	{
+		grid->saveValOnGrid(fileName);
+	}
 	if(avp->SAVE_SLICE){
 		os<<"../OUTPUT/"<<filePrefix<<"-CaptureSlice.dat";
 		fileName=os.str();
@@ -3021,74 +3031,80 @@ void ViabiBitSet::noyauViabi_sansControle_omp( bool sortieOK,int nbArret)
 		//cout<<"dim etat>2\n";
 
 		// cout<<"dim etat  " <<dim<< " taille de trame est " <<tailleTrame<<"\n";
-
 		unsigned long long int posX=0;
-#pragma omp parallel for num_threads(nbOMPThreads)  reduction(+:comptEnleves) private(posX)  shared( gridTab, gridTabNew,subGridSize) default(none)
-		for( posX=0;posX< subGridSize;posX++)
+		double *xCoordsDouble;
+		unsigned long long int   *indice;
+#pragma omp parallel  num_threads(nbOMPThreads)  reduction(+:comptEnleves) private(posX, xCoordsDouble, indice)  shared( gridTab, gridTabNew,subGridSize) default(none)
 		{
-			int  tid = omp_get_thread_num();
-			int dirTramage=grid->getDirTram();
+			xCoordsDouble = new double[dim];
 
-			unsigned long long int * nbPointsSub=grid->getNbPointsSubGrid();
-
-			unsigned long long int longTrame=grid->getLongTrame();
-
-			double * limInf=grid->limInf;
-			double * gridStep=grid->step;
-			unsigned long long int   indice[dim];
-
-			double xCoordsDouble[dim];
-			bool testNonVide;
-			// printf("thread numero %d nouvelle boucle while\n", nbTh);
-			boost::dynamic_bitset<> masque;
-			boost::dynamic_bitset<> * masquePointsEnleves=new boost::dynamic_bitset<>(longTrame,0);
-
-
-			//  cout<< " posX="<<posX<< " size "<<gridTab->size()<<endl;
-			if(!gridTab[posX]->none())
+			indice = new unsigned long long int[dim];
+#pragma omp for
+			for( posX=0;posX< subGridSize;posX++)
 			{
-				numToIntCoords_gen(posX,dim-1,nbPointsSub, indice);
-				masque=grid->analyseTrameMasqueBis(posX,1-tid);
+				int  tid = omp_get_thread_num();
+				int dirTramage=grid->getDirTram();
 
-				masquePointsEnleves->set();
+				unsigned long long int * nbPointsSub=grid->getNbPointsSubGrid();
 
-				if(!masque.none() )
+				unsigned long long int longTrame=grid->getLongTrame();
+
+				double * limInf=grid->limInf;
+				double * gridStep=grid->step;
+
+
+
+				bool testNonVide;
+				//printf("thread numero %d nouvelle boucle while\n", tid);
+				boost::dynamic_bitset<> masque;
+				boost::dynamic_bitset<> * masquePointsEnleves=new boost::dynamic_bitset<>(longTrame,0);
+
+
+				//  cout<< " posX="<<posX<< " size "<<gridTab->size()<<endl;
+				if(!gridTab[posX]->none())
 				{
-					for( int j=0; j<dirTramage;j++)
-					{
-						xCoordsDouble[j]=limInf[j]+indice[j]*gridStep[j];
-					}
+					numToIntCoords_gen(posX,dim-1,nbPointsSub, indice);
+					masque=grid->analyseTrameMasqueBis(posX,1-tid);
 
-					for(int j=dirTramage+1; j<dim;j++)
+					masquePointsEnleves->set();
+					if(!masque.none() )
 					{
-						xCoordsDouble[j]=limInf[j]+indice[j-1]*gridStep[j];
-					}
-
-					for(unsigned long long int k=0;k<longTrame;k++)
-					{
-						if(masque[k])
+						for( int j=0; j<dirTramage;j++)
 						{
-							xCoordsDouble[dirTramage]=limInf[dirTramage]+k*gridStep[dirTramage];
-							testNonVide=this->findViabImagePoint_noControl(xCoordsDouble, false);
+							xCoordsDouble[j]=limInf[j]+indice[j]*gridStep[j];
+						}
 
-							if(!testNonVide)
+						for(int j=dirTramage+1; j<dim;j++)
+						{
+							xCoordsDouble[j]=limInf[j]+indice[j-1]*gridStep[j];
+						}
+						for(unsigned long long int k=0;k<longTrame;k++)
+						{
+							if(masque[k])
 							{
+								xCoordsDouble[dirTramage]=limInf[dirTramage]+k*gridStep[dirTramage];
+								testNonVide=this->findViabImagePoint_noControl(xCoordsDouble, false);
 
-								masquePointsEnleves->set(k,false);
-								comptEnleves++;
-							}
-						}// fin de if masque[k]
-					}// fin de for  de parcours de masque
+								if(!testNonVide)
+								{
 
-					if(masquePointsEnleves->count()<(unsigned long long int)longTrame)
-					{
-						(*gridTabNew[posX])&=(*masquePointsEnleves);
+									masquePointsEnleves->set(k,false);
+									comptEnleves++;
+								}
+							}// fin de if masque[k]
+						}// fin de for  de parcours de masque
+
+						if(masquePointsEnleves->count()<(unsigned long long int)longTrame)
+						{
+							(*gridTabNew[posX])&=(*masquePointsEnleves);
+						}
 					}
-				}
-			}//fin de if la trame n'est pas vide
+				}//fin de if la trame n'est pas vide
 
-		}//fin de for OMP
-
+			}//fin de for OMP
+			delete [] xCoordsDouble;
+			delete [] indice;
+		}
 		grid->copyGrid(gridTabNew, gridTab);
 
 		cout<<"Itération "<<nbIter<< " terminée. Nombre de points  points enlevés: "<<comptEnleves<<"\n";
@@ -3154,7 +3170,14 @@ void ViabiBitSet::saveViableSets()
 	os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<".dat";
 	fileName=os.str();
 	os.str("");
-	grid->saveValOnGrid(fileName);
+	if(avp->SAVE_VIAB_LIGHT)
+	{
+		grid->saveValOnGridLight(fileName);
+	}
+	else
+	{
+		grid->saveValOnGrid(fileName);
+	}
 	if(avp->SAVE_SLICE){
 		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-Slice"<<".dat";
 		fileName=os.str();
@@ -3221,7 +3244,14 @@ void ViabiBitSet::ViabilityKernel( bool sortieOK,int nbArret)
 			os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<".dat";
 			fileName=os.str();
 			os.str("");
-			grid->saveValOnGrid(fileName);
+			if(avp->SAVE_VIAB_LIGHT)
+			{
+				grid->saveValOnGridLight(fileName);
+			}
+			else
+			{
+				grid->saveValOnGrid(fileName);
+			}
 
 			if(avp->SAVE_SLICE){
 				os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refIter+1<<"-Slice"<<".dat";
@@ -3270,7 +3300,14 @@ void ViabiBitSet::ViabilityKernel( bool sortieOK,int nbArret)
 			os<<"../OUTPUT/"<<filePrefix<<"-viab-Refined"<<refIter<<".dat";
 			fileName=os.str();
 			os.str("");
-			grid->saveValOnGrid(fileName);
+			if(avp->SAVE_VIAB_LIGHT)
+			{
+				grid->saveValOnGridLight(fileName);
+			}
+			else
+			{
+				grid->saveValOnGrid(fileName);
+			}
 
 			if(avp->SAVE_BOUNDARY){
 				os<<"../OUTPUT/"<<filePrefix<<"-viab-Refined"<<refIter<<"-bound.dat";
@@ -3285,7 +3322,14 @@ void ViabiBitSet::ViabilityKernel( bool sortieOK,int nbArret)
 		os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refIter<<".dat";
 		fileName=os.str();
 		os.str("");
-		grid->saveValOnGrid(fileName);
+		if(avp->SAVE_VIAB_LIGHT)
+		{
+			grid->saveValOnGridLight(fileName);
+		}
+		else
+		{
+			grid->saveValOnGrid(fileName);
+		}
 		if(avp->SAVE_SLICE){
 			os<<"../OUTPUT/"<<filePrefix<<"-viab-"<<refine<<"-Slice"<<".dat";
 			fileName=os.str();
@@ -3493,76 +3537,83 @@ void ViabiBitSet::noyauViabi_omp( bool sortieOK,int nbArret)
 		// cout<<"dim etat  " <<dim<< " taille de trame est " <<tailleTrame<<"\n";
 
 		unsigned long long int posX=0;
-#pragma omp parallel for num_threads(nbOMPThreads)  reduction(+:comptEnleves) private(posX)  shared( gridTab, gridTabNew,subGridSize) default(none)
-		for( posX=0;posX< subGridSize;posX++)
+		double *xCoordsDouble;
+		unsigned long long int *indice;
+#pragma omp parallel  num_threads(nbOMPThreads)  reduction(+:comptEnleves) private(posX, xCoordsDouble, indice)  shared( gridTab, gridTabNew,subGridSize) default(none)
 		{
-			//int  tid = omp_get_thread_num();
-
-			int dirTramage=grid->getDirTram();
-
-			unsigned long long int * nbPointsSub=grid->getNbPointsSubGrid();
-
-			unsigned long long int longTrame=grid->getLongTrame();
-
-
-			double * limInf=grid->limInf;
-			double * gridStep=grid->step;
-			// printf("thread numero %d nouvelle boucle while\n", nbTh);
-
-			if(!gridTab[posX]->none())
+			xCoordsDouble = new double[dim];
+			indice = new unsigned long long int[dim];
+#pragma omp for
+			for( posX=0;posX< subGridSize;posX++)
 			{
-				// cout<<  (*gridTab[posX])<<endl;
+				//int  tid = omp_get_thread_num();
 
-				boost::dynamic_bitset<> masque=grid->analyseTrameMasqueBis(posX,false);
+				int dirTramage=grid->getDirTram();
 
-				//   cout<<"masque d'analyse  "<<masque<<endl;
+				unsigned long long int * nbPointsSub=grid->getNbPointsSubGrid();
 
-				if(!masque.none() )
+				unsigned long long int longTrame=grid->getLongTrame();
+
+
+				double * limInf=grid->limInf;
+				double * gridStep=grid->step;
+				// printf("thread numero %d nouvelle boucle while\n", nbTh);
+
+				if(!gridTab[posX]->none())
 				{
-					unsigned long long int   indice[dim];
-					double xCoordsDouble[dim];
-					bool testNonVide;
+					// cout<<  (*gridTab[posX])<<endl;
 
-					boost::dynamic_bitset<> * masquePointsEnleves=new boost::dynamic_bitset<>(longTrame,0);
-					numToIntCoords_gen(posX,dim-1,nbPointsSub, indice);
+					boost::dynamic_bitset<> masque=grid->analyseTrameMasqueBis(posX,false);
 
-					masquePointsEnleves->set();
+					//   cout<<"masque d'analyse  "<<masque<<endl;
 
-					for( int j=0; j<dirTramage;j++)
+					if(!masque.none() )
 					{
-						xCoordsDouble[j]=limInf[j]+indice[j]*gridStep[j];
-					}
+						bool testNonVide;
 
-					for(int j=dirTramage+1; j< dim;j++)
-					{
-						xCoordsDouble[j]=limInf[j]+indice[j-1]*gridStep[j];
-					}
+						boost::dynamic_bitset<> * masquePointsEnleves=new boost::dynamic_bitset<>(longTrame,0);
+						numToIntCoords_gen(posX,dim-1,nbPointsSub, indice);
 
-					for(unsigned long long int k=0;k<longTrame;k++)
-					{
+						masquePointsEnleves->set();
 
-						if(masque[k])
+						for( int j=0; j<dirTramage;j++)
 						{
-							xCoordsDouble[dirTramage]=limInf[dirTramage]+k*gridStep[dirTramage];
-							testNonVide=this->findViabImagePoint(xCoordsDouble, false);
+							xCoordsDouble[j]=limInf[j]+indice[j]*gridStep[j];
+						}
 
-							//cout<< " fini\n";
-							if(!testNonVide)
+						for(int j=dirTramage+1; j< dim;j++)
+						{
+							xCoordsDouble[j]=limInf[j]+indice[j-1]*gridStep[j];
+						}
+
+						for(unsigned long long int k=0;k<longTrame;k++)
+						{
+
+							if(masque[k])
 							{
-								masquePointsEnleves->set(k,false);
-								comptEnleves++;
-							}
-						}// fin de if masque[k]
-					}// fin de for  de parcours de masque
+								xCoordsDouble[dirTramage]=limInf[dirTramage]+k*gridStep[dirTramage];
+								testNonVide=this->findViabImagePoint(xCoordsDouble, false);
 
-					if(masquePointsEnleves->count()<(unsigned long long int)longTrame)
-					{
-						(*gridTabNew[posX])&=(*masquePointsEnleves);
+								//cout<< " fini\n";
+								if(!testNonVide)
+								{
+									masquePointsEnleves->set(k,false);
+									comptEnleves++;
+								}
+							}// fin de if masque[k]
+						}// fin de for  de parcours de masque
+
+						if(masquePointsEnleves->count()<(unsigned long long int)longTrame)
+						{
+							(*gridTabNew[posX])&=(*masquePointsEnleves);
+						}
 					}
-				}
-			}//fin de if la trame n'est pas vide
+				}//fin de if la trame n'est pas vide
 
-		}//fin de for OMP
+			}//fin de for OMP
+			delete [] xCoordsDouble;
+			delete [] indice;
+		}
 		//cout<<"Itération "<<nbIter<< " AVANT COPIE "<<comptEnleves<<"\n";
 		grid->copyGrid(gridTabNew, gridTab);
 
