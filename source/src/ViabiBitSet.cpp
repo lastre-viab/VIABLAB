@@ -3119,6 +3119,11 @@ void ViabiBitSet::GarantedViabilityKernel( bool sortieOK,int nbArret)
 
 }
 
+SysDyn* ViabiBitSet::GetSysDynForViabProblem()
+{
+	return this->dynsys;
+}
+
 void ViabiBitSet::loadViableSets()
 {
 

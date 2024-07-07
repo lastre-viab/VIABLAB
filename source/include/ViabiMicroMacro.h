@@ -84,6 +84,7 @@
 //#include "defs.h"
 #include "GridMicroMacro.h"
 #include "ParametersManager.h"
+#include "ViabiMicroMacroTrajectoryHelper.h";
 
 
 class ViabiMicroMacro: public Viabi {
@@ -111,12 +112,12 @@ public:
 	virtual void GarantedViabilityKernel( bool sortieOK,int nbArret);
 
 	virtual	void initialiseConstraints();
+	virtual SysDyn* GetSysDynForViabProblem();
+	GridMicroMacro *  GetGridForViabProblem();
 	void initialiseConstraints_CC();
 	void initialiseConstraints_DD();
 	void computeViableTrajectories();
-	double computeViableTrajectory(double  *initPosition,  double initValue, string fileName, bool &succes);
-	double computeViableTrajectory_DD(unsigned long long int *initPosition,  double initValue, string fileName, bool &succes);
-	double computeViableTrajectory_tych_DD(unsigned long long int *initPosition,  double initValue, string fileName, bool &succes);
+
 
 	virtual void computeTrajectories();
 	virtual void loadViableSets();
@@ -185,6 +186,8 @@ public:
 	void computeAllPossibleCaptureTrajectories(  double * departureTimes, unsigned long long int* capturePoints, int  nbTrajPoints, string prefix );
 
 private:
+
+	ViabiMicroMacroTrajectoryHelper * trajectoryHelper;
 
 	GridMicroMacro * grid;
 	/*!
@@ -495,55 +498,6 @@ private:
 	int targ_or_dep;
 	int computeTmin;
 
-
-	double computeOptimalTrajectory_tmin(double *initPosition, string fileName, bool &succes);
-	double computeOptimalTrajectory_new(double *initPosition, string fileName, bool &succes);
-
-	int findOptiControl_tmin(double *currentPos, unsigned long long int optimDiscreteSuccessor,
-			double &dt,
-			int nbStepIter,
-			double stepCoeff,
-			double *resPos,
-			bool &succes );
-
-	unsigned long long int  findOptimalDiscreteSuccessor_tmin(unsigned long long int pos, double dt);
-
-
-	double computeOptimalTrajectory_Lmin(double *initPosition, string fileName, bool &succes);
-
-	int findOptiControl_Lmin(double budget, double *currentPos,
-			double &dt,
-			int nbStepIter,
-			double stepCoeff,
-			double *resPos,
-			double & newBudget,
-			bool &succes );
-
-	unsigned long long int (ViabiMicroMacro::*findfViableControl_DD)(double budget, unsigned long long int *currentPos,
-			unsigned long long int currentControl,
-			unsigned long long int *resPos,
-			double & newBudget,
-			bool &succes );
-	unsigned long long int  findViabControlDiffControl_DD(double budget, unsigned long long int *currentPos,
-			unsigned long long int currentControl,
-			unsigned long long int *resPos,
-			double & newBudget,
-			bool &succes );
-	unsigned long long int  findViabControlDefault_DD(double budget, unsigned long long int *currentPos,
-			unsigned long long int currentControl,
-			unsigned long long int *resPos,
-			double & newBudget,
-			bool &succes );
-	unsigned long long int  findViabControlDefault_tych_DD(double budget, unsigned long long int *currentPos,
-			unsigned long long int currentControl, unsigned long long int currentTych,
-			unsigned long long int *resPos,
-			double & newBudget,
-			bool &succes );
-	unsigned long long int  findViabControlMinValue_DD(double budget, unsigned long long int *currentPos,
-			unsigned long long int currentControl,
-			unsigned long long int *resPos,
-			double & newBudget,
-			bool &succes );
 };
 
 #endif /* VIABIHJB_H_ */

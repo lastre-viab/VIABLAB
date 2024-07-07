@@ -46,6 +46,8 @@ public:
 	virtual void loadViableSets() =0;
 	virtual void saveViableSets() =0;
 
+	virtual SysDyn* GetSysDynForViabProblem() =0;
+
 protected:
 	ParametersManager* modelParams;
 	SysDyn* dynsys;

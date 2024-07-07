@@ -45,6 +45,7 @@ public:
 
 	virtual void loadViableSets();
 	virtual void saveViableSets();
+	virtual SysDyn* GetSysDynForViabProblem();
 
 	void setK0();
 	void setK0_fd();
