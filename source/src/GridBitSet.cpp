@@ -297,7 +297,7 @@ void Grid_BitSet::refine()
 	unsigned long long int pos;
 	unsigned long long int indiceTemp[dim-1];
 	unsigned long long int parite[dim-1];
-cout<< " Starting grid refinement\n";
+	cout<< " Starting grid refinement\n";
 #pragma omp parallel for num_threads(nbOMPThreads) private(pos) shared( nbgrille) default(none)
 
 	for(pos=0;pos<nbgrille;pos++)
@@ -518,7 +518,7 @@ cout<< " Starting grid refinement\n";
 
 		pos++;
 	}
-cout<< " Grid refinement finished\n";
+	cout<< " Grid refinement finished\n";
 }
 
 
@@ -597,7 +597,7 @@ unsigned long long int  Grid_BitSet::getDirTram()
 }
 
 boost::dynamic_bitset<>  Grid_BitSet::analyseTrameMasqueBis(  unsigned long long int posX, bool print)
-																		{
+																						{
 	print=false;
 	int i=0;
 
@@ -767,10 +767,10 @@ boost::dynamic_bitset<>  Grid_BitSet::analyseTrameMasqueBis(  unsigned long long
 			if(print) cout<< " masque final "<<masque<<endl;
 			return(masque);}
 	}
-																		}
+																						}
 
 boost::dynamic_bitset<>  Grid_BitSet::analyseTrameMasque( unsigned long long int posX)
-				{
+								{
 	int i=0;
 	double x= limInf[0]+step[0];
 	unsigned long long int *indice = new unsigned long long int[dim-1];
@@ -892,7 +892,7 @@ boost::dynamic_bitset<>  Grid_BitSet::analyseTrameMasque( unsigned long long int
 			return(masque);
 		}
 	}
-				}
+								}
 
 
 
@@ -1222,15 +1222,15 @@ unsigned long long int Grid_BitSet::getLongTrame()
 }
 
 boost::dynamic_bitset<>  ** Grid_BitSet:: getGridTab()
-																		{
+																						{
 	return gridTab;
-																		}
+																						}
 
 
 boost::dynamic_bitset<>  ** Grid_BitSet:: getGridTabNew()
-																		{
+																						{
 	return  gridTabNew;
-																		}
+																						}
 
 void Grid_BitSet::saveProjetion(string fileName, unsigned long long int * projection)
 {
@@ -1488,6 +1488,36 @@ bool Grid_BitSet::isInSet(unsigned long long int * coords )
 
 
 	return (*gridTab[posX])[coords[dirTramage]];
+}
+
+unsigned long long int Grid_BitSet::getNearestPointInSet(double *coords )
+{
+	unsigned long long int nearest = this->nbTotalPoints +1; // means that teh is no near points that are viable
+	double minDist = PLUS_INF;
+	unsigned long long int cellNum=localizePoint(coords);
+	unsigned long long int posTemp;
+	unsigned long long int testI[dim];
+	double testV[dim];
+	for(int ii=0;ii<nbPointsCube;ii++)
+	{
+		posTemp= cellNum+indicesDecalCell[ii];
+
+		numToIntAndDoubleCoords( posTemp ,testI, testV);
+		if(isInSet(testI))
+		{
+			double dist=0.0;
+			for(int k=0;k<dim;k++)
+			{
+				dist=max(dist, abs(testV[k]-coords[k]));
+			}
+			if(dist < minDist)
+			{
+				minDist = dist;
+				nearest = posTemp;
+			}
+		}
+	}
+	return nearest;
 }
 
 void savePointsList(string fileName)

@@ -226,7 +226,11 @@ public:
    * 	-lesDecalagesAxes  : décalcage de coordonnées entiéres entre un point et tous ses voisins le long des axes
    *
    */
+
+  virtual unsigned long long int getNearestPointInSet(double *coords );
+
   void computeGridShifts();
+  bool ArePointsInTheSameCell(double *coords1,  double *coords2);
 
   /*!
    * \brief Fonction qui permet de corriger les dépassements éventuels de coordonnées qui

@@ -92,7 +92,7 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid * grRef)
 
 	if(L==0) L=1.0;
 	if(MF==0) MF=1.0;
-	// cout<< " MF="<<MF<< " LIP = "<<L<<endl;
+	cout<< " system :  MF="<<MF<< " LIP = "<<L<<endl;
 
 	double h=(gr)->getMaxStep();
 
@@ -101,14 +101,14 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid * grRef)
 
 	//if(L*MF>1)
 	//{
-	rho=   sqrt((  2.0*  h)/(L*MF));
+	rho=   sqrt((  2.0*  h)/(max(L, lfunc_L)*max(MF, lfunc_MF)));
 	//}
 	/*else
 	{
 		rho=  sqrt(( h/2 ));
 	}*/
 
-	// cout<< " rho= "<<rho<<endl;
+	cout<< " rho= "<<rho<<endl;
 
 	switch(computeMF)
 	{
@@ -575,20 +575,25 @@ void SysDyn::FDiscretRK4Imp(double * x, double * u,   double * res  , double rho
 
 double  SysDyn::calculRho_local(double * x   )
 {
+	if(dynType == DC)
+	{
+		return 1.0;
+	}
 	double rho1;
 	double h=gr->maxStep;
 	double LL= ((this->*calcul_L))(x);
 	double MFF=  ((this->*calcul_M))(x);
+	//cout << "x= "<<x[0]<< " "<<x[1]<< " L= "<<LL<< "  M= "<< MFF<<  " h= "<<h<<" rho= "<<rho1<<endl;
 
 	// if(LL==0)
 	if(MFF*LL<2.0*h)
 	{
+
 		MFF=1.0;
 		LL=1.0;
 	}
 
 	rho1=  sqrt(( 2.0*h)/(LL*MFF));
-	// if(rho>0.1) cout << "x= "<<x[0]<< " "<<x[1]<< " L= "<<LL<< "  M= "<< MFF<<  " h= "<<h<<" rho= "<<rho1<<endl;
 	return rho1;
 }
 
@@ -757,13 +762,12 @@ double SysDyn::calculL_local_ana(double * x   )
 
 double  SysDyn::returnL_local_ana(double * x   )
 {
-	return 1.0;
+	return max(L, lfunc_L);
 	////cout<< "local jacob L= "<<L<<endl;
 }
 double  SysDyn::returnMF_local_ana(double * x   )
 {
-	return 1.0;
-	////cout<< "local jacob L= "<<L<<endl;
+	return max(MF, lfunc_MF);
 }
 
 double SysDyn::calculMF_local_num(double * x )

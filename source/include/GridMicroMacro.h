@@ -44,6 +44,9 @@ public:
 
   void loadSet(string fileName);
   virtual bool isInSet(unsigned long long int * coords );
+  virtual unsigned long long int getNearestPointInSet(double *coords );
+  unsigned long long int getBestNearPointInSet(double *coords );
+  double getOptimalValue(double *coords );
   virtual void savePointsList(string fileName);
   virtual void saveValOnGrid(string fileName);
   virtual void saveValOnGridLight(string fileName);

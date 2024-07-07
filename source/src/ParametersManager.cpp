@@ -217,7 +217,7 @@ void ParametersManager::readSystemParametersFromJson()
 
 	systemParameters->COMPUTE_LC=dataRoot.get<int>("LIPSCHITZ_CONSTANT_COMPUTE_METHOD", 1);
 	systemParameters->COMPUTE_MF=dataRoot.get<int>("DYN_BOUND_COMPUTE_METHOD", 1);
-
+	cout<< " MF method = "<<systemParameters->COMPUTE_MF << " lip method "<<systemParameters->COMPUTE_LC<<endl;
 	if(dataRoot.find("LIPSCHITZ_CONSTANT")!=dataRoot.not_found())
 	{
 		systemParameters->LIP=dataRoot.get<double>("LIPSCHITZ_CONSTANT", 1.0);
@@ -235,7 +235,7 @@ void ParametersManager::readSystemParametersFromJson()
 	{
 		systemParameters->MF = 1.0;
 	}
-
+	cout<< " MF constant = "<<systemParameters->MF << " lip constant "<<systemParameters->LIP<<endl;
 	/*
 	 * Initialisation des paramètres de systèmes dynamique
 	 */
@@ -250,16 +250,25 @@ void ParametersManager::readSystemParametersFromJson()
 
 	systemParameters->SCHEME=dataRoot.get<int>("TIME_DISCRETIZATION_SCHEME", 1);
 	systemParameters->SCALE_PARAM=dataRoot.get<bool>("SCALING", false);
-	if(algoParameters->COMPUTE_TMIN)
+
+	if(dataRoot.find("COST_LIPSCHITZ_CONSTANT")!=dataRoot.not_found())
 	{
-		systemParameters->L_LIP=1.0;
-		systemParameters->L_MF=systemParameters->maxTime;
-	}
-	else{
 		systemParameters->L_LIP=dataRoot.get<double>("COST_LIPSCHITZ_CONSTANT", 1.0);
-		systemParameters->L_MF=dataRoot.get<double>("COST_BOUND_CONSTANT", 1.0);
-		cout<< "  lu cost constants "<<  systemParameters->L_LIP <<  " and " << systemParameters->L_MF << endl;
 	}
+	else
+	{
+		if(algoParameters->COMPUTE_TMIN)
+		{
+			systemParameters->L_LIP=systemParameters->maxTime;
+		}
+		else
+		{
+			systemParameters->L_LIP=1.0;
+		}
+	}
+
+	systemParameters->L_MF=dataRoot.get<double>("COST_BOUND_CONSTANT", 1.0);
+	cout<< "  lu cost constants "<<  systemParameters->L_LIP <<  " and " << systemParameters->L_MF << endl;
 
 	cout<< "  Read SYSTEM params  : FINISHED\n";
 }

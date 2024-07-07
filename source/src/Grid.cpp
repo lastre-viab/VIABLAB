@@ -73,6 +73,11 @@ bool Grid::isInSet(unsigned long long int * coords )
   return false;
 }
 
+unsigned long long int Grid::getNearestPointInSet(double *coords )
+{
+	return 0;
+}
+
 void Grid::savePointsList(string fileName)
 {
 
@@ -168,6 +173,17 @@ unsigned long long int Grid::localizePoint(double *coords )
     }
 delete [] indiceCell;
   return  numCell;
+}
+
+
+bool Grid::ArePointsInTheSameCell(double *coords1,  double *coords2)
+{
+	bool res = true;
+	for(int k = 0; k < dim; k++)
+	{
+		res &= (abs(coords1[k] - coords2[k]) <= this->step[k]);
+	}
+  return  res;
 }
 
 void Grid::computeGridShifts()

@@ -269,9 +269,70 @@ void GridMicroMacro::copyGrid(  double *grIn,  double *grOut)
 }
 bool GridMicroMacro::isInSet(unsigned long long int * coords )
 {
-	//cout<< " coucouc\n";
-	return true;
+	unsigned long long int posX;
+	this->intCoordsToNum(coords, &posX);
+	return ((gridPtr[posX])<(double)PLUS_INF);
 }
+
+unsigned long long int  GridMicroMacro::getNearestPointInSet(double *coords )
+{
+	unsigned long long int nearest = this->nbTotalPoints +1; // means that teh is no near points that are viable
+	double minDist = PLUS_INF;
+	unsigned long long int cellNum=localizePoint(coords);
+	unsigned long long int posTemp;
+	unsigned long long int testI[dim];
+	double testV[dim];
+	for(int ii=0;ii<nbPointsCube;ii++)
+	{
+		posTemp= cellNum+indicesDecalCell[ii];
+
+		numToIntAndDoubleCoords( posTemp ,testI, testV);
+		if(gridPtr[posTemp] < PLUS_INF)
+		{
+			double dist=0.0;
+			for(int k=0;k<dim;k++)
+			{
+				dist=max(dist, abs(testV[k]-coords[k]));
+			}
+			if(dist < minDist)
+			{
+				minDist = dist;
+				nearest = posTemp;
+			}
+		}
+	}
+	return nearest;
+}
+
+unsigned long long int GridMicroMacro::getBestNearPointInSet(double *coords )
+{
+	unsigned long long int nearest = this->nbTotalPoints +1; // means that teh is no near points that are viable
+	double minVal = PLUS_INF;
+	unsigned long long int cellNum=localizePoint(coords);
+	unsigned long long int posTemp;
+	for(int ii=0;ii<nbPointsCube;ii++)
+	{
+		posTemp= cellNum+indicesDecalCell[ii];
+		if(gridPtr[posTemp] < minVal)
+		{
+			minVal = gridPtr[posTemp];
+			nearest = posTemp;
+		}
+	}
+	return nearest;
+}
+
+double GridMicroMacro::getOptimalValue(double *coords )
+{
+	double minCellVal = PLUS_INF;
+	unsigned long long int cellNum=localizePoint(coords);
+	for(int ii=0;ii<nbPointsCube;ii++)
+	{
+		minCellVal=min(minCellVal, gridPtr[cellNum+indicesDecalCell[ii]]);
+	}
+	return minCellVal;
+}
+
 void GridMicroMacro::savePointsList(string fileName)
 {
 	//cout<<"ecriture  de l'ensemble dans un fichier \n";

@@ -21,6 +21,7 @@ public:
   void addPointToSet(unsigned long long int pos, double value)  ;
 
   virtual bool isInSet(unsigned long long int * coords );
+  virtual unsigned long long int getNearestPointInSet(double *coords );
 
   void findNearestViabPointInCell(double *startPoint, double * currentPoint, double * newPoint, double (*dynConstraints)(double *, double *));
   virtual void savePointsList(string fileName);

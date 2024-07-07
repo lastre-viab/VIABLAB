@@ -1733,12 +1733,12 @@ void ViabiBitSet::initialiseTargetPointList()
 
 			if((*(dynsys->target))(xReel)<PLUS_INF)
 			{
-				cout<<" x dans la cible posX="<<pos;
-				for(int i=0;i<dim;i++)
-				{
-					cout<<" "<<xReel[i]<<" ";
-				}
-				cout<<"\n";
+//				cout<<" x dans la cible posX="<<pos;
+//				for(int i=0;i<dim;i++)
+//				{
+//					cout<<" "<<xReel[i]<<" ";
+//				}
+//				cout<<"\n";
 
 
 				totalPointsC++;
@@ -3631,10 +3631,6 @@ void ViabiBitSet::noyauViabi_omp( bool sortieOK,int nbArret)
 
 void ViabiBitSet::noyauViabiGaranti_FD( bool sortieOK,int nbArret)
 {
-
-
-
-
 	int dirTramage=grid->getDirTram();
 
 	unsigned long long int * nbPointsSub=grid->getNbPointsSubGrid();
