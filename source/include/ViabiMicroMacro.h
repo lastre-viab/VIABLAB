@@ -17,8 +17,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- *  Created on: 9 déc. 2013
- *      Author: ANYA
+ *  Created on: 9 dec. 2013
+ *      Author: Ana DESILLES
  */
 
 /*!
@@ -76,7 +76,6 @@
  *
  */
 
-
 #ifndef VIABIHJB_H_
 #define VIABIHJB_H_
 
@@ -84,8 +83,7 @@
 //#include "defs.h"
 #include "GridMicroMacro.h"
 #include "ParametersManager.h"
-#include "ViabiMicroMacroTrajectoryHelper.h";
-
+#include "ViabiMicroMacroTrajectoryHelper.h"
 
 class ViabiMicroMacro: public Viabi {
 public:
@@ -107,30 +105,29 @@ public:
 	//virtual void initialiseConstraints() const;
 	//virtual void initialiseTargetOrConstraints() const;
 
-	virtual void ViabilityKernel( bool sortieOK,int nbArret);
-	virtual void CaptureBasin( );
-	virtual void GarantedViabilityKernel( bool sortieOK,int nbArret);
+	virtual void ViabilityKernel(bool sortieOK, int nbArret);
+	virtual void CaptureBasin();
+	virtual void GarantedViabilityKernel(bool sortieOK, int nbArret);
 
-	virtual	void initialiseConstraints();
+	virtual void initialiseConstraints();
 	virtual SysDyn* GetSysDynForViabProblem();
-	GridMicroMacro *  GetGridForViabProblem();
+	GridMicroMacro* GetGridForViabProblem();
 	void initialiseConstraints_CC();
 	void initialiseConstraints_DD();
 	void computeViableTrajectories();
-
 
 	virtual void computeTrajectories();
 	virtual void loadViableSets();
 	virtual void saveViableSets();
 
-	void viabKerValFunc(unsigned long long int  nbArret);
-	void viabKerValFunc_omp(unsigned long long int  nbArret);
-	void viabKerValFunc_DD(unsigned long long int  nbArret);
-	void viabKerGarantiValFunc_DD(unsigned long long int  nbArret);
+	void viabKerValFunc(unsigned long long int nbArret);
+	void viabKerValFunc_omp(unsigned long long int nbArret);
+	void viabKerValFunc_DD(unsigned long long int nbArret);
+	void viabKerGarantiValFunc_DD(unsigned long long int nbArret);
 	void viabKerValFuncOld();
 
-	double computeOptimalCaptTrajectory(double *initPosition, string fileName, bool &succes);
-
+	double computeOptimalCaptTrajectory(double *initPosition, string fileName,
+			bool &succes);
 
 	/*!
 	 *  \brief Cette foncion calcule l'épigraphe  de la fonction temps minimal
@@ -148,11 +145,7 @@ public:
 	 *   pour le schéma RK2 : \f$\Phi_{imp}(y)=y-0.5 \rho (F(y)+F(y-\rho F(y))\f$
 	 */
 
-
-	void  captBasinEpi_omp();
-
-
-
+	void captBasinEpi_omp();
 
 	/*!
 	 *   \brief  Fonction qui initialise la cible dans la base de données représentant
@@ -169,27 +162,34 @@ public:
 	 *       au tout début avant la première itération
 	 *
 	 */
-	void initialiseTargetHJB() ;
-	void initialiseTargetHJB_DD() ;
-	void initCnIndices(  );
+	void initialiseTargetHJB();
+	void initialiseTargetHJB_DD();
+	void initCnIndices();
 
 	/*!
 	 * Nombre de threads OMP disponible pour une parallélisation OPENMP
 	 */
 	int nbOMPthreads;
 
-	double computeOptimalTrajectory(double * initPosition,string FileName);
-	double computeOptimalTrajectory(unsigned long long int posX,string FileName);
-	void computeEvaderCapturability(double ** trajectory, double * win, double * departureTimes,  unsigned long long int* capturePoints,int nbTrajPoints,string fileName);
-	void computeEvaderCapturability_proj(double ** trajectory, double * win, double * departureTimes,  unsigned long long int* capturePoints,int nbTrajPoints,string fileName,unsigned long long int * proj);
+	double computeOptimalTrajectory(double *initPosition, string FileName);
+	double computeOptimalTrajectory(unsigned long long int posX,
+			string FileName);
+	void computeEvaderCapturability(double **trajectory, double *win,
+			double *departureTimes, unsigned long long int *capturePoints,
+			int nbTrajPoints, string fileName);
+	void computeEvaderCapturability_proj(double **trajectory, double *win,
+			double *departureTimes, unsigned long long int *capturePoints,
+			int nbTrajPoints, string fileName, unsigned long long int *proj);
 
-	void computeAllPossibleCaptureTrajectories(  double * departureTimes, unsigned long long int* capturePoints, int  nbTrajPoints, string prefix );
+	void computeAllPossibleCaptureTrajectories(double *departureTimes,
+			unsigned long long int *capturePoints, int nbTrajPoints,
+			string prefix);
 
 private:
 
-	ViabiMicroMacroTrajectoryHelper * trajectoryHelper;
+	ViabiMicroMacroTrajectoryHelper *trajectoryHelper;
 
-	GridMicroMacro * grid;
+	GridMicroMacro *grid;
 	/*!
 	 *  \brief  Copie pour raisons de rapidté  de la valeur de dimension d'état
 	 */
@@ -202,17 +202,15 @@ private:
 	 *  \brief Pointeur sur la base de données servant à enregister la rétroaction optimale
 	 */
 
-	double * vTab;
+	double *vTab;
 	double *vTab_tmp;
 
 	void InitViabiMicroMacro(algoViabiParams avp);
 	void saveValFunctions();
 	void computeOptimalTrajectories();
 
-
-	vector<unsigned long long int > indicesCn;
-	vector<unsigned long long int > indicesCn_tmp;
-
+	vector<unsigned long long int> indicesCn;
+	vector<unsigned long long int> indicesCn_tmp;
 
 	/* ******************************************************************************************************
 	 * Attributs  servant de variables globales pour les différentes méthodes
@@ -220,11 +218,11 @@ private:
 	 *  en écriture!  Attention en cas de parallélisation!
 	 *********************************************************************************************************/
 
-	unsigned long long int * intPointCoords, *intVect1;
-	double * doublePointCoords, *doubleVect, *doubleVect1;
-	unsigned long long int * intControlCoords;
-	double * doubleControlCoords;
-	unsigned long long int * imageCells;
+	unsigned long long int *intPointCoords, *intVect1;
+	double *doublePointCoords, *doubleVect, *doubleVect1;
+	unsigned long long int *intControlCoords;
+	double *doubleControlCoords;
+	unsigned long long int *imageCells;
 
 	string filePrefix;
 
@@ -254,12 +252,11 @@ private:
 	 */
 	void computeCurrIm_Lmin(int iter);
 
-	void computeCurrIm_DD( int iter);
+	void computeCurrIm_DD(int iter);
 	void computeDiscreteImageOfPoint_DD(unsigned long long int num);
 
-	void addDataToCurrentImage(list<imageCell>::iterator *startIt, imageCell newCell,list<imageCell>::iterator *resIt );
-
-
+	void addDataToCurrentImage(list<imageCell>::iterator *startIt,
+			imageCell newCell, list<imageCell>::iterator *resIt);
 
 	/*!
 	 * \brief Cette fonction parcours la liste de points générée lors d'un calcul de l'image \f$  \Phi(C_{n+1}\setminus C_n)\f$
@@ -286,10 +283,7 @@ private:
 
 	int addNewPoints();
 
-
-
 	int (ViabiMicroMacro::*addNewPointsToSet)();
-
 
 	/*!
 	 * \brief Cette fonction transforme la liste de mailles représentant une image
@@ -303,11 +297,7 @@ private:
 	void createPointsList();
 	void createPointsList_DD();
 
-
-
 	void (ViabiMicroMacro::*createCurrentPointsList)();
-
-
 
 	/*!
 	 * Méthode de debuggage: permet d'afficher sur la console
@@ -339,9 +329,8 @@ private:
 	 */
 	void addDataToCell(list<imageCell>::iterator itCell, imageCell newCell);
 
-
-
-	void (ViabiMicroMacro::*addDataToCurrentCell)(list<imageCell>::iterator , imageCell );
+	void (ViabiMicroMacro::*addDataToCurrentCell)(list<imageCell>::iterator,
+			imageCell);
 
 	/*!
 	 * \brief Cette fonction permet de mettre à jour les données d'un point déjà présent dans
@@ -357,9 +346,11 @@ private:
 	 * @param itPoint pointeur sur le point à modifier dans la liste de points en construction
 	 * @param newPoint structure portant les données à ajouter à cette maille
 	 */
-	void addDataToPoint(list<imagePoint>::iterator itPoint, imagePoint newPoint);
+	void addDataToPoint(list<imagePoint>::iterator itPoint,
+			imagePoint newPoint);
 
-	void (ViabiMicroMacro::*addDataToCurrentPoint)(list<imagePoint>::iterator, imagePoint );
+	void (ViabiMicroMacro::*addDataToCurrentPoint)(list<imagePoint>::iterator,
+			imagePoint);
 	/*!
 	 *  \brief Cette fonction permet d'ajouter un nouveau point dans la liste ordonnée et sans doublons de points de l'image
 	 *  \f$ \Phi(C_{n}\setminus C_{n-1})\f$ .
@@ -372,10 +363,14 @@ private:
 	 * la recherche suivante
 	 */
 
-	void  addTempDataToPointsList(list<imagePoint>::iterator *startIt, imageTempPoint newPoint,list<imagePoint>::iterator *resIt );
-	void addDataToGivenPointsList(imagePointsList * tempImagePointsList, list<imagePoint>::iterator *startIt, imagePoint newPoint,list<imagePoint>::iterator *resIt );
+	void addTempDataToPointsList(list<imagePoint>::iterator *startIt,
+			imageTempPoint newPoint, list<imagePoint>::iterator *resIt);
+	void addDataToGivenPointsList(imagePointsList *tempImagePointsList,
+			list<imagePoint>::iterator *startIt, imagePoint newPoint,
+			list<imagePoint>::iterator *resIt);
 
-	void addDataToPointsList(list<imagePoint>::iterator *startIt, imagePoint newPoint,list<imagePoint>::iterator *resIt );
+	void addDataToPointsList(list<imagePoint>::iterator *startIt,
+			imagePoint newPoint, list<imagePoint>::iterator *resIt);
 
 	/*!
 	 *  \brief  Une structure servant à stocker les données  de l'image discréte
@@ -412,8 +407,8 @@ private:
 	 */
 	imagePointsList currentImagePointsList;
 
-	std::list<imagePoint> * tempPointsList1;
-	std::list<imagePoint> * tempPointsList2;
+	std::list<imagePoint> *tempPointsList1;
+	std::list<imagePoint> *tempPointsList2;
 	int whichPointListToUse;
 
 	/*!
@@ -421,8 +416,7 @@ private:
 	 * @param num numéro du point
 	 */
 
-	void  computeDiscreteImageOfPoint(unsigned long long int num);
-
+	void computeDiscreteImageOfPoint(unsigned long long int num);
 
 	/*!
 	 * \brief  Version parallélisée OpenMP  de la fonction qui calcule l'image discrére d'un point \f$ \Phi(x)\f$
@@ -461,24 +455,16 @@ private:
 	 * \see minTimeEpiLocalRho
 	 */
 
-	void  computeConvexifiedImage_tmin( int iter);
-	void  computeConvexifiedImage_Lmin( int iter);
-	void  computeConvexifiedImage_DD( int iter);
+	void computeConvexifiedImage_tmin(int iter);
+	void computeConvexifiedImage_Lmin(int iter);
+	void computeConvexifiedImage_DD(int iter);
 
-	void (ViabiMicroMacro::* computeFirstConvexifiedImage)( int iter);
+	void (ViabiMicroMacro::*computeFirstConvexifiedImage)(int iter);
 
+	void computeConvexifiedImage_tmin_omp(int iter);
+	void computeConvexifiedImage_Lmin_omp(int iter);
 
-
-
-	void  computeConvexifiedImage_tmin_omp( int iter);
-	void  computeConvexifiedImage_Lmin_omp( int iter);
-
-
-	void (ViabiMicroMacro::* computeFirstConvexifiedImage_omp)( int iter);
-
-
-
-
+	void (ViabiMicroMacro::*computeFirstConvexifiedImage_omp)(int iter);
 
 	/*!
 	 * \brief Fonction qui permet d'ajouter dans l'image convexifiée en construction
@@ -491,7 +477,9 @@ private:
 	 * à inserrer dans l'image en construction
 	 * @param rho pas de temps utilisé pour le calcul de  \f$ \Phi(x) \f$
 	 */
-	void addConvexCombinations(list<imagePoint>::iterator itPoint, unsigned long long int numCell, imageCell * tempImageCell,double rho ,list<imageCell>::iterator *itStart);
+	void addConvexCombinations(list<imagePoint>::iterator itPoint,
+			unsigned long long int numCell, imageCell *tempImageCell,
+			double rho, list<imageCell>::iterator *itStart);
 
 	bool testConstraintesForCell(unsigned long long int numCell);
 

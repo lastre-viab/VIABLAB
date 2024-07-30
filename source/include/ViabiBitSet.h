@@ -28,19 +28,18 @@
 #include "GridBitSet.h"
 #include "ParametersManager.h"
 
-
 class ViabiBitSet: public Viabi {
 public:
 	ViabiBitSet(ParametersManager *pm);
 	virtual ~ViabiBitSet();
 	virtual void printViabiInfo();
 
-	virtual void ViabilityKernel( bool sortieOK,int nbArret);
-	virtual void  CaptureBasin();
-	virtual void GarantedViabilityKernel( bool sortieOK,int nbArret);
+	virtual void ViabilityKernel(bool sortieOK, int nbArret);
+	virtual void CaptureBasin();
+	virtual void GarantedViabilityKernel(bool sortieOK, int nbArret);
 
-	virtual	void initialiseTarget();
-	virtual	void initialiseConstraints();
+	virtual void initialiseTarget();
+	virtual void initialiseConstraints();
 	virtual void computeTrajectories();
 
 	virtual void loadViableSets();
@@ -51,44 +50,40 @@ public:
 	void setK0_fd();
 	void testK0();
 
-	void  saveViabRetro(string fileName);
-	void  saveViabGarantiRetro(string fileName);
+	void saveViabRetro(string fileName);
+	void saveViabGarantiRetro(string fileName);
 
-
-
-
-
-	bool  findViabImagePoint(double *currentPos , bool print);
+	bool findViabImagePoint(double *currentPos, bool print);
 	bool findViabImagePoint_noControl(double *xCoordsDouble, bool print);
-	void  initialiseTargetPointList();
-	int  computeViableTrajectorySetVal(double *initPosition, double finalTime, string fileName);
-	int computeViableTrajectoryHeavy(double *initPosition, double *initControl, double finalTime, string fileName);
+	void initialiseTargetPointList();
+	int computeViableTrajectorySetVal(double *initPosition, double finalTime,
+			string fileName);
+	int computeViableTrajectoryHeavy(double *initPosition, double *initControl,
+			double finalTime, string fileName);
 
-	int computeViableTrajectory(double *initPosition, double finalTime, string fileName);
-	int findViabControl(double *currentPos,
-			double &dt,
-			int nbStepIter,
-			double stepCoeff,
-			double *resPos,
-			int & nbViabVoisins,
-			bool &succes );
+	int computeViableTrajectory(double *initPosition, double finalTime,
+			string fileName);
+	int findViabControl(double *currentPos, double &dt, int nbStepIter,
+			double stepCoeff, double *resPos, int &nbViabVoisins, bool &succes);
 private:
-	Grid_BitSet* grid;
+	Grid_BitSet *grid;
 	void InitViabiBitSet(algoViabiParams avbp);
-	void ViabilityKernelSimple( bool sortieOK,int nbArret);
-	void  computeDiscreteImageOfPoint(double *doublePointCoords, unsigned long long int * intPointCoords  );
-	void  computeDiscreteImageOfPoint_noControl(double *doublePointCoords, unsigned long long int * intPointCoords  );
+	void ViabilityKernelSimple(bool sortieOK, int nbArret);
+	void computeDiscreteImageOfPoint(double *doublePointCoords,
+			unsigned long long int *intPointCoords);
+	void computeDiscreteImageOfPoint_noControl(double *doublePointCoords,
+			unsigned long long int *intPointCoords);
 
-	void  noyauViabi_FD( bool sortieOK,int nbArret);
-	void  noyauViabi( bool sortieOK,int nbArret);
-	void  noyauViabi_sansControle( bool sortieOK,int nbArret);
-	void noyauViabi_omp( bool sortieOK,int nbArret);
-	void noyauViabi_sansControle_omp( bool sortieOK,int nbArret);
-	void noyauViabiGaranti_FD( bool sortieOK,int nbArret);
+	void noyauViabi_FD(bool sortieOK, int nbArret);
+	void noyauViabi(bool sortieOK, int nbArret);
+	void noyauViabi_sansControle(bool sortieOK, int nbArret);
+	void noyauViabi_omp(bool sortieOK, int nbArret);
+	void noyauViabi_sansControle_omp(bool sortieOK, int nbArret);
+	void noyauViabiGaranti_FD(bool sortieOK, int nbArret);
 	void CaptureBasin_ContinuousDynamics();
 	void CaptureBasin_DiscreteDynamics();
 
-		void computeViableTrajectories();
+	void computeViableTrajectories();
 	/*!
 	 *  \brief  Copie pour raisons de rapidt�  de la valeur de dimension d'�tat
 	 */
@@ -102,8 +97,6 @@ private:
 	 */
 	string filePrefix;
 
-
-
 	/*!
 	 *  \brief  Une structure servant � stocker les donn�es  de l'image discr�te
 	 *  d'un point au cours de parcours  de calcul  de \f$ \Phi(C_{n}\setminus C_{n-1}) \f$ .
@@ -114,8 +107,8 @@ private:
 	 */
 	discretImageSet_simple pointDI;
 
-	double   *doubleVect, *doubleVect1;
-	unsigned long long int * imageCells;
+	double *doubleVect, *doubleVect1;
+	unsigned long long int *imageCells;
 
 	/*!
 	 *  \brief La liste de structures repr�sentant  des mailles d'une image en construction
@@ -132,18 +125,21 @@ private:
 	 */
 	imagePointsIntList currentImagePointsList;
 
-
-
-	void  addConvexCombinations(unsigned long long int posX, unsigned long long int numCell, unsigned long long int * tempImageCell, double rho ,list<unsigned long long int>::iterator *itStart);
-	void  computeConvexifiedImage( int iter);
-	void  addDataToCurrentImage(list<unsigned long long int >::iterator *startIt, unsigned long long int newCell,list<unsigned long long int>::iterator *resIt );
-	int  addNewPoints();
-	void  computeCurrentImage( int iter);
-	void  createPointsList();
-	void addDataToPointsList(list<unsigned long long int >::iterator *startIt, unsigned long long int newPoint,list<unsigned long long int>::iterator *resIt );
+	void addConvexCombinations(unsigned long long int posX,
+			unsigned long long int numCell,
+			unsigned long long int *tempImageCell, double rho,
+			list<unsigned long long int>::iterator *itStart);
+	void computeConvexifiedImage(int iter);
+	void addDataToCurrentImage(list<unsigned long long int>::iterator *startIt,
+			unsigned long long int newCell,
+			list<unsigned long long int>::iterator *resIt);
+	int addNewPoints();
+	void computeCurrentImage(int iter);
+	void createPointsList();
+	void addDataToPointsList(list<unsigned long long int>::iterator *startIt,
+			unsigned long long int newPoint,
+			list<unsigned long long int>::iterator *resIt);
 
 };
-
-
 
 #endif /* VIABIBITSET_H_ */

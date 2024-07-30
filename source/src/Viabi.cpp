@@ -1,6 +1,6 @@
 /*
  * Viabi.cpp
- *  *
+ *
  *    VIABLAB : a numerical library for Mathematical Viability Computations
  *    Copyright (C) <2020>  <Anna DESILLES, LASTRE>
  *
@@ -13,21 +13,19 @@
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *   GNU Affero General Public License for more details.
- *   
+ *
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- *  Created on: 10 sept. 2013
- *      Author: ANYA
+ *  Created on: 7 juil. 2013
+ *      Author: Anna DESILLES
  */
 
 #include "../include/Viabi.h"
 
-
-Viabi::Viabi( ParametersManager * pm)
-{
+Viabi::Viabi(ParametersManager *pm) {
 	modelParams = pm;
-	nbOMPThreads=1;
+	nbOMPThreads = 1;
 }
 
 Viabi::Viabi() {

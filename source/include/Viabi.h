@@ -29,19 +29,17 @@
 
 using namespace std;
 
-
-
 class Viabi {
 public:
 	Viabi();
-	Viabi( ParametersManager * pm);
+	Viabi(ParametersManager *pm);
 	virtual ~Viabi();
 	virtual void printViabiInfo() =0;
 	virtual void initialiseTarget() =0;
 	virtual void initialiseConstraints() =0;
-	virtual void  ViabilityKernel( bool sortieOK,int nbArret)  =0;
-	virtual void  CaptureBasin( )  =0;
-	virtual void  GarantedViabilityKernel( bool sortieOK,int nbArret)  =0;
+	virtual void ViabilityKernel(bool sortieOK, int nbArret) =0;
+	virtual void CaptureBasin() =0;
+	virtual void GarantedViabilityKernel(bool sortieOK, int nbArret) =0;
 	virtual void computeTrajectories() =0;
 	virtual void loadViableSets() =0;
 	virtual void saveViableSets() =0;
@@ -49,11 +47,9 @@ public:
 	virtual SysDyn* GetSysDynForViabProblem() =0;
 
 protected:
-	ParametersManager* modelParams;
-	SysDyn* dynsys;
+	ParametersManager *modelParams;
+	SysDyn *dynsys;
 	int nbOMPThreads;
 };
-
-
 
 #endif /* VIABI_H_ */
