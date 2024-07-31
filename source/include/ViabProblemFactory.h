@@ -28,16 +28,17 @@
 #include "ViabiBitSet.h"
 #include "ViabiMicroMacro.h"
 
-class ViabProblemFactory {
+class ViabProblemFactory
+    {
 public:
-	ViabProblemFactory();
-	ViabProblemFactory(ParametersManager *pm);
-	Viabi* constructViabilityProblem(int gridMethod);
-	virtual ~ViabProblemFactory();
+    ViabProblemFactory();
+    ViabProblemFactory(ParametersManager *pm);
+    Viabi* constructViabilityProblem(int gridMethod);
+    virtual ~ViabProblemFactory();
 
 private:
-	ParametersManager *problemParameters;
+    ParametersManager *problemParameters;
 
-};
+    };
 
 #endif /* SRC_VIABPROBLEMFABRIC_H_ */

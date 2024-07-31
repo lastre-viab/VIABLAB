@@ -28,133 +28,171 @@
 #include "../include/ParametersManager.h"
 
 ParametersManager* initParams(gridParams &gp, algoViabiParams &avp,
-		controlParams &cp, systemParams &sp, int nbOmpThreads);
+	controlParams &cp, systemParams &sp, int nbOmpThreads);
 ParametersManager* initParams(gridParams &gp, algoViabiParams &avp,
-		controlParams &cp, systemParams &sp, int nbOmpThreads) {
+	controlParams &cp, systemParams &sp, int nbOmpThreads)
+    {
 
-	ParametersManager *pm = new ParametersManager(&gp, &avp, &cp, &sp,
-			nbOmpThreads, paramsFile);
+    ParametersManager *pm = new ParametersManager(&gp, &avp, &cp, &sp,
+	    nbOmpThreads, paramsFile);
 
-	if (dynamics) {
-		sp.DYNAMICS = &dynamics;
-	} else {
-		sp.DYNAMICS = &dynamics_default;
+    if (dynamics)
+	{
+	sp.DYNAMICS = &dynamics;
 	}
-	if (sp.DYN_TYPE == 4) {
-		sp.DYNAMICS = &dynamics_hybrid;
+    else
+	{
+	sp.DYNAMICS = &dynamics_default;
 	}
-
-	switch (sp.DYN_TYPE) {
-	case 2: {
-		sp.COMPUTE_LC = 0.0;
-		sp.COMPUTE_MF = 0.0;
-
-		sp.LIP = 1.0;
-		sp.MF = 1.0;
-		break;
-	}
-	case 3: {
-		sp.COMPUTE_LC = 0.0;
-		sp.COMPUTE_MF = 0.0;
-		sp.LIP = 1.0;
-		sp.MF = 1.0;
-		break;
-	}
-	}
-	if (constraintsX) {
-		sp.CONSTR_X = &constraintsX;
-	} else {
-		sp.CONSTR_X = &constraintsX_default;
+    if (sp.DYN_TYPE == 4)
+	{
+	sp.DYNAMICS = &dynamics_hybrid;
 	}
 
-	if (constraintsXU) {
-		sp.CONSTR_XU = &constraintsXU;
-	} else {
-		sp.CONSTR_XU = &constraintsXU_default;
+    switch (sp.DYN_TYPE)
+	{
+    case 2:
+	{
+	sp.COMPUTE_LC = 0.0;
+	sp.COMPUTE_MF = 0.0;
+
+	sp.LIP = 1.0;
+	sp.MF = 1.0;
+	break;
 	}
-	if (jacobian) {
-		sp.JACOBIAN = &jacobian;
-	} else {
-		sp.JACOBIAN = &jacobian_default;
+    case 3:
+	{
+	sp.COMPUTE_LC = 0.0;
+	sp.COMPUTE_MF = 0.0;
+	sp.LIP = 1.0;
+	sp.MF = 1.0;
+	break;
 	}
-	if (localDynBounds) {
-		sp.LOCAL_DYN_BOUNDS = &localDynBounds;
-	} else {
-		sp.LOCAL_DYN_BOUNDS = &localDynBounds_default;
 	}
-	if (m) {
-		sp.M_FUNC = &m;
-	} else {
-		sp.M_FUNC = &m_default;
+    if (constraintsX)
+	{
+	sp.CONSTR_X = &constraintsX;
 	}
-	if (l) {
-		sp.L_FUNC = &l;
-	} else {
-		sp.L_FUNC = &l_default;
-	}
-	if (target) {
-		sp.TARGET = &target;
-	} else {
-		sp.TARGET = &target_default;
+    else
+	{
+	sp.CONSTR_X = &constraintsX_default;
 	}
 
-	if (l_fd) {
-		sp.L_FUNC_FD = &l_fd;
-	} else {
-		sp.L_FUNC_FD = &l_fd_default;
+    if (constraintsXU)
+	{
+	sp.CONSTR_XU = &constraintsXU;
+	}
+    else
+	{
+	sp.CONSTR_XU = &constraintsXU_default;
+	}
+    if (jacobian)
+	{
+	sp.JACOBIAN = &jacobian;
+	}
+    else
+	{
+	sp.JACOBIAN = &jacobian_default;
+	}
+    if (localDynBounds)
+	{
+	sp.LOCAL_DYN_BOUNDS = &localDynBounds;
+	}
+    else
+	{
+	sp.LOCAL_DYN_BOUNDS = &localDynBounds_default;
+	}
+    if (m)
+	{
+	sp.M_FUNC = &m;
+	}
+    else
+	{
+	sp.M_FUNC = &m_default;
+	}
+    if (l)
+	{
+	sp.L_FUNC = &l;
+	}
+    else
+	{
+	sp.L_FUNC = &l_default;
+	}
+    if (target)
+	{
+	sp.TARGET = &target;
+	}
+    else
+	{
+	sp.TARGET = &target_default;
 	}
 
-	if (l_tych_fd) {
-		sp.L_FUNC_TYCH_FD = &l_tych_fd;
-	} else {
-		sp.L_FUNC_TYCH_FD = &l_fd_tych_default;
+    if (l_fd)
+	{
+	sp.L_FUNC_FD = &l_fd;
+	}
+    else
+	{
+	sp.L_FUNC_FD = &l_fd_default;
 	}
 
-	if (target_fd) {
-		sp.TARGET_FD = &target_fd;
-	} else {
-		sp.TARGET_FD = &target_fd_default;
+    if (l_tych_fd)
+	{
+	sp.L_FUNC_TYCH_FD = &l_tych_fd;
+	}
+    else
+	{
+	sp.L_FUNC_TYCH_FD = &l_fd_tych_default;
 	}
 
-	if (constraintsXU_fd)
-		sp.CONSTR_XU_fd = &constraintsXU_fd;
-	else
-		sp.CONSTR_XU_fd = &constraintsXU_fd_default;
+    if (target_fd)
+	{
+	sp.TARGET_FD = &target_fd;
+	}
+    else
+	{
+	sp.TARGET_FD = &target_fd_default;
+	}
 
-	if (controlEligibilityForTraj_fd)
-		sp.CONTROL_ELIGIBILITY_FOR_TRAJ_fd = &controlEligibilityForTraj_fd;
-	else
-		sp.CONTROL_ELIGIBILITY_FOR_TRAJ_fd =
-				&controlEligibilityForTraj_fd_default;
+    if (constraintsXU_fd)
+	sp.CONSTR_XU_fd = &constraintsXU_fd;
+    else
+	sp.CONSTR_XU_fd = &constraintsXU_fd_default;
 
-	if (dynamics_fd)
-		sp.DYNAMICS_FD = &dynamics_fd;
-	else
-		sp.DYNAMICS_FD = NULL;
-	if (dynamics_tych_fd)
-		sp.DYNAMICS_TYCH_FD = &dynamics_tych_fd;
-	else
-		sp.DYNAMICS_TYCH_FD = NULL;
-	if (constraintsX_fd)
-		sp.CONSTR_X_fd = &constraintsX_fd;
-	else
-		sp.CONSTR_X_fd = NULL;
-	if (dynConstraintsForTraj)
-		sp.DYN_CONSTR_FOR_TRAJ = &dynConstraintsForTraj;
-	else
-		sp.DYN_CONSTR_FOR_TRAJ = &dynConstraintsForTraj_default;
+    if (controlEligibilityForTraj_fd)
+	sp.CONTROL_ELIGIBILITY_FOR_TRAJ_fd = &controlEligibilityForTraj_fd;
+    else
+	sp.CONTROL_ELIGIBILITY_FOR_TRAJ_fd =
+		&controlEligibilityForTraj_fd_default;
 
-	if (constraintsXUY_fd)
-		sp.MU_FUNC_FD = &constraintsXUY_fd;
-	else
-		sp.MU_FUNC_FD = &constraintsXUY_fd_default;
-	/*
-	 * Initialisation des paramètres de systèmes dynamique
-	 * Ici toutes les valeurs sont par defaut, non utilisés
-	 */
+    if (dynamics_fd)
+	sp.DYNAMICS_FD = &dynamics_fd;
+    else
+	sp.DYNAMICS_FD = NULL;
+    if (dynamics_tych_fd)
+	sp.DYNAMICS_TYCH_FD = &dynamics_tych_fd;
+    else
+	sp.DYNAMICS_TYCH_FD = NULL;
+    if (constraintsX_fd)
+	sp.CONSTR_X_fd = &constraintsX_fd;
+    else
+	sp.CONSTR_X_fd = NULL;
+    if (dynConstraintsForTraj)
+	sp.DYN_CONSTR_FOR_TRAJ = &dynConstraintsForTraj;
+    else
+	sp.DYN_CONSTR_FOR_TRAJ = &dynConstraintsForTraj_default;
 
-	return pm;
+    if (constraintsXUY_fd)
+	sp.MU_FUNC_FD = &constraintsXUY_fd;
+    else
+	sp.MU_FUNC_FD = &constraintsXUY_fd_default;
+    /*
+     * Initialisation des paramètres de systèmes dynamique
+     * Ici toutes les valeurs sont par defaut, non utilisés
+     */
 
-}
+    return pm;
+
+    }
 
 #endif /* SRC_INITPARAMS_H_ */

@@ -10,11 +10,10 @@
 
 #include "WeakDeclarations.h"
 
-double * initControls;
+double *initControls;
 gridParams gp;
 algoViabiParams avp;
 controlParams cp;
 systemParams sp;
-
 
 #endif /* DATA_DEFAULTVALUES_H_ */

@@ -23,26 +23,33 @@
 
 #include "../include/ViabProblemFactory.h"
 
-ViabProblemFactory::ViabProblemFactory() {
-	// TODO Auto-generated constructor stub
+ViabProblemFactory::ViabProblemFactory()
+    {
+    // TODO Auto-generated constructor stub
 
-}
+    }
 
-ViabProblemFactory::ViabProblemFactory(ParametersManager *pm) {
-	problemParameters = pm;
-}
+ViabProblemFactory::ViabProblemFactory(ParametersManager *pm)
+    {
+    problemParameters = pm;
+    }
 
-ViabProblemFactory::~ViabProblemFactory() {
-	// TODO Auto-generated destructor stub
-}
+ViabProblemFactory::~ViabProblemFactory()
+    {
+    // TODO Auto-generated destructor stub
+    }
 
-Viabi* ViabProblemFactory::constructViabilityProblem(int gridMethod) {
-	Viabi *vp;
-	if (gridMethod == BS) {
-		vp = new ViabiBitSet(problemParameters);
-	} else {
-		vp = new ViabiMicroMacro(problemParameters);
+Viabi* ViabProblemFactory::constructViabilityProblem(int gridMethod)
+    {
+    Viabi *vp;
+    if (gridMethod == BS)
+	{
+	vp = new ViabiBitSet(problemParameters);
 	}
-	return vp;
-}
+    else
+	{
+	vp = new ViabiMicroMacro(problemParameters);
+	}
+    return vp;
+    }
 

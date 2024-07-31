@@ -23,16 +23,19 @@
 
 #include "../include/Viabi.h"
 
-Viabi::Viabi(ParametersManager *pm) {
-	modelParams = pm;
-	nbOMPThreads = 1;
-}
+Viabi::Viabi(ParametersManager *pm)
+    {
+    modelParams = pm;
+    nbOMPThreads = 1;
+    }
 
-Viabi::Viabi() {
-	// TODO Auto-generated constructor stub
+Viabi::Viabi()
+    {
+    // TODO Auto-generated constructor stub
 //cout<< "  coucou constructeur par defaut\n";
-}
+    }
 
-Viabi::~Viabi() {
-	// TODO Auto-generated destructor stub
-}
+Viabi::~Viabi()
+    {
+    // TODO Auto-generated destructor stub
+    }
