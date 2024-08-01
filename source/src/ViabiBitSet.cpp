@@ -2441,6 +2441,7 @@ void ViabiBitSet::computeDiscreteImageOfPoint_noControl(
 
 void ViabiBitSet::computeTrajectories()
     {
+    dynsys->setDynamicsForward();
     computeViableTrajectories();
     }
 
@@ -2483,6 +2484,7 @@ void ViabiBitSet::computeViableTrajectories()
 
 void ViabiBitSet::CaptureBasin()
     {
+    dynsys->setDynamicsBackward();
     algoViabiParams *avp = modelParams->getAlgoParameters();
     int refine = avp->GRID_REFINMENTS_NUMBER;
 
@@ -3258,6 +3260,7 @@ void ViabiBitSet::saveViableSets()
 
 void ViabiBitSet::ViabilityKernel(bool sortieOK, int nbArret)
     {
+    dynsys->setDynamicsForward();
     algoViabiParams *avp = modelParams->getAlgoParameters();
     int refine = avp->GRID_REFINMENTS_NUMBER;
 

@@ -27,6 +27,7 @@
 #include "Viabi.h"
 #include "ViabiBitSet.h"
 #include "ViabiMicroMacro.h"
+#include "ViabiMicroMacroDiscrete.h"
 
 class ViabProblemFactory
     {

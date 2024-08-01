@@ -1,83 +1,12 @@
 /*
- * ViabiHJB.h
- *  *
- *    VIABLAB : a numerical library for Mathematical Viability Computations
- *    Copyright (C) <2020>  <Anna DESILLES, LASTRE>
+ * ViabiMicroMacroDiscrete.h
  *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU Affero General Public License as
- *   published by the Free Software Foundation, either version 3 of the
- *   License, or (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU Affero General Public License for more details.
- *   
- *   You should have received a copy of the GNU Affero General Public License
- *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- *  Created on: 9 dec. 2013
- *      Author: Ana DESILLES
+ *  Created on: 1 ao�t 2024
+ *      Author: adesi
  */
 
-/*!
- * \page introViabiHJB ViabiHJB:  Librairie d'algorithmes de viabilité épigraphiques
- *
- *
- * \section p1s1 Introduction
- * La classe ViabiHJB implémente des algorithmes  de viabilité
- * dédiés  aux calculs des ensembles  qui peuvent être représentés comme
- *  épigraphes de fonctions. Il peut s'agir de fonctions valeur de problèmes
- *  de contrôle optimal ou  de solution d'EDP de type HJB.
- *
- *  Ces algorithmes  fonctionnent en laissant une dimension, celle des valeurs de la fonction, libre
- *   et non discrétisée grâce au stockage   particulier des données, réalisé par la classe correspondante GridHJB. Selon la nature de la fonction
- *    dont on souhaite calculer l'épigraphe on utilisera un algorithme approprié de la classe ViabiHJB.
- *
- *    Chaque algorithme calcule une fonction valeur (ou son épigraphe) et la (ou les) fonction(s) de rétro-action associée(s).
- *    Chaque fonction valeur, quelle quoi soit la nature du problème de contrôle optimal associé,  sera stockée
- *    dans une table (base de données) dont les éléments sont  des paires  de la forme (clé, donnée).
- *    La clé, comme la donnée peuvent prendre des formes
- *    différentes, selon le problème. La clé sert à indexer les données :
- *     tout accès aux données se fait à partir des clés correspondantes.
- *
- *     Dans le cas de fonction valeur la clé sera de deux types:
- *     	- si la fonction valeur \f$ V(x)\f$ ne dépend pas de temps ( correspond aux problèmes
- *     	de contrôle optimal à horizon infini, ou problèmes de temps minimum, par exemple) la clé  sera
- *     	l'identifiant de \f$ x\f$ : numéro du point dans la grille. Ainsi dans ce cas les éléments de la table représentant
- *     	la fonction valeur  seront de la forme \f$ (x,V(x))\f$ .
- *
- *     	- si la fonction valeur  \f$ V(x,t)\f$ dépend de temps (problèmes à horizon fini) la clé  sera elle méme un couple
- *     	: \f$ (x,t)\f$ oé  \f$ x\f$ est représenté par son numéro dans la grille et $\f$ t \f$  est une valeur réelle.
- *
- *
- *   \section p1s2 Algorithmes de bassin de capture épigraphiques
- *  Le bassin de capture \f$  Capt_{F}(K,C)\f$   peut être  défini comme le
- *  domaine de la fonction temps minimal
- *  \f$  \omega(x)=\inf\{t\le 0,\ \ x(t)\in C, \ x(0)=x,\ \ \forall s\in[0,t],\ x(s)\in K\} \f$  .
- *  En utilisant cette définition, il suffit de calculer la fonction temps minimal pour déduire
- *  le bassin de capture d'une cible donnée \f$ C\f$  par un systéme dynamique \f$  F\f$  sous les contraintes
- *  \f$  x\in K \f$.
- *
- *   L'algorithme implémenté dans classe ViabiHJB pour le calcul des bassins de capture
- *   calcule l'épigraphe  de la fonction temps minimum. Deux versions de l'algorithme  sont proposées.
- *
- *  La fonction minTimeGlobalRho() est une version oé le pas de discrétisation
- *   temporelle \f$  \rho\f$   est  défini de façon globale par rapport l'état \f$  x \f$  .
- *   Il est déterminé  en fonction du schéma
- *    de discrétisation  en fonction des constantes  de régularité de la dynamique :
- *    \f$  L \f$  , la constante de Lipschitz  et \f$  M= sup \| F(x)\| \f$  .
- *
- *   La fonction minTimeLocalRho() est une version oé le pas de discrétisation temporelle \f$ \rho\f$   est calculé localement pour chaque point
- *    \f$  x\f$  en fonction du  schéma  de discrétisation  est des estimations locales  des constantes  de régularité de la dynamique :
- *    \f$  L\f$ , la constante de Lipschitz  et \f$  M= sup \| F(x)\| \f$.
- *
- *
- */
-
-#ifndef VIABIHJB_H_
-#define VIABIHJB_H_
+#ifndef VIABIMICROMACRODISCRETE_H_
+#define VIABIMICROMACRODISCRETE_H_
 
 #include "Viabi.h"
 //#include "defs.h"
@@ -85,12 +14,12 @@
 #include "ParametersManager.h"
 #include "ViabiMicroMacroTrajectoryHelper.h"
 
-class ViabiMicroMacro: public Viabi
+class ViabiMicroMacroDiscrete: public Viabi
     {
 public:
-    ViabiMicroMacro(ParametersManager *pm);
+    ViabiMicroMacroDiscrete(ParametersManager *pm);
 
-    virtual ~ViabiMicroMacro();
+    virtual ~ViabiMicroMacroDiscrete();
     /*!
      *  \brief Méthode de débuggage:  sert à afficher quelques informations  sur la classe
      *  dans la console
@@ -113,7 +42,6 @@ public:
     virtual void initialiseConstraints();
     virtual SysDyn* GetSysDynForViabProblem();
     GridMicroMacro* GetGridForViabProblem();
-    void initialiseConstraints_CC();
     void computeViableTrajectories();
 
     virtual void computeTrajectories();
@@ -121,28 +49,11 @@ public:
     virtual void saveViableSets();
 
     void viabKerValFunc(unsigned long long int nbArret);
-    void viabKerValFunc_omp(unsigned long long int nbArret);
+    void viabKerGarantiValFunc(unsigned long long int nbArret);
 
     double computeOptimalCaptTrajectory(double *initPosition, string fileName,
 	    bool &succes);
 
-    /*!
-     *  \brief Cette foncion calcule l'épigraphe  de la fonction temps minimal
-     * dans l'hypothése que le pas de temps  est ajusté localement en fonction
-     *  d'une estimation  de la constante de Lipschitz et de M
-     *
-     * Le schéma de discrétisation est un schéma implicite, d'Euler ou RK ou autre
-     *   de la forme
-     *   \f[
-     *   x_{n+1}\in G_{imp}(x_n),\ \ G_{imp}(z)=\{y\in X,\ \ z\in \Phi_{imp}(y)\}
-     *   \f]
-     *
-     *   pour le schéma implicite d'Euler \f$\Phi_{imp}(y)=y-\rho F(y)\f$
-     *
-     *   pour le schéma RK2 : \f$\Phi_{imp}(y)=y-0.5 \rho (F(y)+F(y-\rho F(y))\f$
-     */
-
-    void captBasinEpi_omp();
 
     /*!
      *   \brief  Fonction qui initialise la cible dans la base de données représentant
@@ -201,7 +112,7 @@ private:
     double *vTab;
     double *vTab_tmp;
 
-    void InitViabiMicroMacro(algoViabiParams avp);
+    void InitViabiMicroMacroDiscrete(algoViabiParams avp);
     void saveValFunctions();
     void computeOptimalTrajectories();
 
@@ -222,7 +133,7 @@ private:
 
     string filePrefix;
 
-    void (ViabiMicroMacro::*computeCurrentImage)(int);
+    void (ViabiMicroMacroDiscrete::*computeCurrentImage)(int);
 
     /*!
      *
@@ -247,6 +158,9 @@ private:
      *     si b=1  alors c'est un point ajouté à la dernière itération  et donc il appartient à \f$ C_n\f$
      */
     void computeCurrIm_Lmin(int iter);
+
+    void computeCurrIm(int iter);
+    void computeDiscreteImageOfPoint(unsigned long long int num);
 
     void addDataToCurrentImage(list<imageCell>::iterator *startIt,
 	    imageCell newCell, list<imageCell>::iterator *resIt);
@@ -276,7 +190,7 @@ private:
 
     int addNewPoints();
 
-    int (ViabiMicroMacro::*addNewPointsToSet)();
+    int (ViabiMicroMacroDiscrete::*addNewPointsToSet)();
 
     /*!
      * \brief Cette fonction transforme la liste de mailles représentant une image
@@ -289,7 +203,7 @@ private:
 
     void createPointsList();
 
-    void (ViabiMicroMacro::*createCurrentPointsList)();
+    void (ViabiMicroMacroDiscrete::*createCurrentPointsList)();
 
     /*!
      * Méthode de debuggage: permet d'afficher sur la console
@@ -321,7 +235,7 @@ private:
      */
     void addDataToCell(list<imageCell>::iterator itCell, imageCell newCell);
 
-    void (ViabiMicroMacro::*addDataToCurrentCell)(list<imageCell>::iterator,
+    void (ViabiMicroMacroDiscrete::*addDataToCurrentCell)(list<imageCell>::iterator,
 	    imageCell);
 
     /*!
@@ -341,7 +255,7 @@ private:
     void addDataToPoint(list<imagePoint>::iterator itPoint,
 	    imagePoint newPoint);
 
-    void (ViabiMicroMacro::*addDataToCurrentPoint)(list<imagePoint>::iterator,
+    void (ViabiMicroMacroDiscrete::*addDataToCurrentPoint)(list<imagePoint>::iterator,
 	    imagePoint);
     /*!
      *  \brief Cette fonction permet d'ajouter un nouveau point dans la liste ordonnée et sans doublons de points de l'image
@@ -364,6 +278,7 @@ private:
     void addDataToPointsList(list<imagePoint>::iterator *startIt,
 	    imagePoint newPoint, list<imagePoint>::iterator *resIt);
 
+
     /*!
      *  \brief  Une structure servant à stocker les données  de l'image discréte
      *  d'un point au cours de parcours  de calcul  de \f$ \Phi(C_{n}\setminus C_{n-1}) \f$ .
@@ -372,8 +287,7 @@ private:
      *
      *  Attention! Variable globale dans les méthodes de la classe!
      */
-    discretImageSet pointDI;
-
+    discretImageSet_DD pointDI;
 
     /*!
      *  \brief La liste de structures représentant  des mailles d'une image en construction
@@ -394,74 +308,6 @@ private:
     std::list<imagePoint> *tempPointsList2;
     int whichPointListToUse;
 
-    /*!
-     * \brief Fonction qui calcule l'image discrére d'un point \f$ \Phi(x)\f$
-     * @param num numéro du point
-     */
-
-    void computeDiscreteImageOfPoint(unsigned long long int num);
-
-    /*!
-     * \brief  Version parallélisée OpenMP  de la fonction qui calcule l'image discrére d'un point \f$ \Phi(x)\f$
-     * La parallélisation est faite ici en distribuant la boucle qui parcourt
-     * la liste de tous les controles.
-     *
-     * \todo Cette version est expérimentale, à tester. LE problème est que pour des
-     * dynamiques simples, la tâche confiée à chaque thread est trop courte par rapport à l'effort de
-     * distribution et de synchronisation; A voir plus tard d'autres façons de paralléliser  le calcul
-     *
-     * @param num numéro du point
-     */
-
-    /*!
-     * \brief Fonction qui calcule la première itération d'un algorithme
-     *  de type bassin de capture "direct", issu d'une discrétisation implicite
-     *
-     *  Pour le calcul d'un bassin de capture on suppose que la dynaique contient zéro
-     *  sur la cible : autrement dit, on peut s'arréter, une fois arrivé sur la cible.
-     *  Pour l'application de  tous les théorémes de viabilité dans ce cas
-     *  nous devons avoir une dynamique à image convexe. Donc sur la cible, on définit la dynamique comme
-     *  \f$ \overline{Co}(\{0\} \cup F(x) )\f$. Comme dans es algorithmes issus de la discrétisation implicite
-     *  la première itération calcule l'image \f$ \Phi(C) \f$ on doit donc tenir compte que la
-     *  dynamique est "convexifiée" sur la cible. Cette fonction réalise  le calcul  de \f$ \Phi(C) \f$
-     *  en tenant compte de la convexification.
-     *
-     *  Le principe de calcul est le méme que pour la fonction qui calcule l'image  \f$ \Phi(C_{n}\setminus C_{n-1}) \f$ :
-     *  pour chaque point  de \f$ x\in C \f$ on calcule d'abord \f$ \Phi(x) \f$  sous forme de liste de mailles.
-     *  Ensuite pour chaque maille \f$ m_0\f$  d'une telle liste on ajoute dans l'image en construction la maille elle méme
-     *  avec sa valeur ainsi que toutes les mailles qui sont croisées par le segment reliant le point de départ \f$ x\f$
-     *  à \f$ m_0\f$ . La valeur associée à é chacune de ces ailles intermédiaires est une fraction du pas \f$ \rho(x)\f$
-     *  utilisé pour le calcul de l'image  \f$ \Phi(x) \f$ .
-     *
-     * @param iter :  numéro d'itération
-     *
-     * \see minTimeEpiLocalRho
-     */
-
-    void computeConvexifiedImage_tmin(int iter);
-    void computeConvexifiedImage_Lmin(int iter);
-
-    void (ViabiMicroMacro::*computeFirstConvexifiedImage)(int iter);
-
-    void computeConvexifiedImage_tmin_omp(int iter);
-    void computeConvexifiedImage_Lmin_omp(int iter);
-
-    void (ViabiMicroMacro::*computeFirstConvexifiedImage_omp)(int iter);
-
-    /*!
-     * \brief Fonction qui permet d'ajouter dans l'image convexifiée en construction
-     * toutes les mailles croisées par un segment reliant un point de départ et une maille de
-     * son image discréte  \f$ \Phi(x) \f$ .
-     *
-     * @param posX numéro du point de départ
-     * @param numCell numéro d'une maille de son image
-     * @param tempImageCell pointeur sur une structure de type imageCell pour récupérer les données
-     * à inserrer dans l'image en construction
-     * @param rho pas de temps utilisé pour le calcul de  \f$ \Phi(x) \f$
-     */
-    void addConvexCombinations(list<imagePoint>::iterator itPoint,
-	    unsigned long long int numCell, imageCell *tempImageCell,
-	    double rho, list<imageCell>::iterator *itStart);
 
     bool testConstraintesForCell(unsigned long long int numCell);
 
@@ -470,4 +316,5 @@ private:
 
     };
 
-#endif /* VIABIHJB_H_ */
+
+#endif /* VIABIMICROMACRODISCRETE_H_ */

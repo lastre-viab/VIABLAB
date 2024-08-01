@@ -42,13 +42,21 @@ ViabProblemFactory::~ViabProblemFactory()
 Viabi* ViabProblemFactory::constructViabilityProblem(int gridMethod)
     {
     Viabi *vp;
+    auto dynSysType = problemParameters->getSystemParameters()->DYN_TYPE;
     if (gridMethod == BS)
 	{
 	vp = new ViabiBitSet(problemParameters);
 	}
     else
 	{
-	vp = new ViabiMicroMacro(problemParameters);
+	if(dynSysType == DD)
+	    {
+	    vp = new ViabiMicroMacroDiscrete(problemParameters);
+	    }
+	else
+	    {
+	    vp = new ViabiMicroMacro(problemParameters);
+	    }
 	}
     return vp;
     }
