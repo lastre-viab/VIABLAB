@@ -45,32 +45,6 @@ int main(int argc, char **argv)
 	    }
 	}
 
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-	    "../LOG/test.log", true);
-    file_sink->set_level(spdlog::level::trace);
-
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    console_sink->set_level(spdlog::level::info);
-    console_sink->set_pattern("[ViabLog] [%^%l%$] %v");
-
-    spdlog::sinks_init_list sink_list =
-	{
-	file_sink, console_sink
-	};
-
-    spdlog::logger logger("multi_sink", sink_list.begin(), sink_list.end());
-
-    // or you can even set multi_sink logger as default logger
-    spdlog::set_default_logger(
-	    std::make_shared<spdlog::logger>("ViabLog", spdlog::sinks_init_list(
-		{
-		console_sink, file_sink
-		})));
-
-    spdlog::set_level(spdlog::level::trace);
-
-    spdlog::info(" number of threads #{}", nbOmpThreads);
-
     ostringstream os;
     string fileName;
     double t1, t2, elapsed_time, t1_glob, t2_glob, elapsed_time_glob;

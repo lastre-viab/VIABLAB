@@ -84,13 +84,9 @@ using namespace boost::property_tree;
 #define PLUS_INF 1e+15
 #define NB_MAX_TRAJ_ITER 100000000
 #define numZERO  0.0000000001
-#define  EE   1
-#define  EI   2
-#define  RK2I 3
-#define  RK2E 4
-
-#define  RK4I 5
-#define  RK4E 6
+#define  EL   1
+#define  RK2  2
+#define  RK4  3
 
 #define  FUNC   1
 #define  RETRO   2

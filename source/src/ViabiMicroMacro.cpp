@@ -40,8 +40,7 @@ ViabiMicroMacro::ViabiMicroMacro(ParametersManager *pm)
 
     dynsys = new SysDyn(sp, dim, cp, grid);
     InitViabiMicroMacro(avp);
-    trajectoryHelper = new ViabiMicroMacroTrajectoryHelper(grid, dynsys,
-	    avp.TYPE_TRAJ);
+    trajectoryHelper = new ViabiMicroMacroTrajectoryHelper(grid, dynsys, avp.TYPE_TRAJ);
     }
 
 SysDyn*
@@ -78,12 +77,9 @@ void ViabiMicroMacro::InitViabiMicroMacro(algoViabiParams avp)
      * d'un point qui  servira  é lire et remplir  correctement
      * la bonne partie de ces tableaux
      */
-    pointDI.tabCellEntrees =
-	    new unsigned long long int[dynsys->getTotalNbPointsC() + 1];
-    pointDI.tabImageCells =
-	    new unsigned long long int[dynsys->getTotalNbPointsC()];
-    pointDI.tabImageControls =
-	    new unsigned long long int[dynsys->getTotalNbPointsC()];
+    pointDI.tabCellEntrees = new unsigned long long int[dynsys->getTotalNbPointsC() + 1];
+    pointDI.tabImageCells = new unsigned long long int[dynsys->getTotalNbPointsC()];
+    pointDI.tabImageControls = new unsigned long long int[dynsys->getTotalNbPointsC()];
 
     /*!
      * On initialise la structure  qui servira au stockage temporaire de l'image discrete d'un point de grille
@@ -93,12 +89,9 @@ void ViabiMicroMacro::InitViabiMicroMacro(algoViabiParams avp)
      * d'un point qui  servira  é lire et remplir  correctement
      * la bonne partie de ces tableaux
      */
-    pointDI_DD.tabPointsEntrees =
-	    new unsigned long long int[dynsys->getTotalNbPointsC() + 1];
-    pointDI_DD.tabImagePoints =
-	    new unsigned long long int[dynsys->getTotalNbPointsC()];
-    pointDI_DD.tabImageControls =
-	    new unsigned long long int[dynsys->getTotalNbPointsC()];
+    pointDI_DD.tabPointsEntrees = new unsigned long long int[dynsys->getTotalNbPointsC() + 1];
+    pointDI_DD.tabImagePoints = new unsigned long long int[dynsys->getTotalNbPointsC()];
+    pointDI_DD.tabImageControls = new unsigned long long int[dynsys->getTotalNbPointsC()];
 
     /*
      * Initialisation de tableaux servant de variables globales pour certaines fonctions
@@ -125,21 +118,17 @@ void ViabiMicroMacro::InitViabiMicroMacro(algoViabiParams avp)
     if ((dynsys->getDynType() == DD))
 	{
 	cout << " on utilise les m�thodes DD" << endl;
-	ViabiMicroMacro::createCurrentPointsList =
-		&ViabiMicroMacro::createPointsList_DD;
+	ViabiMicroMacro::createCurrentPointsList = &ViabiMicroMacro::createPointsList_DD;
 	}
     else
 	{
-	ViabiMicroMacro::createCurrentPointsList =
-		&ViabiMicroMacro::createPointsList;
+	ViabiMicroMacro::createCurrentPointsList = &ViabiMicroMacro::createPointsList;
 	}
 
     if (avp.COMPUTE_TMIN)
 	{
-	ViabiMicroMacro::computeFirstConvexifiedImage =
-		&ViabiMicroMacro::computeConvexifiedImage_tmin;
-	ViabiMicroMacro::computeCurrentImage =
-		&ViabiMicroMacro::computeCurrIm_tmin;
+	ViabiMicroMacro::computeFirstConvexifiedImage = &ViabiMicroMacro::computeConvexifiedImage_tmin;
+	ViabiMicroMacro::computeCurrentImage = &ViabiMicroMacro::computeCurrIm_tmin;
 	//  ViabiMicroMacro::computeFirstConvexifiedImage_omp=&ViabiMicroMacro::computeConvexifiedImage_tmin_omp;
 	}
     else
@@ -148,17 +137,13 @@ void ViabiMicroMacro::InitViabiMicroMacro(algoViabiParams avp)
 	if ((dynsys->getDynType() == DD))
 	    {
 	    //cout<< " on est en mode DD et Lmin "<<endl;
-	    ViabiMicroMacro::computeCurrentImage =
-		    &ViabiMicroMacro::computeCurrIm_DD;
-	    ViabiMicroMacro::computeFirstConvexifiedImage =
-		    &ViabiMicroMacro::computeConvexifiedImage_DD;
+	    ViabiMicroMacro::computeCurrentImage = &ViabiMicroMacro::computeCurrIm_DD;
+	    ViabiMicroMacro::computeFirstConvexifiedImage = &ViabiMicroMacro::computeConvexifiedImage_DD;
 	    }
 	else
 	    {
-	    ViabiMicroMacro::computeCurrentImage =
-		    &ViabiMicroMacro::computeCurrIm_Lmin;
-	    ViabiMicroMacro::computeFirstConvexifiedImage =
-		    &ViabiMicroMacro::computeConvexifiedImage_Lmin;
+	    ViabiMicroMacro::computeCurrentImage = &ViabiMicroMacro::computeCurrIm_Lmin;
+	    ViabiMicroMacro::computeFirstConvexifiedImage = &ViabiMicroMacro::computeConvexifiedImage_Lmin;
 	    }
 
 	}
@@ -178,9 +163,9 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
     grid->numToIntAndDoubleCoords(num, intPointCoords, doublePointCoords);
     double rho;
     try
-	{
+    {
 	rho = dynsys->calculRho_local(doublePointCoords);
-	}
+    }
     catch (const std::bad_alloc &e)
 	{
 	std::cout << "Allocation failed dans calculRho: " << e.what() << '\n';
@@ -200,18 +185,15 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 	 * si \f$ u\in U(x)\f$  (contréle admissible) on calcule l'image réelle par la dynamique
 	 *  discrétisée  en temps  du point x avec le controle u
 	 */
-	if (dynsys->constraintsXU(doublePointCoords,
-		controlCoords[cu])<PLUS_INF)
+	if (dynsys->constraintsXU(doublePointCoords, controlCoords[cu]) < PLUS_INF)
 	    {
 	    try
-		{
-		(dynsys->*(dynsys->discretDynamics))(doublePointCoords,
-			controlCoords[cu], doubleVect1, rho);
-		}
+	    {
+		(dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[cu], doubleVect1, rho);
+	    }
 	    catch (const std::bad_alloc &e)
 		{
-		std::cout << "Allocation failed dans discrete dyn: " << e.what()
-			<< '\n';
+		std::cout << "Allocation failed dans discrete dyn: " << e.what() << '\n';
 		cout << " doublePointCoords = ";
 		printVector(doublePointCoords, dim);
 		exit(1);
@@ -254,9 +236,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 		 * \todo prévoir la gestion des autorisations de sortie  par axe pour les variables qui peuvent
 		 * se trouver dans des intervalles non bornés
 		 */
-		if (grid->unboundedDomain
-			&& grid->isPointInGridWithConstr(doubleVect1)
-			&& (dynsys->constraintsX(doubleVect1) < PLUS_INF))
+		if (grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1) && (dynsys->constraintsX(doubleVect1) < PLUS_INF))
 		    {
 		    imageCells[cu] = nbCellsTotal; // sinon on enregistre un nombre convenu reconnaissanble
 		    cellsList.push_back(intPair(imageCells[cu], cu));
@@ -311,8 +291,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 	    pointDI.tabImageCells[iCellsTab] = currentCell;
 	    iEntreesTab++;
 	    iCellsTab++;
-	    while ((itDouble != cellsList.end())
-		    & ((*itDouble).first == currentCell))
+	    while ((itDouble != cellsList.end()) & ((*itDouble).first == currentCell))
 		{
 		pointDI.tabImageControls[iControlTab] = (*itDouble).second;
 		iControlTab++;
@@ -329,8 +308,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint(unsigned long long int num)
 	    }
 	else
 	    {
-	    while ((itDouble != cellsList.end())
-		    & ((*itDouble).first == currentCell))
+	    while ((itDouble != cellsList.end()) & ((*itDouble).first == currentCell))
 		{
 
 		itDouble++;
@@ -376,8 +354,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint_DD(unsigned long long int num)
 	 * si \f$ u\in U(x)\f$  (contréle admissible) on calcule l'image réelle par la dynamique
 	 *  discrétisée  en temps  du point x avec le controle u
 	 */
-	if (dynsys->constraintsXU_fd(intPointCoords,
-		controlCoords[cu])<PLUS_INF)
+	if (dynsys->constraintsXU_fd(intPointCoords, controlCoords[cu]) < PLUS_INF)
 	    {
 
 	    dynsys->dynamics_fd(intPointCoords, controlCoords[cu], intVect1);
@@ -405,14 +382,12 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint_DD(unsigned long long int num)
 		     */
 		    imageCells[cu] = nbPointsTotal + 1; // sinon on enregistre un nombre convenu reconnaissanble
 		    try
-			{
+		    {
 			pointsList.push_back(uintPair(imageCells[cu], cu));
-			}
+		    }
 		    catch (const std::bad_alloc &e)
 			{
-			std::cout
-				<< "Allocation failed: in discretImage_DD points push_back 1"
-				<< e.what() << '\n';
+			std::cout << "Allocation failed: in discretImage_DD points push_back 1" << e.what() << '\n';
 			}
 		    }
 		}
@@ -424,14 +399,12 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint_DD(unsigned long long int num)
 		 */
 		imageCells[cu] = nbPointsTotal + 1; // sinon on enregistre un nombre convenu reconnaissanble
 		try
-		    {
+		{
 		    pointsList.push_back(uintPair(imageCells[cu], cu));
-		    }
+		}
 		catch (const std::bad_alloc &e)
 		    {
-		    std::cout
-			    << "Allocation failed: in discretImage_DD points push_back 2"
-			    << e.what() << '\n';
+		    std::cout << "Allocation failed: in discretImage_DD points push_back 2" << e.what() << '\n';
 		    }
 		}
 
@@ -448,14 +421,12 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint_DD(unsigned long long int num)
 	     */
 	    imageCells[cu] = nbPointsTotal + 1; // sinon on enregistre un nombre convenu reconnaissanble
 	    try
-		{
+	    {
 		pointsList.push_back(uintPair(imageCells[cu], cu));
-		}
+	    }
 	    catch (const std::bad_alloc &e)
 		{
-		std::cout
-			<< "Allocation failed: in discretImage_DD points push_back 3"
-			<< e.what() << '\n';
+		std::cout << "Allocation failed: in discretImage_DD points push_back 3" << e.what() << '\n';
 		}
 	    }
 
@@ -485,8 +456,7 @@ void ViabiMicroMacro::computeDiscreteImageOfPoint_DD(unsigned long long int num)
 	iEntreesTab++;
 	iCellsTab++;
 
-	while ((itDouble != pointsList.end())
-		& ((*itDouble).first == currentPoint))
+	while ((itDouble != pointsList.end()) & ((*itDouble).first == currentPoint))
 	    {
 
 	    pointDI_DD.tabImageControls[iControlTab] = (*itDouble).second;
@@ -532,6 +502,9 @@ void ViabiMicroMacro::initialiseTarget()
 
 void ViabiMicroMacro::computeTrajectories()
     {
+
+    dynsys->setDynamicsForward();
+
     algoViabiParams *avp = modelParams->getAlgoParameters();
     if (avp->TYPE_TRAJ == OP)
 	computeOptimalTrajectories();
@@ -555,8 +528,7 @@ void ViabiMicroMacro::computeOptimalTrajectories()
 	    fileName = os.str();
 	    os.str("");
 
-	    computeOptimalCaptTrajectory(avp->INIT_POINTS + tr * dim, fileName,
-		    success[tr]);
+	    computeOptimalCaptTrajectory(avp->INIT_POINTS + tr * dim, fileName, success[tr]);
 	    }
 	}
     }
@@ -604,32 +576,24 @@ void ViabiMicroMacro::computeViableTrajectories()
 	bool success[nbTrajs];
 	for (int tr = 0; tr < nbTrajs; tr++)
 	    {
-	    os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1
-		    << endOfFileName;
+	    os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1 << endOfFileName;
 	    fileName = os.str();
 	    os.str("");
 
 	    if (dynsys->getDynType() == DD)
 		{
-		logVector("Initial point ", avp->INIT_POINTS_FD + tr * dim,
-			dim);
+		logVector("Initial point ", avp->INIT_POINTS_FD + tr * dim, dim);
 		if (typeTraj == VG)
 		    {
-		    trajectoryHelper->computeViableTrajectory_tych_DD(
-			    avp->INIT_POINTS_FD + tr * dim,
-			    avp->INIT_VALUES_FD[tr], fileName, success[tr]);
+		    trajectoryHelper->computeViableTrajectory_tych_DD(avp->INIT_POINTS_FD + tr * dim, avp->INIT_VALUES_FD[tr], fileName, success[tr]);
 		    }
 		else
 		    {
-		    trajectoryHelper->computeViableTrajectory_DD(
-			    avp->INIT_POINTS_FD + tr * dim,
-			    avp->INIT_VALUES_FD[tr], fileName, success[tr]);
+		    trajectoryHelper->computeViableTrajectory_DD(avp->INIT_POINTS_FD + tr * dim, avp->INIT_VALUES_FD[tr], fileName, success[tr]);
 		    }
 		}
 	    else
-		trajectoryHelper->computeViableTrajectory(
-			avp->INIT_POINTS + tr * dim, avp->INIT_VALUES[tr],
-			fileName, success[tr]);
+		trajectoryHelper->computeViableTrajectory(avp->INIT_POINTS + tr * dim, avp->INIT_VALUES[tr], fileName, success[tr]);
 	    }
 	}
     }
@@ -667,8 +631,7 @@ void ViabiMicroMacro::initialiseTargetHJB()
 
     unsigned long long int pos;
 
-    list<imagePoint>::iterator itStart =
-	    currentImagePointsList.pointsList->begin(), itNew;
+    list<imagePoint>::iterator itStart = currentImagePointsList.pointsList->begin(), itNew;
     int cpt = 0;
     /*
      *  on parcourt  tous les points de l'espace discret  fini
@@ -702,9 +665,7 @@ void ViabiMicroMacro::initialiseTargetHJB()
 	    cpt++;
 	    }
 	}
-    spdlog::info(
-	    "Target set initialized, number of grid points in target set : {0:d}",
-	    cpt);
+    spdlog::info("Target set initialized, number of grid points in target set : {0:d}", cpt);
     }
 
 void ViabiMicroMacro::initialiseTargetHJB_DD()
@@ -739,8 +700,7 @@ void ViabiMicroMacro::initialiseTargetHJB_DD()
 
     unsigned long long int pos;
 
-    list<imagePoint>::iterator itStart =
-	    currentImagePointsList.pointsList->begin(), itNew;
+    list<imagePoint>::iterator itStart = currentImagePointsList.pointsList->begin(), itNew;
     int cpt = 0;
 
     /*
@@ -777,16 +737,13 @@ void ViabiMicroMacro::initialiseTargetHJB_DD()
 	    cpt++;
 	    }
 	}
-    spdlog::info(
-	    "Target set initialized, number of grid points in target set : {0:d}",
-	    cpt);
+    spdlog::info("Target set initialized, number of grid points in target set : {0:d}", cpt);
     }
 
 void ViabiMicroMacro::loadViableSets()
     {
 
-    spdlog::info("Loading viable sets for the problem with prefix {}",
-	    filePrefix);
+    spdlog::info("Loading viable sets for the problem with prefix {}", filePrefix);
     algoViabiParams *avp = modelParams->getAlgoParameters();
 
     ostringstream os;
@@ -927,8 +884,7 @@ void ViabiMicroMacro::viabKerValFunc(unsigned long long int nbArret)
     unsigned long long int compteComm, cellNum, numControl;
 
     double rCoords[dim];
-    spdlog::info(
-	    "Viable kernel computation fo continuous dynamical system with Micro-Macro model");
+    spdlog::info("Viable kernel computation fo continuous dynamical system with Micro-Macro model");
     double rho;
 
     uintPair image;
@@ -956,13 +912,12 @@ void ViabiMicroMacro::viabKerValFunc(unsigned long long int nbArret)
 		{
 		grid->numToIntAndDoubleCoords(pos, iCoords, rCoords);
 		try
-		    {
+		{
 		    rho = dynsys->calculRho_local(rCoords);
-		    }
+		}
 		catch (const std::bad_alloc &e)
 		    {
-		    std::cout << "Allocation failed dans calculRho: "
-			    << e.what() << '\n';
+		    std::cout << "Allocation failed dans calculRho: " << e.what() << '\n';
 		    cout << " pos = " << pos << " rcoords = ";
 		    printVector(rCoords, dim);
 		    exit(1);
@@ -971,15 +926,13 @@ void ViabiMicroMacro::viabKerValFunc(unsigned long long int nbArret)
 		bool testNonVide = false;
 
 		try
-		    {
+		{
 		    this->computeDiscreteImageOfPoint(pos);
 
-		    }
+		}
 		catch (const std::bad_alloc &e)
 		    {
-		    std::cout
-			    << "Allocation failed dans computeDiscrete inmage: "
-			    << e.what() << '\n';
+		    std::cout << "Allocation failed dans computeDiscrete inmage: " << e.what() << '\n';
 		    exit(1);
 		    }
 
@@ -995,24 +948,18 @@ void ViabiMicroMacro::viabKerValFunc(unsigned long long int nbArret)
 			for (int iCell = 0; iCell < nbPointsCube - 1; iCell++)
 			    {
 
-			    double imageVal = vTab[cellNum
-				    + indicesDecalCell[iCell]];
-			    for (unsigned long long int j =
-				    pointDI.tabCellEntrees[compteComm];
-				    j < pointDI.tabCellEntrees[compteComm + 1]
-					    && !testNonVide; j++)
+			    double imageVal = vTab[cellNum + indicesDecalCell[iCell]];
+			    for (unsigned long long int j = pointDI.tabCellEntrees[compteComm];
+				    j < pointDI.tabCellEntrees[compteComm + 1] && !testNonVide; j++)
 				{
 				numControl = pointDI.tabImageControls[j];
 
-				tempL = dynsys->lFunc(rCoords,
-					controlCoords[numControl]);
+				tempL = dynsys->lFunc(rCoords, controlCoords[numControl]);
 
-				tempM = dynsys->mFunc(rCoords,
-					controlCoords[numControl]);
+				tempM = dynsys->mFunc(rCoords, controlCoords[numControl]);
 				if (tempL < PLUS_INF && tempM < PLUS_INF)
 				    {
-				    tempVal = (imageVal + rho * tempL)
-					    / (1 - rho * tempM);
+				    tempVal = (imageVal + rho * tempL) / (1 - rho * tempM);
 				    testNonVide = tempVal < valAtPos;
 				    minValCell = min(minValCell, tempVal);
 
@@ -1026,19 +973,13 @@ void ViabiMicroMacro::viabKerValFunc(unsigned long long int nbArret)
 			}
 		    else if (cellNum == nbCellsTotal)
 			{
-			for (unsigned long long int j =
-				pointDI.tabCellEntrees[compteComm];
-				j < pointDI.tabCellEntrees[compteComm + 1]; j++)
+			for (unsigned long long int j = pointDI.tabCellEntrees[compteComm]; j < pointDI.tabCellEntrees[compteComm + 1]; j++)
 			    {
 			    numControl = pointDI.tabImageControls[j];
-			    (dynsys->*(dynsys->discretDynamics))(rCoords,
-				    controlCoords[numControl], doubleVect1,
-				    1.0);
+			    (dynsys->*(dynsys->discretDynamics))(rCoords, controlCoords[numControl], doubleVect1, 1.0);
 			    printVector(doubleVect1, dim);
-			    tempL = dynsys->lFunc(rCoords,
-				    controlCoords[numControl]);
-			    tempM = dynsys->mFunc(rCoords,
-				    controlCoords[numControl]);
+			    tempL = dynsys->lFunc(rCoords, controlCoords[numControl]);
+			    tempM = dynsys->mFunc(rCoords, controlCoords[numControl]);
 
 			    double tempV = dynsys->constraintsX(doubleVect1);
 			    tempVal = (tempV + rho * tempL) / (1 - rho * tempM);
@@ -1062,12 +1003,9 @@ void ViabiMicroMacro::viabKerValFunc(unsigned long long int nbArret)
 	    }
 
 	nbIter++;
-	spdlog::info(
-		"Iteration {} finished. Number of points with updated value funtion : {}",
-		nbIter, cptChanged);
+	spdlog::info("Iteration {} finished. Number of points with updated value funtion : {}", nbIter, cptChanged);
 	}
-    spdlog::info(
-	    "Viability kernel computation finished. next step : saving results");
+    spdlog::info("Viability kernel computation finished. next step : saving results");
     saveValFunctions();
     }
 
@@ -1075,9 +1013,7 @@ void ViabiMicroMacro::viabKerValFunc_omp(unsigned long long int nbArret)
     {
 
     unsigned long long int cptChanged = 20000000, nbIter = 0;
-    spdlog::info(
-	    "This is a OMP parallelized viability algorithm for micro-macro model. Number of threads : {}",
-	    nbOMPThreads);
+    spdlog::info("This is a OMP parallelized viability algorithm for micro-macro model. Number of threads : {}", nbOMPThreads);
 
     int totalPointsX = grid->getNbTotalPoints();
 
@@ -1115,9 +1051,9 @@ void ViabiMicroMacro::viabKerValFunc_omp(unsigned long long int nbArret)
 		{
 		grid->numToIntAndDoubleCoords(pos, iCoords, rCoords);
 		try
-		    {
+		{
 		    rho = dynsys->calculRho_local(rCoords);
-		    }
+		}
 		catch (const std::bad_alloc &e)
 		    {
 
@@ -1127,9 +1063,9 @@ void ViabiMicroMacro::viabKerValFunc_omp(unsigned long long int nbArret)
 
 		bool testNonVide = false;
 		try
-		    {
+		{
 		    this->computeDiscreteImageOfPoint(pos);
-		    }
+		}
 		catch (const std::bad_alloc &e)
 		    {
 
@@ -1148,23 +1084,17 @@ void ViabiMicroMacro::viabKerValFunc_omp(unsigned long long int nbArret)
 
 			for (int iCell = 0; iCell < nbPointsCube - 1; iCell++)
 			    {
-			    double imageVal = gridTab[cellNum
-				    + indicesDecalCell[iCell]];
+			    double imageVal = gridTab[cellNum + indicesDecalCell[iCell]];
 
-			    for (unsigned long long int j =
-				    pointDI.tabCellEntrees[compteComm];
-				    j < pointDI.tabCellEntrees[compteComm + 1]
-					    && !testNonVide; j++)
+			    for (unsigned long long int j = pointDI.tabCellEntrees[compteComm];
+				    j < pointDI.tabCellEntrees[compteComm + 1] && !testNonVide; j++)
 				{
 				numControl = pointDI.tabImageControls[j];
-				tempL = dynsys->lFunc(rCoords,
-					controlCoords[numControl]);
-				tempM = dynsys->mFunc(rCoords,
-					controlCoords[numControl]);
+				tempL = dynsys->lFunc(rCoords, controlCoords[numControl]);
+				tempM = dynsys->mFunc(rCoords, controlCoords[numControl]);
 				if (tempL < PLUS_INF && tempM < PLUS_INF)
 				    {
-				    tempVal = (imageVal + rho * tempL)
-					    / (1 - rho * tempM);
+				    tempVal = (imageVal + rho * tempL) / (1 - rho * tempM);
 				    testNonVide = tempVal < valAtPos;
 				    minValCell = min(minValCell, tempVal);
 
@@ -1178,18 +1108,12 @@ void ViabiMicroMacro::viabKerValFunc_omp(unsigned long long int nbArret)
 			}
 		    else if (cellNum == nbCellsTotal)
 			{
-			for (unsigned long long int j =
-				pointDI.tabCellEntrees[compteComm];
-				j < pointDI.tabCellEntrees[compteComm + 1]; j++)
+			for (unsigned long long int j = pointDI.tabCellEntrees[compteComm]; j < pointDI.tabCellEntrees[compteComm + 1]; j++)
 			    {
 			    numControl = pointDI.tabImageControls[j];
-			    (dynsys->*(dynsys->discretDynamics))(rCoords,
-				    controlCoords[numControl], doubleVect1,
-				    1.0);
-			    tempL = dynsys->lFunc(rCoords,
-				    controlCoords[numControl]);
-			    tempM = dynsys->mFunc(rCoords,
-				    controlCoords[numControl]);
+			    (dynsys->*(dynsys->discretDynamics))(rCoords, controlCoords[numControl], doubleVect1, 1.0);
+			    tempL = dynsys->lFunc(rCoords, controlCoords[numControl]);
+			    tempM = dynsys->mFunc(rCoords, controlCoords[numControl]);
 
 			    double tempV = dynsys->constraintsX(doubleVect1);
 			    tempVal = (tempV + rho * tempL) / (1 - rho * tempM);
@@ -1213,12 +1137,9 @@ void ViabiMicroMacro::viabKerValFunc_omp(unsigned long long int nbArret)
 	    }
 	grid->copyGrid(gridTabNew, gridTab);
 	nbIter++;
-	spdlog::info(
-		"Iteration {} finished. Number of points with updated value funtion : {}",
-		nbIter, cptChanged);
+	spdlog::info("Iteration {} finished. Number of points with updated value funtion : {}", nbIter, cptChanged);
 	}
-    spdlog::info(
-	    "Viability kernel computation finished. next step : saving results");
+    spdlog::info("Viability kernel computation finished. next step : saving results");
     saveValFunctions();
     }
 
@@ -1267,55 +1188,41 @@ void ViabiMicroMacro::viabKerValFuncOld()
 		    {
 
 		    //for(int iCell=0;iCell<nbPointsCube-1;iCell++)
-			{
-			//double imageVal = vTab[cellNum+indicesDecalCell[iCell]];
-			double imageVal = vTab[cellNum];
+		    {
+		    //double imageVal = vTab[cellNum+indicesDecalCell[iCell]];
+		    double imageVal = vTab[cellNum];
 
-			for (unsigned long long int j =
-				pointDI.tabCellEntrees[compteComm];
-				j < pointDI.tabCellEntrees[compteComm + 1]; j++)
+		    for (unsigned long long int j = pointDI.tabCellEntrees[compteComm]; j < pointDI.tabCellEntrees[compteComm + 1]; j++)
+			{
+			numControl = pointDI.tabImageControls[j];
+			tempL = dynsys->lFunc(rCoords, controlCoords[numControl]);
+			tempM = dynsys->mFunc(rCoords, controlCoords[numControl]);
+			if (tempL < PLUS_INF && tempM < PLUS_INF)
 			    {
-			    numControl = pointDI.tabImageControls[j];
-			    tempL = dynsys->lFunc(rCoords,
-				    controlCoords[numControl]);
-			    tempM = dynsys->mFunc(rCoords,
-				    controlCoords[numControl]);
-			    if (tempL < PLUS_INF && tempM < PLUS_INF)
+			    tempVal = (imageVal + rho * tempL) / (1 - rho * tempM);
+			    minValCell = min(minValCell, tempVal);
+			    if (rCoords[1] >= 0.8)
 				{
-				tempVal = (imageVal + rho * tempL)
-					/ (1 - rho * tempM);
-				minValCell = min(minValCell, tempVal);
-				if (rCoords[1] >= 0.8)
-				    {
-				    cout << " pos ";
-				    printVector(rCoords, dim);
-				    cout << " cellNum = " << cellNum << endl;
-				    cout << " imageVal = " << imageVal
-					    << " currentVal = " << vTab[pos]
-					    << endl;
-				    cout << "  lTemp = " << tempL << " Mtemp = "
-					    << tempM << " rho = " << rho
-					    << " tempVal = " << tempVal << endl;
-				    }
+				cout << " pos ";
+				printVector(rCoords, dim);
+				cout << " cellNum = " << cellNum << endl;
+				cout << " imageVal = " << imageVal << " currentVal = " << vTab[pos] << endl;
+				cout << "  lTemp = " << tempL << " Mtemp = " << tempM << " rho = " << rho << " tempVal = " << tempVal << endl;
 				}
 			    }
 			}
 		    }
+		    }
 		else if (cellNum == nbCellsTotal)
 		    {
-		    for (unsigned long long int j =
-			    pointDI.tabCellEntrees[compteComm];
-			    j < pointDI.tabCellEntrees[compteComm + 1]; j++)
+		    for (unsigned long long int j = pointDI.tabCellEntrees[compteComm]; j < pointDI.tabCellEntrees[compteComm + 1]; j++)
 			{
 			numControl = pointDI.tabImageControls[j];
-			(dynsys->*(dynsys->discretDynamics))(rCoords,
-				controlCoords[numControl], doubleVect1, 1.0);
+			(dynsys->*(dynsys->discretDynamics))(rCoords, controlCoords[numControl], doubleVect1, 1.0);
 			//cout<< " sortie autoris�e pour control num "<<numControl << "  image "<<endl;
 			//printVector(doubleVect1, dim);
-			tempL = dynsys->lFunc(rCoords,
-				controlCoords[numControl]);
-			tempM = dynsys->mFunc(rCoords,
-				controlCoords[numControl]);
+			tempL = dynsys->lFunc(rCoords, controlCoords[numControl]);
+			tempM = dynsys->mFunc(rCoords, controlCoords[numControl]);
 
 			double tempV = dynsys->constraintsX(doubleVect1);
 			//cout<< " value  estimee dans ce point "<< tempV << endl;
@@ -1337,12 +1244,9 @@ void ViabiMicroMacro::viabKerValFuncOld()
 	    }
 
 	nbIter++;
-	spdlog::info(
-		"Iteration {} finished. Number of points with updated value funtion : {}",
-		nbIter, cptChanged);
+	spdlog::info("Iteration {} finished. Number of points with updated value funtion : {}", nbIter, cptChanged);
 	}
-    spdlog::info(
-	    "Viability kernel computation finished. next step : saving results");
+    spdlog::info("Viability kernel computation finished. next step : saving results");
 
     saveValFunctions();
     }
@@ -1371,8 +1275,7 @@ void ViabiMicroMacro::viabKerValFunc_DD(unsigned long long int nbArret)
 	for (pos = 0; pos < (unsigned long long int) nbPointsTotal; pos++)
 	    {
 	    double currentVal = vTab[pos];
-	    grid->numToIntAndDoubleCoords(pos, intPointCoords,
-		    doublePointCoords);
+	    grid->numToIntAndDoubleCoords(pos, intPointCoords, doublePointCoords);
 	    if (currentVal < PLUS_INF)
 		{
 		double tempVal, tempL, tempM;
@@ -1381,11 +1284,9 @@ void ViabiMicroMacro::viabKerValFunc_DD(unsigned long long int nbArret)
 		bool testNonVide = false;
 		while (!testNonVide && (cu < nbCTotal))
 		    {
-		    if (dynsys->constraintsXU_fd(intPointCoords,
-			    controlCoords[cu]) < PLUS_INF)
+		    if (dynsys->constraintsXU_fd(intPointCoords, controlCoords[cu]) < PLUS_INF)
 			{
-			dynsys->dynamics_fd(intPointCoords, controlCoords[cu],
-				intVect1);
+			dynsys->dynamics_fd(intPointCoords, controlCoords[cu], intVect1);
 			if (grid->isPointInGrid_fd(intVect1))
 			    {
 			    grid->intCoordsToNum(intVect1, &imagePos);
@@ -1394,11 +1295,9 @@ void ViabiMicroMacro::viabKerValFunc_DD(unsigned long long int nbArret)
 			     */
 			    if (vTab[imagePos] < PLUS_INF)
 				{
-				tempL = dynsys->lFunc_fd(intPointCoords,
-					controlCoords[cu]);
+				tempL = dynsys->lFunc_fd(intPointCoords, controlCoords[cu]);
 
-				tempM = dynsys->muFunc_fd(intPointCoords,
-					controlCoords[cu]);
+				tempM = dynsys->muFunc_fd(intPointCoords, controlCoords[cu]);
 
 				tempVal = max((vTab[imagePos] - tempL), tempM);
 
@@ -1418,9 +1317,7 @@ void ViabiMicroMacro::viabKerValFunc_DD(unsigned long long int nbArret)
 	    }
 
 	nbIter++;
-	spdlog::info(
-		"Iteration {} finished. Number of grid points with updated value funtion : {}",
-		nbIter, cptChanged);
+	spdlog::info("Iteration {} finished. Number of grid points with updated value funtion : {}", nbIter, cptChanged);
 	}
 
     saveValFunctions();
@@ -1431,8 +1328,7 @@ void ViabiMicroMacro::viabKerGarantiValFunc_DD(unsigned long long int nbArret)
     unsigned long long int cptChanged = 1000000, nbIter = 0;
     unsigned long long int pos;
     unsigned long long int nbPointsTotal = grid->getNbTotalPoints();
-    spdlog::info(
-	    "Guaranted viability kernel algorithm for discrete systems with tychastic controls");
+    spdlog::info("Guaranted viability kernel algorithm for discrete systems with tychastic controls");
     unsigned long long int **controlCoords = dynsys->getControlIntCoords();
     unsigned long long int **tychIntCoords = dynsys->getTychIntCoords();
 
@@ -1455,8 +1351,7 @@ void ViabiMicroMacro::viabKerGarantiValFunc_DD(unsigned long long int nbArret)
 	for (pos = 0; pos < (unsigned long long int) nbPointsTotal; pos++)
 	    {
 	    double currentVal = vTab[pos];
-	    grid->numToIntAndDoubleCoords(pos, intPointCoords,
-		    doublePointCoords);
+	    grid->numToIntAndDoubleCoords(pos, intPointCoords, doublePointCoords);
 	    if (currentVal < PLUS_INF)
 		{
 		double tempVal, tempL, tempM;
@@ -1465,11 +1360,9 @@ void ViabiMicroMacro::viabKerGarantiValFunc_DD(unsigned long long int nbArret)
 		bool testNonVide = false;
 		while (!testNonVide && (cu < nbCTotal))
 		    {
-		    if (dynsys->constraintsXU_fd(intPointCoords,
-			    controlCoords[cu]) < PLUS_INF)
+		    if (dynsys->constraintsXU_fd(intPointCoords, controlCoords[cu]) < PLUS_INF)
 			{
-			dynsys->dynamics_tych_fd(intPointCoords,
-				controlCoords[cu], tychIntCoords[0], intVect1);
+			dynsys->dynamics_tych_fd(intPointCoords, controlCoords[cu], tychIntCoords[0], intVect1);
 			if (grid->isPointInGrid_fd(intVect1))
 			    {
 			    grid->intCoordsToNum(intVect1, &imagePos);
@@ -1479,17 +1372,12 @@ void ViabiMicroMacro::viabKerGarantiValFunc_DD(unsigned long long int nbArret)
 			    if (vTab[imagePos] < PLUS_INF)
 				{
 				double tempValTy = -PLUS_INF;
-				tempM = dynsys->muFunc_fd(intPointCoords,
-					controlCoords[cu]);
+				tempM = dynsys->muFunc_fd(intPointCoords, controlCoords[cu]);
 				for (int jj = 0; jj < dimTy; jj++)
 				    {
-				    tempL = dynsys->lFunc_tych_fd(
-					    intPointCoords, controlCoords[cu],
-					    tychIntCoords[jj]);
+				    tempL = dynsys->lFunc_tych_fd(intPointCoords, controlCoords[cu], tychIntCoords[jj]);
 
-				    tempValTy = max(tempValTy,
-					    max((vTab[imagePos] - tempL),
-						    tempM));
+				    tempValTy = max(tempValTy, max((vTab[imagePos] - tempL), tempM));
 				    }
 
 				tempVal = tempValTy;
@@ -1509,9 +1397,7 @@ void ViabiMicroMacro::viabKerGarantiValFunc_DD(unsigned long long int nbArret)
 	    }
 
 	nbIter++;
-	spdlog::info(
-		"Iteration {} finished. Number of grid points with updated value funtion : {}",
-		nbIter, cptChanged);
+	spdlog::info("Iteration {} finished. Number of grid points with updated value funtion : {}", nbIter, cptChanged);
 	}
 
     saveValFunctions();
@@ -1521,6 +1407,7 @@ void ViabiMicroMacro::CaptureBasin()
     {
     spdlog::info("Capture bassin algorithm : start");
 
+    dynsys->setDynamicsBackward();
     /*!
      * \var nbNewPoints : nb de nouveaux points ajoutés é l'étape n
      */
@@ -1556,8 +1443,7 @@ void ViabiMicroMacro::CaptureBasin()
      */
     while ((nbNewPoints > 0))
 	{
-	spdlog::info("Iteration {} : new points in the set {}", iter,
-		nbNewPoints);
+	spdlog::info("Iteration {} : new points in the set {}", iter, nbNewPoints);
 
 	/*!
 	 * -Calcul de l'image de \f^C_{n}\setminus C_n\f$  par la fonction computeCurrentImageLocalRho(): l'image est enregistrée en émoire vive sous forme de liste
@@ -1589,11 +1475,15 @@ void ViabiMicroMacro::CaptureBasin()
     saveValFunctions();
     }
 
-double ViabiMicroMacro::computeOptimalCaptTrajectory(double *initPosition,
-	string fileName, bool &succes)
+double ViabiMicroMacro::computeOptimalCaptTrajectory(double *initPosition, string fileName, bool &succes)
     {
-    return trajectoryHelper->computeOptimalTrajectory(initPosition, fileName,
-	    succes);
+    return trajectoryHelper->computeOptimalTrajectory(initPosition, fileName, succes);
+    /* if (computeTmin)
+    		return trajectoryHelper->computeOptimalTrajectory(initPosition,
+    				fileName, succes);
+    	else
+    		return trajectoryHelper->computeOptimalTrajectory_Lmin(initPosition,
+    				fileName, succes);*/
     }
 
 void ViabiMicroMacro::computeCurrIm_tmin(int iter)
@@ -1626,8 +1516,7 @@ void ViabiMicroMacro::computeCurrIm_tmin(int iter)
     currentImageList.minNum = 1000 + grid->nbTotalCells;
     double rho;
 
-    list<imagePoint>::iterator itPoint =
-	    currentImagePointsList.pointsList->begin(), itTemp;
+    list<imagePoint>::iterator itPoint = currentImagePointsList.pointsList->begin(), itTemp;
     imageCell tempImageCell;
 
     itStart = this->currentImageList.cellsList.begin();
@@ -1638,7 +1527,7 @@ void ViabiMicroMacro::computeCurrIm_tmin(int iter)
 	posX = (*itPoint).PointNum;
 	grid->numToIntAndDoubleCoords(posX, intPointCoords, doublePointCoords);
 	rho = dynsys->calculRho_local(doublePointCoords);
-	    {
+	{
 	    /*!
 	     * On calcule l'image discrète  du point
 	     */
@@ -1656,16 +1545,14 @@ void ViabiMicroMacro::computeCurrIm_tmin(int iter)
 		addDataToCurrentImage(&itStart, tempImageCell, &itNew);
 		itStart = itNew;
 		}
-	    }
+	}
 	itPoint++;
 	currentImagePointsList.pointsList->pop_front();
 	}
     gettimeofday(&tim, NULL);
     t2 = tim.tv_sec + (tim.tv_usec / 1000000.0);
     elapsed_time = (double) ((t2 - t1));
-    spdlog::debug(
-	    "[Min Time problem] : Elapsed time to compute current image {} sec",
-	    elapsed_time);
+    spdlog::debug("[Min Time problem] : Elapsed time to compute current image {} sec", elapsed_time);
     }
 
 void ViabiMicroMacro::computeCurrIm_Lmin(int iter)
@@ -1702,8 +1589,7 @@ void ViabiMicroMacro::computeCurrIm_Lmin(int iter)
     currentImageList.minNum = 1000 + grid->nbTotalCells;
     double rho, tempL;
 
-    list<imagePoint>::iterator itPoint =
-	    currentImagePointsList.pointsList->begin(), itTemp;
+    list<imagePoint>::iterator itPoint = currentImagePointsList.pointsList->begin(), itTemp;
     imageCell tempImageCell;
 
     itStart = this->currentImageList.cellsList.begin();
@@ -1734,19 +1620,14 @@ void ViabiMicroMacro::computeCurrIm_Lmin(int iter)
 	    if (numCell < nbCellsTotal)
 		{
 		tempImageCell.minVal = PLUS_INF;
-		for (unsigned long long int j = pointDI.tabCellEntrees[i];
-			j < pointDI.tabCellEntrees[i + 1]; j++)
+		for (unsigned long long int j = pointDI.tabCellEntrees[i]; j < pointDI.tabCellEntrees[i + 1]; j++)
 		    {
 		    numControl = pointDI.tabImageControls[j];
-		    tempL = dynsys->lFunc(doublePointCoords,
-			    controlCoords[numControl]);
-		    (dynsys->*(dynsys->discretDynamics))(doublePointCoords,
-			    controlCoords[numControl], imageCoords, 1.0);
+		    tempL = dynsys->lFunc(doublePointCoords, controlCoords[numControl]);
+		    (dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[numControl], imageCoords, 1.0);
 
-		    double tempL1 = dynsys->lFunc(imageCoords,
-			    controlCoords[numControl]);
-		    tempImageCell.minVal = min(tempImageCell.minVal,
-			    (*itPoint).minVal + rho * 0.5 * (tempL + tempL1));
+		    double tempL1 = dynsys->lFunc(imageCoords, controlCoords[numControl]);
+		    tempImageCell.minVal = min(tempImageCell.minVal, (*itPoint).minVal + rho * 0.5 * (tempL + tempL1));
 		    }
 		addDataToCurrentImage(&itStart, tempImageCell, &itNew);
 		itStart = itNew;
@@ -1761,9 +1642,7 @@ void ViabiMicroMacro::computeCurrIm_Lmin(int iter)
     t2 = tim.tv_sec + (tim.tv_usec / 1000000.0);
     elapsed_time = (double) ((t2 - t1));
 
-    spdlog::debug(
-	    "[Integral cost problem] : Elapsed time to compute current image {} sec",
-	    elapsed_time);
+    spdlog::debug("[Integral cost problem] : Elapsed time to compute current image {} sec", elapsed_time);
 
     }
 
@@ -1811,8 +1690,7 @@ void ViabiMicroMacro::computeCurrIm_DD(int iter)
 
     double tempL, tempMu;
 
-    list<imagePoint>::iterator itPoint =
-	    currentImagePointsList.pointsList->begin(), itTemp;
+    list<imagePoint>::iterator itPoint = currentImagePointsList.pointsList->begin(), itTemp;
     imagePoint tempImagePoint;
 
     list<imagePoint>::iterator itStart, itNew;
@@ -1840,19 +1718,14 @@ void ViabiMicroMacro::computeCurrIm_DD(int iter)
 	    if (numPoint < nbPointsTotal)
 		{
 		tempImagePoint.minVal = PLUS_INF;
-		for (unsigned long long int j = pointDI_DD.tabPointsEntrees[i];
-			j < pointDI_DD.tabPointsEntrees[i + 1]; j++)
+		for (unsigned long long int j = pointDI_DD.tabPointsEntrees[i]; j < pointDI_DD.tabPointsEntrees[i + 1]; j++)
 		    {
 		    numControl = pointDI_DD.tabImageControls[j];
-		    tempL = dynsys->lFunc_fd(intPointCoords,
-			    controlCoords[numControl]);
-		    tempMu = dynsys->muFunc_fd(intPointCoords,
-			    controlCoords[numControl]);
-		    tempImagePoint.minVal = min(tempImagePoint.minVal,
-			    max(tempMu, (*itPoint).minVal + tempL));
+		    tempL = dynsys->lFunc_fd(intPointCoords, controlCoords[numControl]);
+		    tempMu = dynsys->muFunc_fd(intPointCoords, controlCoords[numControl]);
+		    tempImagePoint.minVal = min(tempImagePoint.minVal, max(tempMu, (*itPoint).minVal + tempL));
 		    }
-		addDataToGivenPointsList(&tempPointsList, &itStart,
-			tempImagePoint, &itNew);
+		addDataToGivenPointsList(&tempPointsList, &itStart, tempImagePoint, &itNew);
 		itStart = itNew;
 		}
 	    }
@@ -1875,9 +1748,7 @@ void ViabiMicroMacro::computeCurrIm_DD(int iter)
     t2 = tim.tv_sec + (tim.tv_usec / 1000000.0);
     elapsed_time = (double) ((t2 - t1));
 
-    spdlog::debug(
-	    "[Discrete value problem] : Elapsed time to compute current image {} sec",
-	    elapsed_time);
+    spdlog::debug("[Discrete value problem] : Elapsed time to compute current image {} sec", elapsed_time);
 
     }
 
@@ -1891,9 +1762,7 @@ void ViabiMicroMacro::computeConvexifiedImage_Lmin_omp(int iter)
     currentImageList.minNum = 1000 + grid->nbTotalCells;
     double rho, tempL;
 
-    list<imagePoint>::iterator itPoint =
-	    currentImagePointsList.pointsList->begin(), itLastPoint =
-	    currentImagePointsList.pointsList->end(), itTemp;
+    list<imagePoint>::iterator itPoint = currentImagePointsList.pointsList->begin(), itLastPoint = currentImagePointsList.pointsList->end(), itTemp;
     imageCell tempImageCell;
 
     unsigned long long int nbCellsTotal = grid->getNbTotalPoints();
@@ -1923,19 +1792,15 @@ void ViabiMicroMacro::computeConvexifiedImage_Lmin_omp(int iter)
 	    if (numCell < nbCellsTotal)
 		{
 		tempImageCell.minVal = PLUS_INF;
-		for (unsigned long long int j = pointDI.tabCellEntrees[i];
-			j < pointDI.tabCellEntrees[i + 1]; j++)
+		for (unsigned long long int j = pointDI.tabCellEntrees[i]; j < pointDI.tabCellEntrees[i + 1]; j++)
 		    {
 		    numControl = pointDI.tabImageControls[j];
-		    tempL = dynsys->lFunc(doublePointCoords,
-			    controlCoords[numControl]);
-		    tempImageCell.minVal = min(tempImageCell.minVal,
-			    (*itPoint).minVal + rho * tempL);
+		    tempL = dynsys->lFunc(doublePointCoords, controlCoords[numControl]);
+		    tempImageCell.minVal = min(tempImageCell.minVal, (*itPoint).minVal + rho * tempL);
 		    }
 		addDataToCurrentImage(&itStart, tempImageCell, &itNew);
 		itStart = itNew;
-		addConvexCombinations(itPoint, numCell, &tempImageCell, rho,
-			&itStart);
+		addConvexCombinations(itPoint, numCell, &tempImageCell, rho, &itStart);
 		}
 	    }
 	itPoint++;
@@ -1944,8 +1809,7 @@ void ViabiMicroMacro::computeConvexifiedImage_Lmin_omp(int iter)
 
 void ViabiMicroMacro::computeConvexifiedImage_tmin(int iter)
     {
-    spdlog::info(
-	    "[Min Time problem] : Computing convexified image of teh target set. number of points {}",
+    spdlog::info("[Min Time problem] : Computing convexified image of teh target set. number of points {}",
 	    currentImagePointsList.pointsList->size());
     int posX;
 
@@ -1956,9 +1820,7 @@ void ViabiMicroMacro::computeConvexifiedImage_tmin(int iter)
     currentImageList.minNum = 1000 + grid->nbTotalCells;
     double rho;
 
-    list<imagePoint>::iterator itPoint =
-	    currentImagePointsList.pointsList->begin(), itLastPoint =
-	    currentImagePointsList.pointsList->end(), itTemp;
+    list<imagePoint>::iterator itPoint = currentImagePointsList.pointsList->begin(), itLastPoint = currentImagePointsList.pointsList->end(), itTemp;
     imageCell tempImageCell;
 
     itStart = this->currentImageList.cellsList.begin();
@@ -1968,7 +1830,7 @@ void ViabiMicroMacro::computeConvexifiedImage_tmin(int iter)
 	posX = (*itPoint).PointNum;
 	grid->numToIntAndDoubleCoords(posX, intPointCoords, doublePointCoords);
 	rho = dynsys->calculRho_local(doublePointCoords);
-	    {
+	{
 	    /*!
 	     * On calcule l'image discrète  du point
 	     */
@@ -1986,12 +1848,11 @@ void ViabiMicroMacro::computeConvexifiedImage_tmin(int iter)
 		tempImageCell.cellNum = numCell;
 		addDataToCurrentImage(&itStart, tempImageCell, &itNew);
 		itStart = itNew;
-		addConvexCombinations(itPoint, numCell, &tempImageCell, rho,
-			&itStart);
+		addConvexCombinations(itPoint, numCell, &tempImageCell, rho, &itStart);
 
 		tempImageCell.minVal = (*itPoint).minVal + rho;
 		}
-	    }
+	}
 	itPoint++;
 
 	}
@@ -2004,8 +1865,7 @@ void ViabiMicroMacro::computeConvexifiedImage_DD(int iter)
 
 void ViabiMicroMacro::computeConvexifiedImage_Lmin(int iter)
     {
-    spdlog::info(
-	    "[Integral cost problem] : Computing convexified image of teh target set. number of points {}",
+    spdlog::info("[Integral cost problem] : Computing convexified image of the target set. number of points {}",
 	    currentImagePointsList.pointsList->size());
 
     int posX;
@@ -2016,9 +1876,7 @@ void ViabiMicroMacro::computeConvexifiedImage_Lmin(int iter)
     currentImageList.minNum = 1000 + grid->nbTotalCells;
     double rho, tempL;
 
-    list<imagePoint>::iterator itPoint =
-	    currentImagePointsList.pointsList->begin(), itLastPoint =
-	    currentImagePointsList.pointsList->end(), itTemp;
+    list<imagePoint>::iterator itPoint = currentImagePointsList.pointsList->begin(), itLastPoint = currentImagePointsList.pointsList->end(), itTemp;
     imageCell tempImageCell;
 
     unsigned long long int nbCellsTotal = grid->getNbTotalPoints();
@@ -2050,31 +1908,24 @@ void ViabiMicroMacro::computeConvexifiedImage_Lmin(int iter)
 	    if (numCell < nbCellsTotal)
 		{
 		tempImageCell.minVal = PLUS_INF;
-		for (unsigned long long int j = pointDI.tabCellEntrees[i];
-			j < pointDI.tabCellEntrees[i + 1]; j++)
+		for (unsigned long long int j = pointDI.tabCellEntrees[i]; j < pointDI.tabCellEntrees[i + 1]; j++)
 		    {
 		    numControl = pointDI.tabImageControls[j];
-		    tempL = dynsys->lFunc(doublePointCoords,
-			    controlCoords[numControl]);
-		    (dynsys->*(dynsys->discretDynamics))(doublePointCoords,
-			    controlCoords[numControl], imageCoords, 1.0);
-		    double tempL1 = dynsys->lFunc(imageCoords,
-			    controlCoords[numControl]);
-		    tempImageCell.minVal = min(tempImageCell.minVal,
-			    (*itPoint).minVal + rho * 0.5 * (tempL + tempL1));
+		    tempL = dynsys->lFunc(doublePointCoords, controlCoords[numControl]);
+		    (dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[numControl], imageCoords, rho);
+		    double tempL1 = dynsys->lFunc(imageCoords, controlCoords[numControl]);
+		    tempImageCell.minVal = min(tempImageCell.minVal, (*itPoint).minVal + rho * 0.5 * (tempL + tempL1));
 		    }
 		addDataToCurrentImage(&itStart, tempImageCell, &itNew);
 		itStart = itNew;
-		addConvexCombinations(itPoint, numCell, &tempImageCell, rho,
-			&itStart);
+		addConvexCombinations(itPoint, numCell, &tempImageCell, rho, &itStart);
 		}
 	    }
 	itPoint++;
 	}
     }
 
-void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint,
-	unsigned long long int numCell, imageCell *tempImageCell, double rho,
+void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint, unsigned long long int numCell, imageCell *tempImageCell, double rho,
 	list<imageCell>::iterator *itStart)
     {
 
@@ -2116,8 +1967,7 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint,
      */
     double deltat = min(0.1, grid->getMaxStep() / (2.0 * sqrt(dist)));
     double t = deltat;
-    unsigned long long int newCellNum, lastVisitCellNum =
-	    grid->getNbTotalCells() + 1;
+    unsigned long long int newCellNum, lastVisitCellNum = grid->getNbTotalCells() + 1;
     while (t < 1.0)
 	{
 
@@ -2145,8 +1995,7 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint,
 
 		    (*tempImageCell).cellNum = newCellNum;
 		    (*tempImageCell).minVal = pointVal + t * rho * LVal;
-		    this->addDataToCurrentImage(itStart, (*tempImageCell),
-			    &itNew);
+		    this->addDataToCurrentImage(itStart, (*tempImageCell), &itNew);
 		    lastVisitCellNum = newCellNum;
 		    (*itStart) = itNew;
 		    }
@@ -2155,8 +2004,7 @@ void ViabiMicroMacro::addConvexCombinations(list<imagePoint>::iterator itPoint,
 	t = t + deltat;
 	}
     }
-void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt,
-	imagePoint newPoint, list<imagePoint>::iterator *resIt)
+void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt, imagePoint newPoint, list<imagePoint>::iterator *resIt)
     {
     /*!
      * Dans l'image  en construction de \f$ C_{n}\setminus C_{n-1}\f$ les mailles sont stockées dans l'ordre croissant
@@ -2215,8 +2063,7 @@ void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt,
 		    if (numnewPoint > (*itCell).PointNum)
 			{
 			itCell++;
-			currentImagePointsList.pointsList->insert(itCell,
-				newPoint);
+			currentImagePointsList.pointsList->insert(itCell, newPoint);
 			}
 		    else
 			{
@@ -2233,8 +2080,7 @@ void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt,
 			}
 		    if (numnewPoint < (*itCell).PointNum)
 			{
-			currentImagePointsList.pointsList->insert(itCell,
-				newPoint);
+			currentImagePointsList.pointsList->insert(itCell, newPoint);
 			}
 		    else
 			{
@@ -2248,9 +2094,7 @@ void ViabiMicroMacro::addDataToPointsList(list<imagePoint>::iterator *startIt,
 	}
     }
 
-void ViabiMicroMacro::addDataToGivenPointsList(
-	imagePointsList *tempImagePointsList,
-	list<imagePoint>::iterator *startIt, imagePoint newPoint,
+void ViabiMicroMacro::addDataToGivenPointsList(imagePointsList *tempImagePointsList, list<imagePoint>::iterator *startIt, imagePoint newPoint,
 	list<imagePoint>::iterator *resIt)
     {
     /*!
@@ -2311,8 +2155,7 @@ void ViabiMicroMacro::addDataToGivenPointsList(
 		    if (numnewPoint > (*itCell).PointNum)
 			{
 			itCell++;
-			tempImagePointsList->pointsList->insert(itCell,
-				newPoint);
+			tempImagePointsList->pointsList->insert(itCell, newPoint);
 			}
 		    else
 			{
@@ -2329,8 +2172,7 @@ void ViabiMicroMacro::addDataToGivenPointsList(
 			}
 		    if (numnewPoint < (*itCell).PointNum)
 			{
-			tempImagePointsList->pointsList->insert(itCell,
-				newPoint);
+			tempImagePointsList->pointsList->insert(itCell, newPoint);
 			}
 		    else
 			{
@@ -2344,8 +2186,7 @@ void ViabiMicroMacro::addDataToGivenPointsList(
 	}
     }
 
-void ViabiMicroMacro::addDataToPoint(list<imagePoint>::iterator itCell,
-	imagePoint newPoint)
+void ViabiMicroMacro::addDataToPoint(list<imagePoint>::iterator itCell, imagePoint newPoint)
     {
     (*itCell).minVal = min((*itCell).minVal, newPoint.minVal);
     }
@@ -2372,8 +2213,7 @@ void ViabiMicroMacro::createPointsList()
     currentImagePointsList.minNum = currentImageList.minNum;
 
     int nbPointsCube = (int) pow(2.0, dim);	//pow(2.0, dim);
-    list<imageCell>::iterator itCell = currentImageList.cellsList.begin(),
-	    itLast = currentImageList.cellsList.end();
+    list<imageCell>::iterator itCell = currentImageList.cellsList.begin(), itLast = currentImageList.cellsList.end();
     int i;
 
     long long int *indicesDecalCell = grid->getIndicesDecalCell();
@@ -2418,8 +2258,7 @@ void ViabiMicroMacro::createPointsList()
 	 *   Exactement comme pour les celllules! Donc du copier coller de code.
 	 *
 	 */
-	tempPoint.PointNum = (*itCell).cellNum
-		+ indicesDecalCell[nbPointsCube - 1];
+	tempPoint.PointNum = (*itCell).cellNum + indicesDecalCell[nbPointsCube - 1];
 	this->addDataToPointsList(&itStart, tempPoint, &itNew);
 	itStart = itNew;
 
@@ -2435,8 +2274,7 @@ void ViabiMicroMacro::createPointsList()
 
     }
 
-void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt,
-	imageCell newCell, list<imageCell>::iterator *resIt)
+void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt, imageCell newCell, list<imageCell>::iterator *resIt)
     {
     /*!
      * Dans l'image  en construction de \f$ C_{n}\setminus C_{n-1}\f$ les mailles sont stockées dans l'ordre croissant
@@ -2474,8 +2312,7 @@ void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt,
 	    {
 	    currentImageList.cellsList.push_back(newCell);
 	    currentImageList.maxNum = numNewCell;
-	    currentImageList.minNum = min(currentImageList.maxNum,
-		    currentImageList.minNum);
+	    currentImageList.minNum = min(currentImageList.maxNum, currentImageList.minNum);
 	    (*resIt) = currentImageList.cellsList.end();
 	    (*resIt)--;
 	    }
@@ -2485,8 +2322,7 @@ void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt,
 		{
 		currentImageList.cellsList.push_front(newCell);
 		currentImageList.minNum = numNewCell;
-		currentImageList.maxNum = max(currentImageList.maxNum,
-			currentImageList.minNum);
+		currentImageList.maxNum = max(currentImageList.maxNum, currentImageList.minNum);
 		(*resIt) = currentImageList.cellsList.begin();
 		}
 	    else
@@ -2495,8 +2331,7 @@ void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt,
 
 		if ((numNewCell > (*itCell).cellNum))
 		    {
-		    while ((itCell != itLast)
-			    && (numNewCell > (*itCell).cellNum))
+		    while ((itCell != itLast) && (numNewCell > (*itCell).cellNum))
 			{
 			itCell++;
 			}
@@ -2532,8 +2367,7 @@ void ViabiMicroMacro::addDataToCurrentImage(list<imageCell>::iterator *startIt,
 	}
     }
 
-void ViabiMicroMacro::addDataToCell(list<imageCell>::iterator itCell,
-	imageCell newCell)
+void ViabiMicroMacro::addDataToCell(list<imageCell>::iterator itCell, imageCell newCell)
     {
 
     (*itCell).minVal = min((*itCell).minVal, newCell.minVal);
@@ -2573,8 +2407,7 @@ void ViabiMicroMacro::printViabiInfo()
 void ViabiMicroMacro::showCurrentImageList()
     {
     imageCell c;
-    list<imageCell>::iterator itCell = currentImageList.cellsList.begin(),
-	    itLast = currentImageList.cellsList.end();
+    list<imageCell>::iterator itCell = currentImageList.cellsList.begin(), itLast = currentImageList.cellsList.end();
     list<triple>::iterator it;
     cout << " image  de CN calculée  est la suivante \n";
     cout << "*******************************************************\n";
@@ -2592,9 +2425,7 @@ void ViabiMicroMacro::showCurrentImageList()
 void ViabiMicroMacro::showCurrentImagePointsList()
     {
     imagePoint c;
-    list<imagePoint>::iterator itCell =
-	    currentImagePointsList.pointsList->begin(), itLast =
-	    currentImagePointsList.pointsList->end();
+    list<imagePoint>::iterator itCell = currentImagePointsList.pointsList->begin(), itLast = currentImagePointsList.pointsList->end();
     cout << " image  de CN calculée  est la suivante : liste de POINTS \n";
     cout << "*******************************************************\n";
     while ((itCell != itLast))
@@ -2644,9 +2475,7 @@ int ViabiMicroMacro::addNewPoints()
 
     int nbNewPoints = 0;
 
-    list<imagePoint>::iterator itPoint =
-	    currentImagePointsList.pointsList->begin(), itLastPoint =
-	    currentImagePointsList.pointsList->end(), itTemp;
+    list<imagePoint>::iterator itPoint = currentImagePointsList.pointsList->begin(), itLastPoint = currentImagePointsList.pointsList->end(), itTemp;
 
     imagePoint tempPoint;
     while (itPoint != itLastPoint)
@@ -2656,8 +2485,7 @@ int ViabiMicroMacro::addNewPoints()
 	if ((*itPoint).minVal < vTab[(*itPoint).PointNum])
 	    {
 	    nbNewPoints++;
-	    vTab[(*itPoint).PointNum] = min(vTab[(*itPoint).PointNum],
-		    (*itPoint).minVal);
+	    vTab[(*itPoint).PointNum] = min(vTab[(*itPoint).PointNum], (*itPoint).minVal);
 	    itPoint++;
 	    }
 	else
@@ -2746,6 +2574,7 @@ void ViabiMicroMacro::initialiseConstraints_DD()
 
 void ViabiMicroMacro::ViabilityKernel(bool sortieOK, int nbArret)
     {
+    dynsys->setDynamicsForward();
     if (!(dynsys->getDynType() == DD))
 	{
 	if (nbOMPThreads > 1)
@@ -2766,6 +2595,7 @@ void ViabiMicroMacro::ViabilityKernel(bool sortieOK, int nbArret)
 
 void ViabiMicroMacro::GarantedViabilityKernel(bool sortieOK, int nbArret)
     {
+    dynsys->setDynamicsForward();
     if ((dynsys->getDynType() == DD))
 	{
 	viabKerGarantiValFunc_DD(nbArret);

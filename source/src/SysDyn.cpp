@@ -150,25 +150,16 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid *grRef)
 	SysDyn::discretDynamics = &SysDyn::FDiscret;
 	break;
     case 1:
-	SysDyn::discretDynamics = &SysDyn::FDiscretEulerExp;
+	SysDyn::discretDynamics = &SysDyn::FDiscretEuler;
 	break;
     case 2:
-	SysDyn::discretDynamics = &SysDyn::FDiscretEulerImp;
+	SysDyn::discretDynamics = &SysDyn::FDiscretRK2;
 	break;
     case 3:
-	SysDyn::discretDynamics = &SysDyn::FDiscretRK2Imp;
+	SysDyn::discretDynamics = &SysDyn::FDiscretRK4;
 	break;
-    case 4:
-	SysDyn::discretDynamics = &SysDyn::FDiscretRK2Exp;
-	break;
-    case 5:
-	SysDyn::discretDynamics = &SysDyn::FDiscretRK4Imp;
-	break;
-    case 6:
-	SysDyn::discretDynamics = &SysDyn::FDiscretRK4Exp;
-	break;
-
 	}
+    dynSignFactor = 1.0; //forward by default
     unsigned long long int k;
     int dc;
     /*!
@@ -357,7 +348,7 @@ double SysDyn::getTimeStep()
     return rho;
     }
 
-void SysDyn::FDiscretEulerExp(double *x, double *u, double *res, double rho)
+void SysDyn::FDiscretEuler(double *x, double *u, double *res, double rho)
     {
 
     int i;
@@ -366,7 +357,7 @@ void SysDyn::FDiscretEulerExp(double *x, double *u, double *res, double rho)
 
     for (i = 0; i < dimS; i++)
 	{
-	res[i] = x[i] + rho * res[i];
+	res[i] = x[i] + rho * dynSignFactor * res[i];
 	}
 
     gr->periodizePoint(res);
@@ -379,42 +370,9 @@ void SysDyn::FDiscret(double *x, double *u, double *res, double rho)
     (*dynamics)(x, u, res);
     gr->periodizePoint(res);
     }
-void SysDyn::FDiscretEulerImp(double *x, double *u, double *res, double rho)
-    {
-    int i;
-    (*dynamics)(x, u, res);
-    for (i = 0; i < dimS; i++)
-	{
-	res[i] = x[i] - rho * res[i];
-	}
-    gr->periodizePoint(res);
-    }
-void SysDyn::FDiscretRK2Imp(double *x, double *u, double *res, double rho)
-    {
 
-    int i;
-    double *Fx, *Fres;
-    Fx = new double[dimS];
-    Fres = new double[dimS];
-    (*dynamics)(x, u, Fx);
 
-    for (i = 0; i < dimS; i++)
-	{
-	res[i] = x[i] - rho * Fx[i];
-	}
-    gr->periodizePoint(res);
-
-    (*dynamics)(res, u, Fres);
-    for (i = 0; i < dimS; i++)
-	{
-	res[i] = x[i] - 0.5 * rho * (Fx[i] + Fres[i]);
-	}
-    delete[] Fx;
-    delete[] Fres;
-    gr->periodizePoint(res);
-    }
-
-void SysDyn::FDiscretRK4Exp(double *x, double *u, double *res, double rho)
+void SysDyn::FDiscretRK4(double *x, double *u, double *res, double rho)
     {
     int i;
     double *ki, *y;
@@ -424,8 +382,8 @@ void SysDyn::FDiscretRK4Exp(double *x, double *u, double *res, double rho)
 
     for (i = 0; i < dimS; i++)
 	{
-	res[i] = x[i] + rho * ki[i] / 6.0;
-	y[i] = x[i] + 0.5 * rho * ki[i];
+	res[i] = x[i] + rho * dynSignFactor * ki[i] / 6.0;
+	y[i] = x[i] + 0.5 * rho * dynSignFactor * ki[i];
 	}
     gr->periodizePoint(y);
 
@@ -438,8 +396,8 @@ void SysDyn::FDiscretRK4Exp(double *x, double *u, double *res, double rho)
 
     for (i = 0; i < dimS; i++)
 	{
-	y[i] = x[i] + 0.5 * rho * ki[i];
-	res[i] = res[i] + rho * ki[i] / 3.0;
+	y[i] = x[i] + 0.5 * rho * dynSignFactor * ki[i];
+	res[i] = res[i] + rho * dynSignFactor * ki[i] / 3.0;
 	}
 
     gr->periodizePoint(y);
@@ -452,8 +410,8 @@ void SysDyn::FDiscretRK4Exp(double *x, double *u, double *res, double rho)
 
     for (i = 0; i < dimS; i++)
 	{
-	y[i] = x[i] + rho * ki[i];
-	res[i] = res[i] + rho * ki[i] / 3.0;
+	y[i] = x[i] + rho * dynSignFactor * ki[i];
+	res[i] = res[i] + rho * dynSignFactor * ki[i] / 3.0;
 	}
 
     gr->periodizePoint(y);
@@ -467,7 +425,7 @@ void SysDyn::FDiscretRK4Exp(double *x, double *u, double *res, double rho)
 
     for (i = 0; i < dimS; i++)
 	{
-	res[i] = res[i] + rho * ki[i] / 6.0;
+	res[i] = res[i] + rho * dynSignFactor * ki[i] / 6.0;
 	}
 
     gr->periodizePoint(res);
@@ -475,66 +433,6 @@ void SysDyn::FDiscretRK4Exp(double *x, double *u, double *res, double rho)
     delete[] y;
     }
 
-void SysDyn::FDiscretRK4Imp(double *x, double *u, double *res, double rho)
-    {
-    int i;
-    double *ki, *y;
-    ki = new double[dimS];
-    y = new double[dimS];
-    (*dynamics)(x, u, ki);
-
-    for (i = 0; i < dimS; i++)
-	{
-	res[i] = x[i] - rho * ki[i] / 6.0;
-	y[i] = x[i] - 0.5 * rho * ki[i];
-	}
-    gr->periodizePoint(y);
-
-    /*
-     * k2=f(x+0.5*rho*k1,u)
-     * res=res+rho*k2/3;
-     *
-     */
-    (*dynamics)(y, u, ki);
-
-    for (i = 0; i < dimS; i++)
-	{
-	y[i] = x[i] - 0.5 * rho * ki[i];
-	res[i] = res[i] - rho * ki[i] / 3.0;
-	}
-
-    gr->periodizePoint(y);
-    /*
-     * k3=f(x+0.5*rho*k2,u)
-     * res=res+rho*k3/3;
-     *
-     */
-    (*dynamics)(y, u, ki);
-
-    for (i = 0; i < dimS; i++)
-	{
-	y[i] = x[i] - rho * ki[i];
-	res[i] = res[i] - rho * ki[i] / 3.0;
-	}
-
-    gr->periodizePoint(y);
-
-    /*
-     * k4=f(x+rho*k3,u)
-     * res=res+rho*k4/6;
-     *
-     */
-    (*dynamics)(y, u, ki);
-
-    for (i = 0; i < dimS; i++)
-	{
-	res[i] = res[i] - rho * ki[i] / 6.0;
-	}
-
-    gr->periodizePoint(res);
-    delete[] ki;
-    delete[] y;
-    }
 
 double SysDyn::calculRho_local(double *x)
     {
@@ -557,7 +455,7 @@ double SysDyn::calculRho_local(double *x)
     return rho1;
     }
 
-void SysDyn::FDiscretRK2Exp(double *x, double *u, double *res, double rho)
+void SysDyn::FDiscretRK2(double *x, double *u, double *res, double rho)
     {
 
     int i;
@@ -570,7 +468,7 @@ void SysDyn::FDiscretRK2Exp(double *x, double *u, double *res, double rho)
 
     for (i = 0; i < dimS; i++)
 	{
-	res[i] = x[i] + rho * Fx[i];
+	res[i] = x[i] + rho * dynSignFactor * Fx[i];
 	}
 
     gr->periodizePoint(res);
@@ -579,7 +477,7 @@ void SysDyn::FDiscretRK2Exp(double *x, double *u, double *res, double rho)
 
     for (i = 0; i < dimS; i++)
 	{
-	res[i] = x[i] + 0.5 * rho * (Fx[i] + Fres[i]);
+	res[i] = x[i] + 0.5 * rho * dynSignFactor * (Fx[i] + Fres[i]);
 	}
 
     gr->periodizePoint(res);
@@ -783,4 +681,12 @@ bool SysDyn::isTimeStepGlobal()
 void SysDyn::setRho(double r)
     {
     rho = r;
+    }
+void SysDyn::setDynamicsForward()
+    {
+    dynSignFactor = 1.0;
+    }
+void SysDyn::setDynamicsBackward()
+    {
+    dynSignFactor = -1.0;
     }

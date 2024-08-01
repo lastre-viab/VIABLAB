@@ -347,6 +347,10 @@ public:
      */
     int getDynType();
 
+    void setDynamicsForward();
+    void setDynamicsBackward();
+
+
 private:
 
     double calculL_local_num(double *x);
@@ -366,12 +370,9 @@ private:
      * Méthodes  qui seront utilisées dans le cas où
      * la dynamique est continue en temps et en espace
      */
-    void FDiscretEulerExp(double *x, double *u, double *res, double rho);
-    void FDiscretEulerImp(double *x, double *u, double *res, double rho);
-    void FDiscretRK2Imp(double *x, double *u, double *res, double rho);
-    void FDiscretRK2Exp(double *x, double *u, double *res, double rho);
-    void FDiscretRK4Imp(double *x, double *u, double *res, double rho);
-    void FDiscretRK4Exp(double *x, double *u, double *res, double rho);
+    void FDiscretEuler(double *x, double *u, double *res, double rho);
+    void FDiscretRK2(double *x, double *u, double *res, double rho);
+    void FDiscretRK4(double *x, double *u, double *res, double rho);
 
     int fd_dyn_type;
     double timeHorizon;
@@ -412,6 +413,7 @@ private:
     double **jacob;
     void (*localDynBounds)(double *x, double *res);
     void (*jacobian)(double *x, double *u, double **jacob);
+    double dynSignFactor;
 
     };
 
