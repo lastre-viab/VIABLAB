@@ -741,12 +741,6 @@ void ViabiMicroMacroDiscrete::CaptureBasin()
 double ViabiMicroMacroDiscrete::computeOptimalCaptTrajectory(double *initPosition, string fileName, bool &succes)
     {
     return trajectoryHelper->computeOptimalTrajectory(initPosition, fileName, succes);
-    /* if (computeTmin)
-     return trajectoryHelper->computeOptimalTrajectory(initPosition,
-     fileName, succes);
-     else
-     return trajectoryHelper->computeOptimalTrajectory_Lmin(initPosition,
-     fileName, succes);*/
     }
 
 void ViabiMicroMacroDiscrete::computeCurrIm(int iter)

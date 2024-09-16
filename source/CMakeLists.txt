@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project( viabLabLib )
-    
+#To build ViabLab as a library, set the variable BUILD_LIB to ON
+option(BUILD_LIB "Builds ViabLab as Library" OFF)   
 	
 IF(CMAKE_SYSTEM_NAME STREQUAL Darwin)
   set(CMAKE_C_COMPILER   gcc)
@@ -43,6 +44,14 @@ file(GLOB_RECURSE Viab_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS data/
  
 file(GLOB_RECURSE Viab_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.cpp) 
 
-ADD_EXECUTABLE(viabLabExe  ${Viab_SOURCES} ${Viab_HEADERS})  # creation de la librairie  
+if(BUILD_LIB)
+message("Building ViabLab as library  ")
+ADD_LIBRARY(viabLabLib STATIC ${Viab_SOURCES} ${Viab_HEADERS})  # creation de la librairie  
+else()
+message("Building ViabLab as executable ")
+ADD_EXECUTABLE(viabLabExe  ${Viab_SOURCES} ${Viab_HEADERS})  # Executable creation
+endif(BUILD_LIB)
+unset(BUILD_LIB CACHE)
+
 
  

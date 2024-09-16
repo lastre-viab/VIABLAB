@@ -26,7 +26,7 @@
 using namespace std;
 
 Grid_BitSet::Grid_BitSet(gridParams gp) :
-	Grid()
+		Grid()
     {
     // TODO Auto-generated constructor stub
 
@@ -268,7 +268,7 @@ void Grid_BitSet::findNearestViabPointInCell(double *startPoint,
 		for (int i = 0; i < dim; i++)
 		    {
 		    dist += (testV[i] - currentPoint[i])
-			    * (testV[i] - currentPoint[i]);
+				    * (testV[i] - currentPoint[i]);
 		    }
 		if (dist < minDist)
 		    {
@@ -350,7 +350,7 @@ void Grid_BitSet::refine()
     //cout<< " ok \n";
 
     unsigned long long int *nbPointsSubGridNew = new unsigned long long int[dim
-	    - 1];
+									    - 1];
     unsigned long long int totalPointsSubgridNew = 1;
     for (int kl = 0; kl < dim - 1; kl++)
 	{
@@ -594,7 +594,7 @@ unsigned long long int Grid_BitSet::getDirTram()
 
 boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueBis(
 	unsigned long long int posX, bool print)
-    {
+		{
     print = false;
     int i = 0;
 
@@ -607,7 +607,7 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueBis(
     if (print)
 	{
 	cout
-		<< "\n *******************************************************************\n";
+	<< "\n *******************************************************************\n";
 
 	cout << " \n analyse dirTramage " << dirTramage << " indice size = "
 		<< dim - 1 << "  indice=";
@@ -670,7 +670,7 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueBis(
 		{
 		if (print)
 		    cout << " k =" << k << " indices dcal="
-			    << indicesDecalSub[k] << endl;
+		    << indicesDecalSub[k] << endl;
 		k++;
 		}
 
@@ -713,7 +713,7 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueBis(
 			    cout << " masqueD " << masqueDecale << "\n";
 			    cout << " masque  " << masque << "\n";
 			    cout
-				    << "\n ============================================\n";
+			    << "\n ============================================\n";
 
 			    }
 			//on d�cale la trame de 1 bite  et on fait le ET pour chaque
@@ -729,7 +729,7 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueBis(
 			    cout << " masqueD " << masqueDecale << "\n";
 			    cout << " masque  " << masque << "\n";
 			    cout
-				    << "\n ============================================\n";
+			    << "\n ============================================\n";
 
 			    }
 			}
@@ -780,11 +780,11 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueBis(
 	    return (masque);
 	    }
 	}
-    }
+		}
 
 boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasque(
 	unsigned long long int posX)
-    {
+		{
     int i = 0;
     double x = limInf[0] + step[0];
     unsigned long long int *indice = new unsigned long long int[dim - 1];
@@ -864,13 +864,13 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasque(
 			//on d�cale la trame de 1 bite  et on fait le ET pour chaque
 			//bit �a donne : b[i] ET b[i+1]
 			masqueDecale = ((*gridTab[posX + indicesDecalSub[k]]))
-				>> (1);
+					>> (1);
 			masqueDecale[longTrame - 1] = 1;
 			masque &= (masqueDecale);
 			//on d�cale la trame de 1 bite  et on fait le ET pour chaque
 			//bit �a donne : b[i] ET b[i-1]
 			masqueDecale = ((*gridTab[posX + indicesDecalSub[k]]))
-				<< (1);
+					<< (1);
 			masqueDecale[0] = 1;
 			masque &= (masqueDecale);
 
@@ -909,7 +909,7 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasque(
 	    return (masque);
 	    }
 	}
-    }
+		}
 
 /*
  * parite == 0 indices paires
@@ -1047,7 +1047,7 @@ void Grid_BitSet::saveValOnGrid(string fileName)
 	    for (unsigned long long int k = 0; k < longTrame; k++)
 		{
 		xCoordsDouble[dirTramage] = limInf[dirTramage]
-			+ k * step[dirTramage];
+						   + k * step[dirTramage];
 
 		if ((*gridTab[posX])[k])
 		    {
@@ -1108,7 +1108,7 @@ void Grid_BitSet::saveValOnGridLight(string fileName)
 	    for (unsigned long long int k = 0; k < longTrame; k++)
 		{
 		xCoordsDouble[dirTramage] = limInf[dirTramage]
-			+ k * step[dirTramage];
+						   + k * step[dirTramage];
 
 		if ((*gridTab[posX])[k])
 		    {
@@ -1241,14 +1241,14 @@ unsigned long long int Grid_BitSet::getLongTrame()
     }
 
 boost::dynamic_bitset<>** Grid_BitSet::getGridTab()
-    {
+		{
     return gridTab;
-    }
+		}
 
 boost::dynamic_bitset<>** Grid_BitSet::getGridTabNew()
-    {
+		{
     return gridTabNew;
-    }
+		}
 
 void Grid_BitSet::saveProjetion(string fileName,
 	unsigned long long int *projection)
@@ -1330,8 +1330,8 @@ void Grid_BitSet::saveProjetion(string fileName,
 		for (int l1 = 0; l1 < dim - 1; l1++)
 		    {
 		    fichierB
-			    << reducedLimInf[l1]
-				    + reducedStep[l1] * tempVect[l1] << " ";
+		    << reducedLimInf[l1]
+				     + reducedStep[l1] * tempVect[l1] << " ";
 		    }
 		fichierB << "\n";
 		}
@@ -1425,7 +1425,7 @@ void Grid_BitSet::saveCoupeBoundary(string nomFichier)
 		if (masqueFront[k])
 		    {
 		    coordReelles[dirTramage] = k * step[dirTramage]
-			    + limInf[dirTramage];
+							+ limInf[dirTramage];
 		    test = true;
 		    for (int k = 0; k < (int) dirs.size(); k++)
 			{
@@ -1484,7 +1484,7 @@ void Grid_BitSet::saveBoundary(string nomFichier)
 		if (masqueFront[k])
 		    {
 		    coordReelles[dirTramage] = k * step[dirTramage]
-			    + limInf[dirTramage];
+							+ limInf[dirTramage];
 
 		    compte++;
 
@@ -1514,6 +1514,27 @@ bool Grid_BitSet::isInSet(unsigned long long int *coords)
     this->intCoordsToNum_dm1(coords, &posX);
 
     return (*gridTab[posX])[coords[dirTramage]];
+    }
+
+
+int Grid_BitSet::getNumberOfViableNeighbors(unsigned long long int pos)
+    {
+    int res = 0;
+    unsigned long long int tempPos;
+    unsigned long long int intCoords[dim];
+    for(int k = 0; k< pow3; k++)
+	{
+	tempPos = pos + indicesDecal[k];
+	if(tempPos != pos)
+	    {
+	    this->numToIntCoords(tempPos,  intCoords);
+	    if(this->isInSet(intCoords))
+		{
+		res++;
+		}
+	    }
+	}
+    return res;
     }
 
 unsigned long long int Grid_BitSet::getNearestPointInSet(double *coords)
@@ -1586,7 +1607,7 @@ void Grid_BitSet::computeSubGridShifts()
 	for (int i = 0; i < dim - 2; i++)
 	    {
 	    numX = numX * nbPointsSubGrid[i + 1]
-		    + lesDecalagesCellSub[k][i + 1];
+					  + lesDecalagesCellSub[k][i + 1];
 	    }
 	indicesDecalCellSub[k] = numX;
 
@@ -1650,7 +1671,7 @@ void Grid_BitSet::computeSubGridShifts()
 	for (int i = 0; i < dim - 2; i++)
 	    {
 	    numX = numX * nbPointsSubGrid[i + 1]
-		    + lesDecalagesAxesSub[k][i + 1];
+					  + lesDecalagesAxesSub[k][i + 1];
 	    }
 
 	(indicesDecalAxesSub)[k] = numX;

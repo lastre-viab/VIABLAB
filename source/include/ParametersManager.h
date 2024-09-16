@@ -30,10 +30,8 @@ class ParametersManager
     {
 public:
     ParametersManager();
-    ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp,
-	    systemParams *sp);
-    ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp,
-	    systemParams *sp, int nbOmpThreads, string paramsFile);
+    ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp, systemParams *sp);
+    ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp, systemParams *sp, int nbOmpThreads, string paramsFile);
     gridParams* getGridParameters();
     algoViabiParams* getAlgoParameters();
     controlParams* getControlParameters();
@@ -51,12 +49,12 @@ private:
     systemParams *systemParameters;
     int nbOmpThreads;
     string parametersFileName;
-    void readTabData(ptree *dataRoot, double *target, string label,
-	    int nbElements);
-    void readTabData(ptree *dataRoot, unsigned long long int *target,
-	    string label, int nbElements);
-    void readTabData(ptree *dataRoot, int *target, string label,
-	    int nbElements);
+    void readTabData(ptree *dataRoot, double *target, string label, int nbElements);
+    void readTabData(ptree *dataRoot, unsigned long long int *target, string label, int nbElements);
+    void readTabData(ptree *dataRoot, int *target, string label, int nbElements);
+    void readDoubleTabData(ptree *dataRoot, int *target, string label, int nbElements, int dim);
+    void readDoubleTabData(ptree *dataRoot, double *target, string label, int nbElements, int dim);
+    void readDoubleTabData(ptree *dataRoot, unsigned long long int *target, string label, int nbElements, int dim);
     };
 
 #endif /* SRC_PARAMETERSMANAGER_H_ */

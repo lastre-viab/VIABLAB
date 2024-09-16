@@ -51,6 +51,7 @@
 #include "boost/property_tree/detail/info_parser_error.hpp"
 #include "boost/property_tree/detail/info_parser_utils.hpp"
 #include "boost/property_tree/json_parser.hpp"
+#include "boost/foreach.hpp"
 using namespace boost::property_tree;
 
 #include "../spdlog/include/spdlog/spdlog.h"
@@ -194,6 +195,7 @@ struct controlParams
 struct systemParams
     {
     void (*DYNAMICS)(double*, double*, double*);
+    void (*DYNAMICS_TYCH)(double*, double*, double*, double*);
     void (*DYNAMICS_FD)(unsigned long long int*, unsigned long long int*,
 	    unsigned long long int*);
     void (*DYNAMICS_TYCH_FD)(unsigned long long int*, unsigned long long int*,
@@ -214,9 +216,12 @@ struct systemParams
 	    unsigned long long int*);
 
     double (*L_FUNC)(double*, double*);
+    double (*L_FUNC_TYCH)(double*, double*, double*);
     double (*MU_FUNC_FD)(unsigned long long int*, unsigned long long int*);
     double (*M_FUNC)(double*, double*);
+    double (*M_FUNC_TYCH)(double*, double*, double*);
     void (*JACOBIAN)(double *x, double *u, double **jacob);
+    void (*JACOBIAN_TYCH)(double *x, double *u, double *v, double **jacob);
     void (*LOCAL_DYN_BOUNDS)(double *x, double *res);
     int COMPUTE_LC;
     double LIP;

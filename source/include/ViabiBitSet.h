@@ -47,6 +47,7 @@ public:
     virtual void saveViableSets();
     virtual SysDyn* GetSysDynForViabProblem();
 
+    void saveIntermediateViableSets(int refine);
     void setK0();
     void setK0_fd();
     void testK0();
@@ -55,6 +56,7 @@ public:
     void saveViabGarantiRetro(string fileName);
 
     bool findViabImagePoint(double *currentPos, bool print);
+    bool findGuarantedViabImagePoint(double *xCoordsDouble, bool print);
     bool findViabImagePoint_noControl(double *xCoordsDouble, bool print);
     void initialiseTargetPointList();
     int computeViableTrajectorySetVal(double *initPosition, double finalTime,
@@ -70,6 +72,7 @@ private:
     Grid_BitSet *grid;
     void InitViabiBitSet(algoViabiParams avbp);
     void ViabilityKernelSimple(bool sortieOK, int nbArret);
+    void GuarantedViabilityKernelSimple(bool sortieOK, int nbArret);
     void computeDiscreteImageOfPoint(double *doublePointCoords,
 	    unsigned long long int *intPointCoords);
     void computeDiscreteImageOfPoint_noControl(double *doublePointCoords,
@@ -77,14 +80,17 @@ private:
 
     void noyauViabi_FD(bool sortieOK, int nbArret);
     void noyauViabi(bool sortieOK, int nbArret);
+    void noyauViabiGuaranti(bool sortieOK, int nbArret);
     void noyauViabi_sansControle(bool sortieOK, int nbArret);
     void noyauViabi_omp(bool sortieOK, int nbArret);
     void noyauViabi_sansControle_omp(bool sortieOK, int nbArret);
     void noyauViabiGaranti_FD(bool sortieOK, int nbArret);
     void CaptureBasin_ContinuousDynamics();
     void CaptureBasin_DiscreteDynamics();
-
+    unsigned long long int findViableDiscreteSuccessor(unsigned long long int pos, double dt);
+    int findViabControl_bis(double *currentPos, unsigned long long int optimDiscreteSuccessor, double &dt, int nbStepIter, double stepCoeff, double *resPos, bool &succes);
     void computeViableTrajectories();
+    int computeViableTrajectorySetVal_bis(double *initPosition, double finalTime, string fileName);
     /*!
      *  \brief  Copie pour raisons de rapidt�  de la valeur de dimension d'�tat
      */

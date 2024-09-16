@@ -405,6 +405,7 @@ bool Grid::isPointInGrid(double *coords)
 
     }
 
+
 bool Grid::isPointInGrid_fd(unsigned long long int *coords)
     {
 

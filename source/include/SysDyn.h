@@ -55,6 +55,7 @@ public:
      * @param[out] res : le r?����sultat
      */
     void (*dynamics)(double*, double*, double*);
+    void (*dynamics_tych)(double*, double*, double*, double*);
     void (*dynamics_fd)(unsigned long long int*, unsigned long long int*,
 	    unsigned long long int*);
     void (*dynamics_tych_fd)(unsigned long long int*, unsigned long long int*,
@@ -71,6 +72,7 @@ public:
      * @param[out] res : le r?����sultat
      */
     void (SysDyn::*discretDynamics)(double*, double*, double*, double rho);
+    void (SysDyn::*discretDynamics_tych)(double*, double*, double*, double*, double rho);
 
     /*!
      * \brief Pointeur sur l'une des fonctions membres d?����finissant
@@ -163,6 +165,7 @@ public:
      * @return valeur r?����elle si\f$(x,u)\in Dom(l)\f$, \f$ +\infty\f$ sinon
      */
     double (*lFunc)(double *x, double *u);
+    double (*lFunc_tych)(double *x, double *u, double *v);
     double (*lFunc_fd)(unsigned long long int *x, unsigned long long int *u);
     double (*lFunc_tych_fd)(unsigned long long int *x,
 	    unsigned long long int *u, unsigned long long int *v);
@@ -192,6 +195,7 @@ public:
      * @return valeur r?����elle si\f$(x,u)\in Dom(l)\f$, \f$ +\infty\f$ sinon
      */
     double (*mFunc)(double *x, double *u);
+    double (*mFunc_tych)(double *x, double *u, double *v);
 
     /*!
      * \brief Constructeur principal
@@ -357,6 +361,11 @@ private:
     double calculMF_local_num(double *x);
     double calculL_local_ana(double *x);
     double calculMF_local_ana(double *x);
+
+    double calculL_local_num_tych(double *x);
+    double calculMF_local_num_tych(double *x);
+    double calculL_local_ana_tych(double *x);
+
     double returnL_local_ana(double *x);
 
     double returnMF_local_ana(double *x);
@@ -373,6 +382,16 @@ private:
     void FDiscretEuler(double *x, double *u, double *res, double rho);
     void FDiscretRK2(double *x, double *u, double *res, double rho);
     void FDiscretRK4(double *x, double *u, double *res, double rho);
+
+    void FDiscret_tych(double *x, double *u, double *v, double *res, double rho);
+    /*!
+     * Méthodes  qui seront utilisées dans le cas où
+     * la dynamique est continue en temps et en espace
+     */
+    void FDiscretEuler_tych(double *x, double *u, double *v, double *res, double rho);
+    void FDiscretRK2_tych(double *x, double *u, double *v, double *res, double rho);
+    void FDiscretRK4_tych(double *x, double *u, double *v, double *res, double rho);
+
 
     int fd_dyn_type;
     double timeHorizon;
@@ -397,6 +416,7 @@ private:
     double **tychCoords;
     unsigned long long int **tychIntCoords;
     unsigned long long int totalNbPointsTych;
+    bool isTychastic;
 
     double L;  // constante de Lipschitz
     double MF;  // majoration de la norme de la dynamique
@@ -413,6 +433,7 @@ private:
     double **jacob;
     void (*localDynBounds)(double *x, double *res);
     void (*jacobian)(double *x, double *u, double **jacob);
+    void (*jacobian_tych)(double *x, double *u, double *v, double **jacob);
     double dynSignFactor;
 
     };

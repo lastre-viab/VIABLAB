@@ -70,17 +70,17 @@ ParametersManager::ParametersManager(gridParams *gp, algoViabiParams *avp, contr
     console_sink->set_pattern("[ViabLog] [%^%l%$] %v");
 
     spdlog::sinks_init_list sink_list =
-	{
-	file_sink, console_sink
-	};
+	    {
+		    file_sink, console_sink
+	    };
 
     spdlog::logger logger("multi_sink", sink_list.begin(), sink_list.end());
 
     // or you can even set multi_sink logger as default logger
     spdlog::set_default_logger(std::make_shared<spdlog::logger>("ViabLog", spdlog::sinks_init_list(
-	{
-	console_sink, file_sink
-	})));
+	    {
+    console_sink, file_sink
+	    })));
 
     spdlog::set_level(spdlog::level::trace);
 
@@ -372,14 +372,7 @@ void ParametersManager::readAlgoParametersFromJson()
 	{
 	if (dataRoot.find("INITIAL_POINTS") != dataRoot.not_found())
 	    {
-	    ptree pointsTree = dataRoot.find("INITIAL_POINTS")->second;
-	    int pointCounter = 0;
-	    for (ptree::value_type &point : pointsTree.get_child(""))
-		{
-		ptree pointRoot = point.second;
-		this->readTabData(&pointRoot, initPoints + pointCounter * gridParameters->DIM, "POINT_COORDINATES", gridParameters->DIM);
-		pointCounter++;
-		}
+	    readDoubleTabData(&dataRoot, initPoints, "INITIAL_POINTS", algoParameters->NB_TRAJS, gridParameters->DIM);
 	    }
 	}
     algoParameters->INIT_POINTS = initPoints;
@@ -387,14 +380,7 @@ void ParametersManager::readAlgoParametersFromJson()
     unsigned long long int *initPoints_fd = new unsigned long long int[gridParameters->DIM * algoParameters->NB_TRAJS];
     if (dataRoot.find("INITIAL_POINTS_DISCRETE") != dataRoot.not_found())
 	{
-	ptree pointsTree = dataRoot.find("INITIAL_POINTS_DISCRETE")->second;
-	int pointCounter = 0;
-	for (ptree::value_type &point : pointsTree.get_child(""))
-	    {
-	    ptree pointRoot = point.second;
-	    this->readTabData(&pointRoot, initPoints_fd + pointCounter * gridParameters->DIM, "POINT_COORDINATES", gridParameters->DIM);
-	    pointCounter++;
-	    }
+	readDoubleTabData(&dataRoot, initPoints_fd, "INITIAL_POINTS_DISCRETE", algoParameters->NB_TRAJS, gridParameters->DIM);
 	}
 
     algoParameters->INIT_POINTS_FD = initPoints_fd;
@@ -428,14 +414,7 @@ void ParametersManager::readAlgoParametersFromJson()
     double *initControls = new double[controlParameters->DIMC * algoParameters->NB_TRAJS];
     if (dataRoot.find("INITIAL_CONTROLS") != dataRoot.not_found())
 	{
-	ptree pointsTree = dataRoot.find("INITIAL_CONTROLS")->second;
-	int pointCounter = 0;
-	for (ptree::value_type &point : pointsTree.get_child(""))
-	    {
-	    ptree pointRoot = point.second;
-	    this->readTabData(&pointRoot, initControls + pointCounter * controlParameters->DIMC, "CONTROL_COORDINATES", controlParameters->DIMC);
-	    pointCounter++;
-	    }
+	readDoubleTabData(&dataRoot, initControls, "INITIAL_CONTROLS", algoParameters->NB_TRAJS, controlParameters->DIMC);
 	}
 
     algoParameters->INIT_CONTROLS = initControls;
@@ -563,6 +542,33 @@ void ParametersManager::readTabData(ptree *dataRoot, unsigned long long int *tar
 	}
     }
 
+void ParametersManager::readDoubleTabData(ptree *dataRoot, unsigned long long int *target, string label, int nbElements, int dim)
+    {
+    if (dataRoot->find(label) != dataRoot->not_found())
+	{
+	int cptPoints = 0;
+	BOOST_FOREACH(ptree::value_type & rowPair, dataRoot->find(label)->second)
+	    {
+	    if (cptPoints >= nbElements)
+		{
+		break;
+		}
+	    int cptCoords = 0;
+	    BOOST_FOREACH(ptree::value_type & itemPair, rowPair.second)
+		{
+		if(cptCoords >= dim)
+		    {
+		    break;
+		    }
+		target[cptPoints * dim + cptCoords] = (unsigned long long int) itemPair.second.get_value<int>();
+		cptCoords++;
+		}
+	    cptPoints++;
+	    }
+	}
+    logVector("[ParametrManager] : Read from table " + label, target, nbElements * dim);
+    }
+
 void ParametersManager::readTabData(ptree *dataRoot, int *target, string label, int nbElements)
     {
     if (dataRoot->find(label) != dataRoot->not_found())
@@ -576,6 +582,60 @@ void ParametersManager::readTabData(ptree *dataRoot, int *target, string label, 
 	    }
 	logVector("[ParametrManager] : Read from table " + label, target, nbElements);
 	}
+    }
+
+void ParametersManager::readDoubleTabData(ptree *dataRoot, int *target, string label, int nbElements, int dim)
+    {
+    if (dataRoot->find(label) != dataRoot->not_found())
+	{
+	int cptPoints = 0;
+	BOOST_FOREACH(ptree::value_type & rowPair, dataRoot->find(label)->second)
+	    {
+	    if (cptPoints >= nbElements)
+		{
+		break;
+		}
+	    int cptCoords = 0;
+	    BOOST_FOREACH(ptree::value_type & itemPair, rowPair.second)
+		{
+		if(cptCoords >= dim)
+		    {
+		    break;
+		    }
+		target[cptPoints * dim + cptCoords] = itemPair.second.get_value<int>();
+		cptCoords++;
+		}
+	    cptPoints++;
+	    }
+	}
+    logVector("[ParametrManager] : Read from table " + label, target, nbElements * dim);
+    }
+
+void ParametersManager::readDoubleTabData(ptree *dataRoot, double *target, string label, int nbElements, int dim)
+    {
+    if (dataRoot->find(label) != dataRoot->not_found())
+	{
+	int cptPoints = 0;
+	BOOST_FOREACH(ptree::value_type & rowPair, dataRoot->find(label)->second)
+	    {
+	    if (cptPoints >= nbElements)
+		{
+		break;
+		}
+	    int cptCoords = 0;
+	    BOOST_FOREACH(ptree::value_type & itemPair, rowPair.second)
+		{
+		if(cptCoords >= dim)
+		    {
+		    break;
+		    }
+		target[cptPoints * dim + cptCoords] = itemPair.second.get_value<double>();
+		cptCoords++;
+		}
+	    cptPoints++;
+	    }
+	}
+    logVector("[ParametrManager] : Read from table " + label, target, nbElements * dim);
     }
 
 void ParametersManager::readTabData(ptree *dataRoot, double *target, string label, int nbElements)

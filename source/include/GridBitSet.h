@@ -35,7 +35,7 @@ public:
 
     void addPointToSet(unsigned long long int *coords, double value);
     void addPointToSet(unsigned long long int pos, double value);
-
+    int getNumberOfViableNeighbors(unsigned long long int pos);
     virtual bool isInSet(unsigned long long int *coords);
     virtual unsigned long long int getNearestPointInSet(double *coords);
 

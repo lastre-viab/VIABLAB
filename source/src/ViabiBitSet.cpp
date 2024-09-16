@@ -157,8 +157,7 @@ void ViabiBitSet::setK0()
 
 	for (unsigned long long int k = 0; k < longTrame; k++)
 	    {
-	    xCoordsDouble[dirTramage] = limInf[dirTramage]
-		    + k * gridStep[dirTramage];
+	    xCoordsDouble[dirTramage] = limInf[dirTramage] + k * gridStep[dirTramage];
 
 	    testK = (dynsys->constraintsX(xCoordsDouble) < PLUS_INF);
 
@@ -169,8 +168,7 @@ void ViabiBitSet::setK0()
 
 void ViabiBitSet::initialiseConstraints()
     {
-    if ((this->dynsys->getDynType() == CC)
-	    || (this->dynsys->getDynType() == DC))
+    if ((this->dynsys->getDynType() == CC) || (this->dynsys->getDynType() == DC))
 	{
 	setK0();
 	}
@@ -217,8 +215,7 @@ void ViabiBitSet::testK0()
 	    }
 	for (unsigned long long int k = 0; k < longTrame; k++)
 	    {
-	    xCoordsDouble[dirTramage] = limInf[dirTramage]
-		    + k * gridStep[dirTramage];
+	    xCoordsDouble[dirTramage] = limInf[dirTramage] + k * gridStep[dirTramage];
 	    testK = (dynsys->constraintsX(xCoordsDouble) < PLUS_INF);
 	    if (!testK)
 		grid->setPoint(posX, k, testK);
@@ -274,8 +271,7 @@ void ViabiBitSet::InitViabiBitSet(algoViabiParams avbp)
      * la bonne partie de ces tableaux
      */
 
-    pointDI.tabImageCells =
-	    new unsigned long long int[dynsys->getTotalNbPointsC()];
+    pointDI.tabImageCells = new unsigned long long int[dynsys->getTotalNbPointsC()];
 
     doubleVect = new double[dim];
     doubleVect1 = new double[dim];
@@ -300,8 +296,7 @@ void ViabiBitSet::noyauViabi_FD(bool sortieOK, int nbArret)
 
     unsigned long long int nbC = dynsys->getTotalNbPointsC();
     boost::dynamic_bitset<> masque;
-    boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(
-	    longTrame, 0);
+    boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(longTrame, 0);
     boost::dynamic_bitset<> **gridTab = grid->getGridTab();
     unsigned long long int indice[dim];
     unsigned long long int **controlIntCoords = dynsys->getControlIntCoords();
@@ -360,13 +355,10 @@ void ViabiBitSet::noyauViabi_FD(bool sortieOK, int nbArret)
 			    compteComm = 0;
 			    while (!testNonVide && (compteComm < nbC))
 				{
-				if (dynsys->constraintsXU_fd(coordDiscretes,
-					controlIntCoords[compteComm]) < PLUS_INF)
+				if (dynsys->constraintsXU_fd(coordDiscretes, controlIntCoords[compteComm]) < PLUS_INF)
 				    {
 				    //  cout<< "  controle "<<controlIntCoords[compteComm][0]<<" "<<controlIntCoords[compteComm][1]<< " est autorise \n";
-				    dynsys->dynamics_fd(coordDiscretes,
-					    controlIntCoords[compteComm],
-					    imageXU);
+				    dynsys->dynamics_fd(coordDiscretes, controlIntCoords[compteComm], imageXU);
 				    // cout<< "  image "<<imageXU[0]<<" "<<imageXU[1]<< " est autorise \n";
 
 				    if (grid->isPointInGrid_fd(imageXU))
@@ -388,8 +380,7 @@ void ViabiBitSet::noyauViabi_FD(bool sortieOK, int nbArret)
 			    }	// fin de if masque[k]
 			}	// fin de for  de parcours de masque
 
-		    if (masquePointsEnleves->count()
-			    < (unsigned long long int) longTrame)
+		    if (masquePointsEnleves->count() < (unsigned long long int) longTrame)
 			{
 			(*gridTab[posX]) &= (*masquePointsEnleves);
 			}
@@ -403,8 +394,7 @@ void ViabiBitSet::noyauViabi_FD(bool sortieOK, int nbArret)
     cout << "fini nbIter=" << nbIter;
     }
 
-int ViabiBitSet::computeViableTrajectory(double *initPosition, double finalTime,
-	string fileName)
+int ViabiBitSet::computeViableTrajectory(double *initPosition, double finalTime, string fileName)
     {
 
     double succes = 0;
@@ -484,8 +474,7 @@ int ViabiBitSet::computeViableTrajectory(double *initPosition, double finalTime,
 
 	    if (!testNonVide)
 		{
-		cout
-			<< " La position initiale sélectionnée n'appartiant pas au noyau de viabilité\n";
+		cout << " La position initiale sélectionnée n'appartiant pas au noyau de viabilité\n";
 		succes = 0;
 		}
 	    else
@@ -518,8 +507,7 @@ int ViabiBitSet::computeViableTrajectory(double *initPosition, double finalTime,
 
 		    rho = min(rho, finalTime - time);
 
-		    bestCu = this->findViabControl(xCoordsDouble, rho, 1, 1.0,
-			    imageVect, maxnbViabPoints, testNonVide);
+		    bestCu = this->findViabControl(xCoordsDouble, rho, 1, 1.0, imageVect, maxnbViabPoints, testNonVide);
 		    time += rho;
 		    testviabInt = (maxnbViabPoints == nbPointsCube);
 
@@ -536,8 +524,7 @@ int ViabiBitSet::computeViableTrajectory(double *initPosition, double finalTime,
 
 			    for (int dc = 0; dc < dimC; dc++)
 				{
-				trajControlCoords[dc] =
-					controlCoords[bestCu][dc];
+				trajControlCoords[dc] = controlCoords[bestCu][dc];
 				}
 			    trajC.push_back(trajControlCoords);
 			    for (int i = 0; i < dim; i++)
@@ -552,14 +539,11 @@ int ViabiBitSet::computeViableTrajectory(double *initPosition, double finalTime,
 
 			    rho = min(rho, finalTime - time);
 
-			    bestCu = this->findViabControl(xCoordsDouble, rho,
-				    10, 0.95, imageVect, maxnbViabPoints,
-				    testNonVide);
+			    bestCu = this->findViabControl(xCoordsDouble, rho, 10, 0.95, imageVect, maxnbViabPoints, testNonVide);
 
 			    for (int dc = 0; dc < dimC; dc++)
 				{
-				trajControlCoords[dc] =
-					controlCoords[bestCu][dc];
+				trajControlCoords[dc] = controlCoords[bestCu][dc];
 				}
 			    trajC.push_back(trajControlCoords);
 			    for (int i = 0; i < dim; i++)
@@ -596,56 +580,54 @@ int ViabiBitSet::computeViableTrajectory(double *initPosition, double finalTime,
 	}
 
     // if(succes)
+    {
+
+    printf(" trajectoire trouvée. Enregistrement\n");
+
+    FILE *fi;
+    fi = fopen(fileName.c_str(), "w");
+    if (fi == NULL)
 	{
+	printf("** error: impossible to open the file %s.\n", fileName.c_str());
 
-	printf(" trajectoire trouvée. Enregistrement\n");
-
-	FILE *fi;
-	fi = fopen(fileName.c_str(), "w");
-	if (fi == NULL)
-	    {
-	    printf("** error: impossible to open the file %s.\n",
-		    fileName.c_str());
-
-	    }
-	else
-	    {
-	    list<valarray<double> >::iterator it = traj.begin();
-	    list<valarray<double> >::iterator itc = trajC.end();
-	    itc--;
-	    trajC.push_back(*itc);
-	    itc = trajC.begin();
-
-	    while (it != traj.end())
-		{
-
-		for (int l1 = 0; l1 < dim; l1++)
-		    {
-		    fprintf(fi, "%15.8f ", (*it)[l1]);
-		    cout << " " << (*it)[l1];
-		    }
-		fprintf(fi, "%15.8f ", (*it)[dim]);
-		cout << " " << (*it)[dim];
-		for (int dc = 0; dc < dimC; dc++)
-		    {
-		    fprintf(fi, "%15.8f ", (*itc)[dc]);
-		    cout << " " << (*itc)[dc] << endl;
-		    }
-		fprintf(fi, "\n");
-		it++;
-		itc++;
-		//   traj.pop_front();
-		//   trajC.pop_front();
-		}
-	    fclose(fi);
-	    }
 	}
+    else
+	{
+	list<valarray<double> >::iterator it = traj.begin();
+	list<valarray<double> >::iterator itc = trajC.end();
+	itc--;
+	trajC.push_back(*itc);
+	itc = trajC.begin();
+
+	while (it != traj.end())
+	    {
+
+	    for (int l1 = 0; l1 < dim; l1++)
+		{
+		fprintf(fi, "%15.8f ", (*it)[l1]);
+		cout << " " << (*it)[l1];
+		}
+	    fprintf(fi, "%15.8f ", (*it)[dim]);
+	    cout << " " << (*it)[dim];
+	    for (int dc = 0; dc < dimC; dc++)
+		{
+		fprintf(fi, "%15.8f ", (*itc)[dc]);
+		cout << " " << (*itc)[dc] << endl;
+		}
+	    fprintf(fi, "\n");
+	    it++;
+	    itc++;
+	    //   traj.pop_front();
+	    //   trajC.pop_front();
+	    }
+	fclose(fi);
+	}
+    }
     return succes;
 
     }
 
-int ViabiBitSet::computeViableTrajectoryHeavy(double *initPosition,
-	double *initControl, double finalTime, string fileName)
+int ViabiBitSet::computeViableTrajectoryHeavy(double *initPosition, double *initControl, double finalTime, string fileName)
     {
 
     double succes = 0;
@@ -725,8 +707,7 @@ int ViabiBitSet::computeViableTrajectoryHeavy(double *initPosition,
 
 	    if (!testNonVide)
 		{
-		cout
-			<< " La position initiale sélectionnée n'appartiant pas au noyau de viabilité\n";
+		cout << " La position initiale sélectionnée n'appartiant pas au noyau de viabilité\n";
 		succes = 0;
 		}
 	    else
@@ -772,8 +753,7 @@ int ViabiBitSet::computeViableTrajectoryHeavy(double *initPosition,
 		    rho = min(rho, finalTime - time);
 		    dynsys->setRho(rho);
 		    // cout<< " rho= "<<rho<<endl;
-		    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble,
-			    currentControl, doubleVect1, rho);
+		    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, currentControl, doubleVect1, rho);
 		    testNonVide = false;
 		    if (grid->isPointInGrid(doubleVect1))
 			{
@@ -789,8 +769,7 @@ int ViabiBitSet::computeViableTrajectoryHeavy(double *initPosition,
 			    for (int ii = 0; ii < nbPointsCube; ii++)
 				{
 				posTemp = cellNum + indicesDecalCell[ii];
-				grid->numToIntAndDoubleCoords(posTemp, testI,
-					testV);
+				grid->numToIntAndDoubleCoords(posTemp, testI, testV);
 				if (grid->isInSet(testI))
 				    {
 				    cptOK++;
@@ -822,11 +801,8 @@ int ViabiBitSet::computeViableTrajectoryHeavy(double *initPosition,
 			    }
 			else
 			    {
-			    cout
-				    << " ======================= Recalage pendant la phase controle constant  =======================\n";
-			    grid->findNearestViabPointInCell(xCoordsDouble,
-				    doubleVect1, xCoordsDouble,
-				    dynsys->dynConstraintsForTraj);
+			    cout << " ======================= Recalage pendant la phase controle constant  =======================\n";
+			    grid->findNearestViabPointInCell(xCoordsDouble, doubleVect1, xCoordsDouble, dynsys->dynConstraintsForTraj);
 			    for (int dc = 0; dc < dimC; dc++)
 				{
 				trajControlCoords[dc] = currentControl[dc];
@@ -837,11 +813,9 @@ int ViabiBitSet::computeViableTrajectoryHeavy(double *initPosition,
 			}
 		    else
 			{
-			cout
-				<< " ======================= CHANGEMENT DE CONTROLE =======================\n";
+			cout << " ======================= CHANGEMENT DE CONTROLE =======================\n";
 
-			bestCu = this->findViabControl(xCoordsDouble, rho, 1,
-				1.0, imageVect, maxnbViabPoints, testNonVide);
+			bestCu = this->findViabControl(xCoordsDouble, rho, 1, 1.0, imageVect, maxnbViabPoints, testNonVide);
 
 			testviabInt = (maxnbViabPoints == nbPointsCube);
 
@@ -862,10 +836,8 @@ int ViabiBitSet::computeViableTrajectoryHeavy(double *initPosition,
 
 				for (int dc = 0; dc < dimC; dc++)
 				    {
-				    trajControlCoords[dc] =
-					    controlCoords[bestCu][dc];
-				    currentControl[dc] =
-					    controlCoords[bestCu][dc];
+				    trajControlCoords[dc] = controlCoords[bestCu][dc];
+				    currentControl[dc] = controlCoords[bestCu][dc];
 				    }
 				trajC.push_back(trajControlCoords);
 				for (int i = 0; i < dim; i++)
@@ -875,19 +847,14 @@ int ViabiBitSet::computeViableTrajectoryHeavy(double *initPosition,
 				}
 			    else
 				{
-				cout
-					<< " ======================= Recalage =======================\n";
-				grid->findNearestViabPointInCell(xCoordsDouble,
-					imageVect, xCoordsDouble,
-					dynsys->dynConstraintsForTraj);
+				cout << " ======================= Recalage =======================\n";
+				grid->findNearestViabPointInCell(xCoordsDouble, imageVect, xCoordsDouble, dynsys->dynConstraintsForTraj);
 
 				cout << " controle ";
 				for (int dc = 0; dc < dimC; dc++)
 				    {
-				    trajControlCoords[dc] =
-					    controlCoords[bestCu][dc];
-				    currentControl[dc] =
-					    controlCoords[bestCu][dc];
+				    trajControlCoords[dc] = controlCoords[bestCu][dc];
+				    currentControl[dc] = controlCoords[bestCu][dc];
 				    cout << " " << currentControl[dc];
 				    }
 				trajC.push_back(trajControlCoords);
@@ -924,56 +891,54 @@ int ViabiBitSet::computeViableTrajectoryHeavy(double *initPosition,
 	}
 
     // if(succes)
+    {
+
+    printf(" trajectoire trouvée. Enregistrement\n");
+
+    FILE *fi;
+    fi = fopen(fileName.c_str(), "w");
+    if (fi == NULL)
 	{
+	printf("** error: impossible to open the file %s.\n", fileName.c_str());
 
-	printf(" trajectoire trouvée. Enregistrement\n");
-
-	FILE *fi;
-	fi = fopen(fileName.c_str(), "w");
-	if (fi == NULL)
-	    {
-	    printf("** error: impossible to open the file %s.\n",
-		    fileName.c_str());
-
-	    }
-	else
-	    {
-	    list<valarray<double> >::iterator it = traj.begin();
-	    list<valarray<double> >::iterator itc = trajC.end();
-	    itc--;
-	    trajC.push_back(*itc);
-	    itc = trajC.begin();
-
-	    while (it != traj.end())
-		{
-
-		for (int l1 = 0; l1 < dim; l1++)
-		    {
-		    fprintf(fi, "%15.8f ", (*it)[l1]);
-		    //  cout<< " "<<  (*it)[l1];
-		    }
-		fprintf(fi, "%15.8f ", (*it)[dim]);
-		//cout<< " "<<(*it)[dim];
-		for (int dc = 0; dc < dimC; dc++)
-		    {
-		    fprintf(fi, "%15.8f ", (*itc)[dc]);
-		    // cout<< " "<<(*itc)[dc]<<endl;
-		    }
-		fprintf(fi, "\n");
-		it++;
-		itc++;
-		//   traj.pop_front();
-		//   trajC.pop_front();
-		}
-	    fclose(fi);
-	    }
 	}
+    else
+	{
+	list<valarray<double> >::iterator it = traj.begin();
+	list<valarray<double> >::iterator itc = trajC.end();
+	itc--;
+	trajC.push_back(*itc);
+	itc = trajC.begin();
+
+	while (it != traj.end())
+	    {
+
+	    for (int l1 = 0; l1 < dim; l1++)
+		{
+		fprintf(fi, "%15.8f ", (*it)[l1]);
+		//  cout<< " "<<  (*it)[l1];
+		}
+	    fprintf(fi, "%15.8f ", (*it)[dim]);
+	    //cout<< " "<<(*it)[dim];
+	    for (int dc = 0; dc < dimC; dc++)
+		{
+		fprintf(fi, "%15.8f ", (*itc)[dc]);
+		// cout<< " "<<(*itc)[dc]<<endl;
+		}
+	    fprintf(fi, "\n");
+	    it++;
+	    itc++;
+	    //   traj.pop_front();
+	    //   trajC.pop_front();
+	    }
+	fclose(fi);
+	}
+    }
     return succes;
 
     }
 
-int ViabiBitSet::findViabControl(double *currentPos, double &dt, int nbStepIter,
-	double stepCoeff, double *resPos, int &nbViabVoisins, bool &succes)
+int ViabiBitSet::findViabControl(double *currentPos, double &dt, int nbStepIter, double stepCoeff, double *resPos, int &nbViabVoisins, bool &succes)
     {
 
     int nbPointsCube = (int) pow(2.0, dim);			//pow(2.0, dim);
@@ -1053,15 +1018,13 @@ int ViabiBitSet::findViabControl(double *currentPos, double &dt, int nbStepIter,
 	     * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
 	     * au point en cours
 	     */
-	    if (dynsys->constraintsXU(xCoordsDouble,
-		    controlCoords[cu])<PLUS_INF)
+	    if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
 		{
 		/*
 		 * calcul du successeur  du point en cours
 		 */
 		rho = dynsys->calculRho_local(xCoordsDouble);
-		(dynsys->*(dynsys->discretDynamics))(xCoordsDouble,
-			controlCoords[cu], doubleVect1, rho);
+		(dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[cu], doubleVect1, rho);
 		if (grid->isPointInGrid(doubleVect1))
 		    {
 		    /*
@@ -1084,19 +1047,15 @@ int ViabiBitSet::findViabControl(double *currentPos, double &dt, int nbStepIter,
 			for (int ii = 0; ii < nbPointsCube; ii++)
 			    {
 			    posTemp = cellNum + indicesDecalCell[ii];
-			    grid->numToIntAndDoubleCoords(posTemp, testI,
-				    testV);
-			    if (dynsys->dynConstraintsForTraj(xCoordsDouble,
-				    testV) < PLUS_INF)// on v�rifie si la projection corrspond aux contraintes de dynamique
+			    grid->numToIntAndDoubleCoords(posTemp, testI, testV);
+			    if (dynsys->dynConstraintsForTraj(xCoordsDouble, testV) < PLUS_INF)	// on v�rifie si la projection corrspond aux contraintes de dynamique
 				{
 				double dist = 0.0;
 				for (int k = 0; k < dim; k++)
 				    {
-				    dist = max(dist,
-					    abs(testV[k] - doubleVect1[k]));
+				    dist = max(dist, abs(testV[k] - doubleVect1[k]));
 				    }
-				testviabInt = (grid->isInSet(testI)
-					&& (dist <= hMax / 2.0));
+				testviabInt = (grid->isInSet(testI) && (dist <= hMax / 2.0));
 				if (grid->isInSet(testI))
 				    {
 				    cptOK++;
@@ -1116,8 +1075,8 @@ int ViabiBitSet::findViabControl(double *currentPos, double &dt, int nbStepIter,
 		}
 	    cu++;
 	    }				//fin de parcours de tous les contrôles
-					// la boucle s'arête ici u premier contrôle
-					// qui donne un successeur viable
+	// la boucle s'arête ici u premier contrôle
+	// qui donne un successeur viable
 	iter++;
 	rho = rho * stepCoeff;
 	dynsys->setRho(rho);
@@ -1126,8 +1085,7 @@ int ViabiBitSet::findViabControl(double *currentPos, double &dt, int nbStepIter,
 
     succes = testNonVide;
     nbViabVoisins = maxnbViabPoints;
-    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[bestCu],
-	    doubleVect1, rho);
+    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[bestCu], doubleVect1, rho);
     for (int i = 0; i < dim; i++)
 	{
 	resPos[i] = doubleVect1[i];
@@ -1135,8 +1093,7 @@ int ViabiBitSet::findViabControl(double *currentPos, double &dt, int nbStepIter,
     return bestCu;
     }
 
-bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble,
-	bool print)
+bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print)
     {
 
     //cout<< " findImage no control debut"<<endl;
@@ -1203,8 +1160,7 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble,
 	    /*
 	     * calcul du successeur  du point en cours
 	     */
-	    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble,
-		    controlCoords[cu], doubleVect1, rho);
+	    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[cu], doubleVect1, rho);
 	    //cout<< "image "; printVector(doubleVect1, dim);
 
 	    if (grid->isPointInGrid(doubleVect1))
@@ -1231,17 +1187,14 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble,
 			{
 			posTemp = cellNum + indicesDecalCell[ii];
 			grid->numToIntAndDoubleCoords(posTemp, testI, testV);
-			if (dynsys->dynConstraintsForTraj(xCoordsDouble,
-				testV)<PLUS_INF)
+			if (dynsys->dynConstraintsForTraj(xCoordsDouble, testV) < PLUS_INF)
 			    {
 			    double dist = 0.0;
 			    for (int k = 0; k < dim; k++)
 				{
-				dist = max(dist,
-					abs(testV[k] - doubleVect1[k]));
+				dist = max(dist, abs(testV[k] - doubleVect1[k]));
 				}
-			    testNonVide = grid->isInSet(testI)
-				    && (dist <= hMax / 2.0);
+			    testNonVide = grid->isInSet(testI) && (dist <= hMax / 2.0);
 
 			    }
 			ii++;
@@ -1251,9 +1204,7 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble,
 	    else
 		{
 		//cout<< " sortie du domaine : autorisation : "<<grid->unboundedDomain<< "point "<< doubleVect1[0]<<" "<<doubleVect1[1]<<endl;
-		testNonVide = grid->unboundedDomain
-			&& grid->isPointInGridWithConstr(doubleVect1)
-			&& (dynsys->constraintsX(doubleVect1) < PLUS_INF);
+		testNonVide = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1) && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
 		}
 	    }
 	cu += stepCu;
@@ -1341,8 +1292,7 @@ bool ViabiBitSet::findViabImagePoint(double *xCoordsDouble, bool print)
 	    /*
 	     * calcul du successeur  du point en cours
 	     */
-	    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble,
-		    controlCoords[cu], doubleVect1, rho);
+	    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[cu], doubleVect1, rho);
 	    if (grid->isPointInGrid(doubleVect1))
 		{
 		/*
@@ -1367,17 +1317,14 @@ bool ViabiBitSet::findViabImagePoint(double *xCoordsDouble, bool print)
 			{
 			posTemp = cellNum + indicesDecalCell[ii];
 			grid->numToIntAndDoubleCoords(posTemp, testI, testV);
-			if (dynsys->dynConstraintsForTraj(xCoordsDouble,
-				testV)<PLUS_INF)
+			if (dynsys->dynConstraintsForTraj(xCoordsDouble, testV) < PLUS_INF)
 			    {
 			    double dist = 0.0;
 			    for (int k = 0; k < dim; k++)
 				{
-				dist = max(dist,
-					abs(testV[k] - doubleVect1[k]));
+				dist = max(dist, abs(testV[k] - doubleVect1[k]));
 				}
-			    testNonVide = grid->isInSet(testI)
-				    && (dist <= hMax / 2.0);
+			    testNonVide = grid->isInSet(testI) && (dist <= hMax / 2.0);
 			    ii++;
 			    }
 			}
@@ -1385,9 +1332,7 @@ bool ViabiBitSet::findViabImagePoint(double *xCoordsDouble, bool print)
 		}
 	    else
 		{
-		testNonVide = grid->unboundedDomain
-			&& grid->isPointInGridWithConstr(doubleVect1)
-			&& (dynsys->constraintsX(doubleVect1) < PLUS_INF);
+		testNonVide = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1) && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
 		}
 
 	    }
@@ -1407,14 +1352,12 @@ bool ViabiBitSet::findViabImagePoint(double *xCoordsDouble, bool print)
 		 * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
 		 * au point en cours
 		 */
-		if (dynsys->constraintsXU(xCoordsDouble,
-			controlCoords[cu])<PLUS_INF)
+		if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
 		    {
 		    /*
 		     * calcul du successeur  du point en cours
 		     */
-		    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble,
-			    controlCoords[cu], doubleVect1, rho);
+		    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[cu], doubleVect1, rho);
 		    if (grid->isPointInGrid(doubleVect1))
 			{
 			/*
@@ -1443,16 +1386,13 @@ bool ViabiBitSet::findViabImagePoint(double *xCoordsDouble, bool print)
 			    while (ii < nbPointsCube && !testNonVide)
 				{
 				posTemp = cellNum + indicesDecalCell[ii];
-				grid->numToIntAndDoubleCoords(posTemp, testI,
-					testV);
-				if (dynsys->dynConstraintsForTraj(xCoordsDouble,
-					testV) < PLUS_INF)
+				grid->numToIntAndDoubleCoords(posTemp, testI, testV);
+				if (dynsys->dynConstraintsForTraj(xCoordsDouble, testV) < PLUS_INF)
 				    {
 				    double dist = 0.0;
 				    for (int k = 0; k < dim; k++)
 					{
-					dist = max(dist,
-						abs(testV[k] - doubleVect1[k]));
+					dist = max(dist, abs(testV[k] - doubleVect1[k]));
 					}
 				    //testNonVide= grid->isInSet(testI) && (dist<=hMax/2.0);
 
@@ -1481,8 +1421,487 @@ bool ViabiBitSet::findViabImagePoint(double *xCoordsDouble, bool print)
 
     }
 
-int ViabiBitSet::computeViableTrajectorySetVal(double *initPosition,
-	double finalTime, string fileName)
+bool ViabiBitSet::findGuarantedViabImagePoint(double *xCoordsDouble, bool print)
+    {
+    print = false;
+    int nbPointsCube = (int) pow(2.0, dim);			//pow(2.0, dim);
+    /*
+     * tableaux temporaires pour récupérer les indices du point dans la
+     * grille
+     */
+    unsigned long long int *testI = new unsigned long long int[dim];
+    double *testV = new double[dim];
+    /*
+     * tableau de coordonnées  définissant
+     * la grille de contrôles
+     */
+    double **controlCoords = dynsys->getControlCoords();
+    double **tychCoords = dynsys->getTychCoords();
+    /*
+     * nombre total de points de contrôle
+     */
+    unsigned long long int nbCTotal = dynsys->getTotalNbPointsC();
+    unsigned long long int nbTyTotal = dynsys->getTotalNbPointsTy();
+
+    /*
+     * indices de déplacement pour parcourir les sommets d'une malle à partir
+     * du sommet inf
+     */
+    long long int *indicesDecalCell = grid->getIndicesDecalCell();
+    /*
+     * coordonnées du points corent de la trajectoire
+     */
+
+    /*
+     * numéros de mailles
+     */
+    int cellNum;
+
+    int posTemp;
+    double rho = dynsys->calculRho_local(xCoordsDouble);
+
+    /*
+     * tests de validité de point initial
+     */
+    bool testNonVide = false;
+
+    double *doubleVect1 = new double[dim];
+
+    double hMax = grid->maxStep;
+
+    unsigned long long int cu = 0;
+
+    /*
+     * On recherche la plus grande puissance de 2 plus grande  que le nombre totale de
+     * contrôles à parcourir
+     */
+
+    int p = 0;
+    unsigned long long int pow2 = 1;
+    while (pow2 <= nbCTotal)
+	{
+	p++;
+	pow2 *= 2;
+	}
+    p--;
+    pow2 = pow2 / 2;
+
+    int first = 0;
+    int stepCu = pow2;
+    cu = first;
+    bool testAllTych;
+    while ((cu < nbCTotal) && !testNonVide)
+	{
+	/*
+	 * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
+	 * au point en cours
+	 */
+	testAllTych = true;
+	int ty = 0;
+	while (ty < nbTyTotal && testAllTych)
+	    {
+	    if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
+		{
+		/*
+		 * calcul du successeur  du point en cours
+		 */
+		(dynsys->*(dynsys->discretDynamics_tych))(xCoordsDouble, controlCoords[cu], tychCoords[ty], doubleVect1, rho);
+		if (grid->isPointInGrid(doubleVect1))
+		    {
+		    /*
+		     *  le sucesseur est dans la grille de calcul
+		     */
+		    if (dynsys->constraintsX(doubleVect1) < PLUS_INF)
+			{
+			/*
+			 * le successeur vérifie les contraintes
+			 * On identifie la maille où il se trouve
+			 */
+			cellNum = grid->localizePoint(doubleVect1);
+			// cout<< " num cellule "<<cellNum<<endl;
+
+			/*
+			 * On parcours les sommets de la maille
+			 * autour du sucesseur pour voir s'il y a des
+			 * points viables
+			 */
+			int ii = 0;
+			bool imageInSet = false;
+			while (ii < nbPointsCube && !imageInSet)
+			    {
+			    posTemp = cellNum + indicesDecalCell[ii];
+			    grid->numToIntAndDoubleCoords(posTemp, testI, testV);
+			    double dist = 0.0;
+			    for (int k = 0; k < dim; k++)
+				{
+				dist = max(dist, abs(testV[k] - doubleVect1[k]));
+				}
+			    imageInSet = grid->isInSet(testI) && (dist <= hMax / 2.0);
+			    ii++;
+			    }
+			testAllTych &= imageInSet;
+			}
+		    }
+		else
+		    {
+		    testAllTych = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1)
+																							    && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
+		    }
+
+		}
+	    ty++;
+	    }
+	testNonVide = testAllTych;
+	cu += stepCu;
+	}			//fin de parcours de tous les contrôles
+
+    if (!testNonVide)
+	{
+	first = stepCu / 2;
+	while (stepCu > 1 && !testNonVide)
+	    {
+	    //    cout<< " parcours controles debut = "<<first<< " step= "<<stepCu<<endl;
+	    cu = first;
+	    while (cu < nbCTotal && !testNonVide)
+		{
+		/*
+		 * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
+		 * au point en cours
+		 */
+		testAllTych = true;
+		int ty = 0;
+		while (ty < nbTyTotal && testAllTych)
+		    {
+		    if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
+			{
+			/*
+			 * calcul du successeur  du point en cours
+			 */
+			(dynsys->*(dynsys->discretDynamics_tych))(xCoordsDouble, controlCoords[cu], tychCoords[ty], doubleVect1, rho);
+			if (grid->isPointInGrid(doubleVect1))
+			    {
+			    /*
+			     *  le sucesseur est dans la grille de calcul
+			     */
+			    if (dynsys->constraintsX(doubleVect1) < PLUS_INF)
+				{
+				/* cout<< " image du point ";
+				 for(int k=0;k<dim;k++)
+				 {
+				 cout<< " "<<doubleVect1[k];
+				 }*/
+				/*
+				 * le successeur vérifie les contraintes
+				 * On identifie la maille où il se trouve
+				 */
+				cellNum = grid->localizePoint(doubleVect1);
+				// cout<< " num cellule "<<cellNum<<endl;
+
+				/*
+				 * On parcours les sommets de la maille
+				 * autour du sucesseur pour voir s'il y a des
+				 * points viables
+				 */
+				int ii = 0;
+				bool imageInSet = false;
+				while (ii < nbPointsCube && !imageInSet)
+				    {
+				    posTemp = cellNum + indicesDecalCell[ii];
+				    grid->numToIntAndDoubleCoords(posTemp, testI, testV);
+				    double dist = 0.0;
+				    for (int k = 0; k < dim; k++)
+					{
+					dist = max(dist, abs(testV[k] - doubleVect1[k]));
+					}
+				    imageInSet = grid->isInSet(testI) && (dist <= hMax / 2.0);
+				    ii++;
+				    }
+				testAllTych &= imageInSet;
+				}
+			    }
+			else
+			    {
+			    testAllTych = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1)
+																								    && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
+			    }
+
+			}
+		    ty++;
+		    }
+		testNonVide = testAllTych;
+		cu += stepCu;
+		}			//fin de parcours de tous les contrôles
+
+	    first = first / 2;
+	    stepCu = stepCu / 2;
+	    }
+	}
+
+    delete[] doubleVect1;
+    delete[] testV;
+    delete[] testI;
+
+    return testNonVide;
+
+    }
+
+unsigned long long int ViabiBitSet::findViableDiscreteSuccessor(unsigned long long int pos, double dt)
+    {
+    int nbPointsCube = (int) pow(2.0, dim);
+    unsigned long long int bestViabSuccessor = grid->nbTotalPoints + 1;
+    unsigned long long int viabSuccessor = grid->nbTotalPoints + 1;
+    unsigned long long int intCoordsOnDiscreteTraj[dim];
+    unsigned long long int testI[dim];
+    double testV[dim];
+    /*
+     * coordonnées du points corent de la trajectoire
+     */
+    double xCoordsDouble[dim];
+    grid->numToIntAndDoubleCoords(pos, intCoordsOnDiscreteTraj, xCoordsDouble);
+
+    double imageVect[dim];
+
+    /*
+     * tableau de coordonnées  définissant
+     * la grille de contrôles
+     */
+    double **controlCoords = dynsys->getControlCoords();
+    /*
+     * nombre total de points de contrôle
+     */
+    unsigned long long int nbCTotal = dynsys->getTotalNbPointsC();
+
+    /*
+     * indices de déplacement pour parcourir les sommets d'une malle à partir
+     * du sommet inf
+     */
+    long long int *indicesDecalCell = grid->getIndicesDecalCell();
+
+    /*
+     * le pas de temps déterminé localement pour chaque point de la trajectoire
+     */
+    double rho;
+    /*
+     * numéros de mailles
+     */
+    int cellNum = 0;
+
+    int posTemp;
+
+    rho = dt;
+    dynsys->setRho(rho);
+    /*
+     * on parcours tous les contrôles
+     */
+
+    double minVal = PLUS_INF;
+    unsigned long long int cu = 0;
+
+    minVal = PLUS_INF;
+    bool testNonVide = false;
+    int maxNbViableNeighbors = 0;
+    bool atLeastOneViableSuccessorFound = false;
+    while (cu < nbCTotal && !testNonVide)
+	{
+	/*
+	 * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
+	 * au point en cours
+	 */
+	if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
+	    {
+	    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[cu], imageVect, rho);
+	    if (grid->isPointInGrid(imageVect))
+		{
+		/*
+		 *  le sucesseur est dans la grille de calcul
+		 */
+		if (dynsys->constraintsX(imageVect) < PLUS_INF)
+		    {
+		    /*
+		     * le successeur vérifie les contraintes
+		     * On identifie la maille où il se trouve
+		     */
+		    cellNum = grid->localizePoint(imageVect);
+		    //cout<< " num cellule "<<cellNum<<endl;
+
+		    /*
+		     * On parcours les sommets de la maille
+		     * autour du sucesseur pour voir s'il y a des
+		     * points viables
+		     */
+		    viabSuccessor = grid->getNearestPointInSet(imageVect);
+		    testNonVide = (viabSuccessor < grid->nbTotalPoints + 1);
+
+		    /*   for (int ii = 0; ii < nbPointsCube; ii++)
+			{
+			posTemp = cellNum + indicesDecalCell[ii];
+			grid->numToIntAndDoubleCoords(posTemp, testI, testV);
+
+			if (grid->isInSet(testI))
+			    {
+			    if(!atLeastOneViableSuccessorFound)
+				{
+				cout<< " viab successor found pour cu = "<<cu<<endl;
+				viabSuccessor = posTemp;
+				atLeastOneViableSuccessorFound = true;
+				}
+
+
+			    int nbGoodNeighbors = grid->getNumberOfViableNeighbors(posTemp);
+			    if(nbGoodNeighbors > maxNbViableNeighbors)
+				{
+				bestViabSuccessor = posTemp;
+				maxNbViableNeighbors = nbGoodNeighbors;
+				testNonVide = true;
+				spdlog::info(" Best viab successor cu =  {}, nb voisins viables {}", cu, nbGoodNeighbors );
+				}
+			    }
+			}*/
+		    }
+		}
+	    }
+	cu++;
+	}
+
+	return viabSuccessor;
+    }
+
+int ViabiBitSet::findViabControl_bis(double *currentPos, unsigned long long int optimDiscreteSuccessor, double &dt, int nbStepIter, double stepCoeff,
+	double *resPos, bool &succes)
+    {
+    double realCoordsOnDiscreteTraj[dim];
+    unsigned long long int intCoordsOnDiscreteTraj[dim];
+    double rho0 = dt;
+    dynsys->setRho(rho0);
+    int bestCu;
+    long long int *indicesDecalCell = grid->getIndicesDecalCell();
+    grid->numToIntAndDoubleCoords(optimDiscreteSuccessor, intCoordsOnDiscreteTraj, realCoordsOnDiscreteTraj);
+
+    double imageVect[dim], testV[dim];
+    unsigned long long int testI[dim];
+    int nbPointsCube = (int) pow(2.0, dim);
+    double **controlCoords = dynsys->getControlCoords();
+    /*
+     * nombre total de points de contrôle
+     */
+    unsigned long long int nbCTotal = dynsys->getTotalNbPointsC();
+    unsigned long long int posTemp;
+    /*
+     * coordonnées du points corent de la trajectoire
+     */
+    double xCoordsDouble[dim];
+    ostringstream os;
+    string msg;
+
+    /*
+     * tests de validité de point initial
+     */
+    bool testNonVide = false;
+
+    spdlog::info("Start of computing of the real viable control");
+
+    for (int i = 0; i < (int) dim; i++)
+	{
+	xCoordsDouble[i] = currentPos[i];
+	}
+    os << "Time step  : " << rho0 << ". Current point = ";
+    msg = os.str();
+    os.str("");
+    logVector(msg, xCoordsDouble, dim);
+
+    bestCu = 0;
+    int iter = 0;
+    double rhoOptim = rho0;
+    double rhoMin = rho0 * (1 - stepCoeff);			// we will test steps from rhoMin to  rhoMax = rho0 * (1 + stepCoeff);
+    double rho = rhoMin;
+    double step = rho0 * stepCoeff / nbStepIter;
+    testNonVide = false;
+    double minDist = PLUS_INF;
+    while (iter < 2 * nbStepIter + 1)
+	{
+	unsigned long long int cu = 0;
+
+	while (cu < nbCTotal)
+	    {
+	    /*
+	     * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
+	     * au point en cours
+	     */
+	    if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
+		{
+		(dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[cu], imageVect, rho);
+		if (grid->isPointInGrid(imageVect))
+		    {
+		    /*
+		     *  le sucesseur est dans la grille de calcul
+		     */
+		    if (dynsys->constraintsX(imageVect) < PLUS_INF)
+			{
+			unsigned long long int cellNum = grid->localizePoint(imageVect);
+
+			/*
+			 * On parcours les sommets de la maille
+			 * autour du sucesseur pour voir s'il y a des
+			 * points viables
+			 */
+			bool allInSet = false;
+			for (int ii = 0; ii < nbPointsCube; ii++)
+			    {
+			    posTemp = cellNum + indicesDecalCell[ii];
+			    grid->numToIntAndDoubleCoords(posTemp, testI, testV);
+
+			    allInSet |= grid->isInSet(testI);
+
+			    }
+			if(allInSet)
+			    {
+			    testNonVide = true;
+			    double dist = 0.0;
+			    for (int k = 0; k < dim; k++)
+				{
+				dist += (imageVect[k] - realCoordsOnDiscreteTraj[k]) * (imageVect[k] - realCoordsOnDiscreteTraj[k]);
+				}
+			    dist = sqrt(dist);
+
+			    if (dist < minDist)
+				{
+
+				minDist = dist;
+				bestCu = cu;
+				rhoOptim = rho;
+				}
+			    }
+
+			}
+		    }
+		}
+	    cu++;
+	    }		//fin de parcours de tous les contrôles
+
+	iter++;
+	rho += step;
+	dynsys->setRho(rho);
+
+	}
+
+    if (testNonVide)
+	{
+	spdlog::info("Best real control found");
+	spdlog::info(" Distance {}, optimal time step {}", minDist, rhoOptim);
+	}
+    succes = testNonVide;
+    dynsys->setRho(rhoOptim);
+
+    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[bestCu], imageVect, rhoOptim);
+    for (int i = 0; i < (int) dim; i++)
+	{
+	resPos[i] = imageVect[i];
+	}
+    dt = rhoOptim;
+    return bestCu;
+    }
+
+int ViabiBitSet::computeViableTrajectorySetVal(double *initPosition, double finalTime, string fileName)
     {
 
     double succes = 0;
@@ -1562,8 +1981,7 @@ int ViabiBitSet::computeViableTrajectorySetVal(double *initPosition,
 
 	    if (!testNonVide)
 		{
-		cout
-			<< " La position initiale sélectionnée n'appartiant pas au noyau de viabilité\n";
+		cout << " La position initiale sélectionnée n'appartiant pas au noyau de viabilité\n";
 		succes = 0;
 		}
 	    else
@@ -1601,8 +2019,7 @@ int ViabiBitSet::computeViableTrajectorySetVal(double *initPosition,
 
 		    //  cout<< " rho= "<<rho<<endl;
 
-		    bestCu = this->findViabControl(xCoordsDouble, rho, 1, 1.0,
-			    imageVect, maxnbViabPoints, testNonVide);
+		    bestCu = this->findViabControl(xCoordsDouble, rho, 1, 1.0, imageVect, maxnbViabPoints, testNonVide);
 		    time += rho;
 		    testviabInt = (maxnbViabPoints == nbPointsCube);
 
@@ -1623,8 +2040,7 @@ int ViabiBitSet::computeViableTrajectorySetVal(double *initPosition,
 
 			    for (int dc = 0; dc < dimC; dc++)
 				{
-				trajControlCoords[dc] =
-					controlCoords[bestCu][dc];
+				trajControlCoords[dc] = controlCoords[bestCu][dc];
 				}
 			    trajC.push_back(trajControlCoords);
 			    for (int i = 0; i < dim; i++)
@@ -1635,14 +2051,11 @@ int ViabiBitSet::computeViableTrajectorySetVal(double *initPosition,
 			else
 			    {
 			    //     cout<< " ======================= Recalage =======================\n";
-			    grid->findNearestViabPointInCell(xCoordsDouble,
-				    imageVect, xCoordsDouble,
-				    dynsys->dynConstraintsForTraj);
+			    grid->findNearestViabPointInCell(xCoordsDouble, imageVect, xCoordsDouble, dynsys->dynConstraintsForTraj);
 
 			    for (int dc = 0; dc < dimC; dc++)
 				{
-				trajControlCoords[dc] =
-					controlCoords[bestCu][dc];
+				trajControlCoords[dc] = controlCoords[bestCu][dc];
 				}
 			    trajC.push_back(trajControlCoords);
 
@@ -1676,49 +2089,332 @@ int ViabiBitSet::computeViableTrajectorySetVal(double *initPosition,
 	}
 
     // if(succes)
+    {
+
+    printf(" trajectoire trouvée. Enregistrement\n");
+
+    FILE *fi;
+    fi = fopen(fileName.c_str(), "w");
+    if (fi == NULL)
 	{
+	printf("** error: impossible to open the file %s.\n", fileName.c_str());
 
-	printf(" trajectoire trouvée. Enregistrement\n");
+	}
+    else
+	{
+	list<valarray<double> >::iterator it = traj.begin();
+	list<valarray<double> >::iterator itc = trajC.end();
+	itc--;
+	trajC.push_back(*itc);
+	itc = trajC.begin();
 
-	FILE *fi;
-	fi = fopen(fileName.c_str(), "w");
-	if (fi == NULL)
+	while (it != traj.end())
 	    {
-	    printf("** error: impossible to open the file %s.\n",
-		    fileName.c_str());
 
+	    for (int l1 = 0; l1 < dim; l1++)
+		{
+		fprintf(fi, "%15.8f ", (*it)[l1]);
+		//  cout<< " "<<  (*it)[l1];
+		}
+	    fprintf(fi, "%15.8f ", (*it)[dim]);
+	    //cout<< " "<<(*it)[dim];
+	    for (int dc = 0; dc < dimC; dc++)
+		{
+		fprintf(fi, "%15.8f ", (*itc)[dc]);
+		// cout<< " "<<(*itc)[dc]<<endl;
+		}
+	    fprintf(fi, "\n");
+	    it++;
+	    itc++;
+	    //   traj.pop_front();
+	    //   trajC.pop_front();
+	    }
+	fclose(fi);
+	}
+    }
+    return succes;
+
+    }
+
+int ViabiBitSet::computeViableTrajectorySetVal_bis(double *initPosition, double finalTime, string fileName)
+    {
+
+    double succes = 0;
+    int nbPointsCube = (int) pow(2.0, dim);			//pow(2.0, dim);
+
+    /*
+     * tableaux temporaires pour récupérer les indices du point dans la
+     * grille
+     */
+    unsigned long long int testI[dim];
+    double testV[dim];
+    /*
+     * tableau de coordonnées  définissant
+     * la grille de contrôles
+     */
+    double **controlCoords = dynsys->getControlCoords();
+
+    /*
+     * indices de déplacement pour parcourir les sommets d'une malle à partir
+     * du sommet inf
+     */
+    long long int *indicesDecalCell = grid->getIndicesDecalCell();
+    /*
+     * coordonnées du points corent de la trajectoire
+     */
+    double xCoordsDouble[dim], imageVect[dim], doubleCoordsOnDiscreteTraj[dim];
+    unsigned long long int intCoordsOnDiscreteTraj[dim];
+    /*
+     * le pas de temps déterminé localement pour chaque point de la trajectoire
+     */
+    double rho, realTimeStep;
+    /*
+     * numéros de mailles
+     */
+    int cellNum;
+    /*
+     * listes  pour contenir la trajectoire ( temps-position) et les contrôles
+     */
+    list<valarray<double> > traj, trajC, trajDiscrete;
+    unsigned long long int intDiscretPos;
+    /*
+     * structures accumulables dansune liste
+     */
+    valarray<double> newTrajPoint(dim + 1);
+    valarray<double> newTrajDiscretePoint(dim + 1);
+    valarray<double> trajControlCoords(dimC);
+
+    int posTemp;
+
+    /*
+     * tests de validité de point initial
+     */
+    bool testNonVide = false;
+    int cptOK = 0;
+    if (grid->isPointInGrid(initPosition))
+	{
+	if (dynsys->constraintsX(initPosition) < PLUS_INF)
+	    {
+	    cellNum = grid->localizePoint(initPosition);
+
+	    for (int ii = 0; ii < nbPointsCube; ii++)
+		{
+		posTemp = cellNum + indicesDecalCell[ii];
+		grid->numToIntAndDoubleCoords(posTemp, testI, testV);
+		if (grid->isInSet(testI))
+		    {
+		    cptOK++;
+		    }
+		}
+
+	    testNonVide = (cptOK > 0);
+
+	    if (!testNonVide)
+		{
+		spdlog::error("Initial point is out of the viability domain. Stop.");
+		succes = 0;
+		}
+	    else
+		{
+		/*
+		 * la position initiale se trouve dans le noyau de viabilité
+		 * on initialise le temps à 0  et recopie la pos initiale
+		 * dans le coordonnées temporaires du point en cours de la trajectoire
+		 */
+		double time = 0.0;
+		intDiscretPos = grid->getNearestPointInSet(initPosition);
+
+		for (int i = 0; i < dim; i++)
+		    {
+		    xCoordsDouble[i] = initPosition[i];
+		    }
+		int nbIter = 0;
+		ostringstream os;
+		string msg;
+		os << "Time : " << time << ". Current point = ";
+		msg = os.str();
+		os.str("");
+		logVector(msg, xCoordsDouble, dim);
+
+		unsigned long long int currentDiscreteTrajPos = intDiscretPos;
+		unsigned long long int optimSuccessor;
+		bool testviabInt = false;
+		int maxnbViabPoints;
+		int bestCu;
+		while (time < finalTime && nbIter <= NB_MAX_TRAJ_ITER)
+		    {
+		    // cout<< " point en cours ";
+		    for (int i = 0; i < dim; i++)
+			{
+			newTrajPoint[i] = xCoordsDouble[i];
+			//  cout<< " "<<newTrajPoint[i];
+			}
+		    newTrajPoint[dim] = time;
+		    // cout<< " temps= "<<newTrajPoint[dim]<<endl;
+		    traj.push_back(newTrajPoint);
+
+
+
+		    grid->numToIntAndDoubleCoords(currentDiscreteTrajPos, intCoordsOnDiscreteTraj, doubleCoordsOnDiscreteTraj);
+
+		    for (int i = 0; i < (int) dim; i++)
+			{
+			newTrajDiscretePoint[i] = doubleCoordsOnDiscreteTraj[i];
+			}
+		    newTrajDiscretePoint[dim] = time;
+
+		    trajDiscrete.push_back(newTrajDiscretePoint);
+
+		    rho = dynsys->calculRho_local(doubleCoordsOnDiscreteTraj);
+
+		    rho = min(rho, finalTime - time);
+
+
+		    optimSuccessor = this->findViableDiscreteSuccessor(currentDiscreteTrajPos, rho);
+		    if (optimSuccessor > grid->nbTotalPoints)
+			{
+			spdlog::error("Optimal successor not found");
+			break;
+			}
+		    else
+			{
+			realTimeStep = rho;
+			bestCu = this->findViabControl_bis(xCoordsDouble, optimSuccessor, realTimeStep, 10, 0.5, imageVect, testNonVide);
+			time +=realTimeStep;
+			if (testNonVide)
+			    {
+			    currentDiscreteTrajPos = optimSuccessor;
+			    for (int dc = 0; dc < dimC; dc++)
+				{
+				trajControlCoords[dc] = controlCoords[bestCu][dc];
+				}
+			    trajC.push_back(trajControlCoords);
+			    for (int i = 0; i < dim; i++)
+				{
+				xCoordsDouble[i] = imageVect[i];
+				}
+			    }
+			else
+			    {
+			    spdlog::warn("Search for real viable control failed. Reset the real trajectory with the discret position. ");
+			    currentDiscreteTrajPos = optimSuccessor;
+			    grid->numToIntAndDoubleCoords(currentDiscreteTrajPos, intCoordsOnDiscreteTraj, doubleCoordsOnDiscreteTraj);
+			    for (int dc = 0; dc < dimC; dc++)
+				{
+				trajControlCoords[dc] = controlCoords[bestCu][dc];
+				}
+			    trajC.push_back(trajControlCoords);
+			    for (int i = 0; i < dim; i++)
+				{
+				xCoordsDouble[i] = doubleCoordsOnDiscreteTraj[i];
+				}
+
+			    }
+			nbIter++;
+			}
+		    }
+		if (time >= finalTime)
+		    {
+		    succes = 1.0;
+		    }
+		//fin de else (reconstruction de trajectoire)
+
+		}
 	    }
 	else
 	    {
-	    list<valarray<double> >::iterator it = traj.begin();
-	    list<valarray<double> >::iterator itc = trajC.end();
-	    itc--;
-	    trajC.push_back(*itc);
-	    itc = trajC.begin();
-
-	    while (it != traj.end())
-		{
-
-		for (int l1 = 0; l1 < dim; l1++)
-		    {
-		    fprintf(fi, "%15.8f ", (*it)[l1]);
-		    //  cout<< " "<<  (*it)[l1];
-		    }
-		fprintf(fi, "%15.8f ", (*it)[dim]);
-		//cout<< " "<<(*it)[dim];
-		for (int dc = 0; dc < dimC; dc++)
-		    {
-		    fprintf(fi, "%15.8f ", (*itc)[dc]);
-		    // cout<< " "<<(*itc)[dc]<<endl;
-		    }
-		fprintf(fi, "\n");
-		it++;
-		itc++;
-		//   traj.pop_front();
-		//   trajC.pop_front();
-		}
-	    fclose(fi);
+	    spdlog::error("Initial point is out of the constraints set. Stop.");
+	    succes = 0;
 	    }
+	}
+    else
+	{
+	spdlog::error("Initial point is out of the grid. Stop.");
+	succes = 0;
+	}
+
+    string fileNameD(fileName);
+    for(int k=0;k<4;k++)
+	{
+	fileNameD.pop_back();
+	}
+    fileNameD+="-Discrete.dat";
+    if(succes)
+	{
+	spdlog::info("Trajectory reconstruction finished with success");
+	spdlog::info("The real trajectory will be saved in the file {}, the discrete trajectory saved in the file ", fileName, fileNameD);
+	}
+    else
+	{
+	spdlog::warn("Trajectory reconstruction failed before attempting the target set");
+	spdlog::warn("The real partial trajectory will be saved in the file {}, the partial discrete trajectory saved in the file ", fileName, fileNameD);
+	}
+
+
+
+    FILE *fi;
+    fi = fopen(fileName.c_str(), "w");
+    if (fi == NULL)
+	{
+	printf("** error: impossible to open the file %s.\n", fileName.c_str());
+
+	}
+    else
+	{
+	list<valarray<double> >::iterator it = traj.begin();
+	list<valarray<double> >::iterator itc = trajC.end();
+	itc--;
+	trajC.push_back(*itc);
+	itc = trajC.begin();
+
+	while (it != traj.end())
+	    {
+
+	    for (int l1 = 0; l1 < dim; l1++)
+		{
+		fprintf(fi, "%15.8f ", (*it)[l1]);
+		//  cout<< " "<<  (*it)[l1];
+		}
+	    fprintf(fi, "%15.8f ", (*it)[dim]);
+	    //cout<< " "<<(*it)[dim];
+	    for (int dc = 0; dc < dimC; dc++)
+		{
+		fprintf(fi, "%15.8f ", (*itc)[dc]);
+		// cout<< " "<<(*itc)[dc]<<endl;
+		}
+	    fprintf(fi, "\n");
+	    it++;
+	    itc++;
+	    //   traj.pop_front();
+	    //   trajC.pop_front();
+	    }
+	fclose(fi);
+	}
+
+    FILE *fiD;
+
+
+    fiD = fopen(fileNameD.c_str(), "w");
+    if (fiD == NULL)
+	{
+	spdlog::error("Impossible to open the file {}", fileNameD);
+	}
+    else
+	{
+	list<valarray<double> >::iterator itD = trajDiscrete.begin();
+
+	while (itD != trajDiscrete.end())
+	    {
+
+	    for (int l1 = 0; l1 < (int) dim; l1++)
+		{
+		fprintf(fiD, "%15.8f ", (*itD)[l1]);
+		}
+	    fprintf(fiD, "%15.8f ", (*itD)[dim]);
+	    fprintf(fiD, "\n");
+	    itD++;
+	    }
+	fclose(fiD);
 	}
     return succes;
 
@@ -1750,8 +2446,7 @@ void ViabiBitSet::initialiseTargetPointList()
 
     unsigned long long int pos;
 
-    list<unsigned long long int>::iterator itStart =
-	    currentImagePointsList.pointsList.begin(), itNew;
+    list<unsigned long long int>::iterator itStart = currentImagePointsList.pointsList.begin(), itNew;
 
     /*
      *  on parcourt  tous les points de l'espace discret  fini
@@ -1777,12 +2472,12 @@ void ViabiBitSet::initialiseTargetPointList()
 
 	    if ((*(dynsys->target))(xReel) < PLUS_INF)
 		{
-//				cout<<" x dans la cible posX="<<pos;
-//				for(int i=0;i<dim;i++)
-//				{
-//					cout<<" "<<xReel[i]<<" ";
-//				}
-//				cout<<"\n";
+		//				cout<<" x dans la cible posX="<<pos;
+		//				for(int i=0;i<dim;i++)
+		//				{
+		//					cout<<" "<<xReel[i]<<" ";
+		//				}
+		//				cout<<"\n";
 
 		totalPointsC++;
 
@@ -1818,9 +2513,7 @@ void ViabiBitSet::initialiseTargetPointList()
 void ViabiBitSet::computeConvexifiedImage(int iter)
     {
 
-    cout << "  Compute First confexified  Image . Iteration num " << iter
-	    << " points dans Cn = " << currentImagePointsList.pointsList.size()
-	    << endl;
+    cout << "  Compute First confexified  Image . Iteration num " << iter << " points dans Cn = " << currentImagePointsList.pointsList.size() << endl;
 
     unsigned long long int posX;
 
@@ -1834,9 +2527,8 @@ void ViabiBitSet::computeConvexifiedImage(int iter)
 
     double rho;
 
-    list<unsigned long long int>::iterator itPoint =
-	    currentImagePointsList.pointsList.begin(), itLastPoint =
-	    currentImagePointsList.pointsList.end(), itTemp;
+    list<unsigned long long int>::iterator itPoint = currentImagePointsList.pointsList.begin(), itLastPoint = currentImagePointsList.pointsList.end(),
+	    itTemp;
     unsigned long long int tempImageCell;
 
     while (itPoint != itLastPoint)
@@ -1881,8 +2573,7 @@ void ViabiBitSet::computeConvexifiedImage(int iter)
 
     }
 
-void ViabiBitSet::addConvexCombinations(unsigned long long int posX,
-	unsigned long long int numCell, unsigned long long int *tempImageCell,
+void ViabiBitSet::addConvexCombinations(unsigned long long int posX, unsigned long long int numCell, unsigned long long int *tempImageCell,
 	double rho, list<unsigned long long int>::iterator *itStart)
     {
 
@@ -1924,8 +2615,7 @@ void ViabiBitSet::addConvexCombinations(unsigned long long int posX,
     //    cout<< "   norme de difference "<<sqrt(dist)<< " pas maxi "<<grid->getMaxStep()<<endl<< " difference vecteur ";
     //printVector(doubleVect, dim);
     double t = deltat;
-    unsigned long long int newCellNum, lastVisitCellNum =
-	    grid->getNbTotalCells() + 1;
+    unsigned long long int newCellNum, lastVisitCellNum = grid->getNbTotalCells() + 1;
     while (t < 1.0)
 	{
 
@@ -1958,8 +2648,7 @@ void ViabiBitSet::addConvexCombinations(unsigned long long int posX,
 		    (*tempImageCell) = newCellNum;
 		    //itStart=this->currentImageList.cellsList.begin();
 		    // cout<<  "  ajout de celule "<<newCellNum<< " avec val = "<<t*rho*(dynsys->lFunc(doubleVect1,cVect))<<endl;
-		    this->addDataToCurrentImage(itStart, (*tempImageCell),
-			    &itNew);
+		    this->addDataToCurrentImage(itStart, (*tempImageCell), &itNew);
 		    lastVisitCellNum = newCellNum;
 		    (*itStart) = itNew;
 		    //this->showCurrentImageList();
@@ -1973,9 +2662,7 @@ void ViabiBitSet::addConvexCombinations(unsigned long long int posX,
     ////////system("pause");
 
     }
-void ViabiBitSet::addDataToCurrentImage(
-	list<unsigned long long int>::iterator *startIt,
-	unsigned long long int newCell,
+void ViabiBitSet::addDataToCurrentImage(list<unsigned long long int>::iterator *startIt, unsigned long long int newCell,
 	list<unsigned long long int>::iterator *resIt)
     {
     /*!
@@ -1996,8 +2683,7 @@ void ViabiBitSet::addDataToCurrentImage(
 
     unsigned long long int numNewCell = newCell;
 
-    list<unsigned long long int>::iterator itCell, itLast =
-	    currentImageList.cellsList.end();
+    list<unsigned long long int>::iterator itCell, itLast = currentImageList.cellsList.end();
 
     if (currentImageList.cellsList.size() == 0)
 	{
@@ -2014,8 +2700,7 @@ void ViabiBitSet::addDataToCurrentImage(
 	    {
 	    currentImageList.cellsList.push_back(newCell);
 	    currentImageList.maxNum = numNewCell;
-	    currentImageList.minNum = min(currentImageList.maxNum,
-		    currentImageList.minNum);
+	    currentImageList.minNum = min(currentImageList.maxNum, currentImageList.minNum);
 	    (*resIt) = currentImageList.cellsList.end();
 	    (*resIt)--;
 	    }
@@ -2025,8 +2710,7 @@ void ViabiBitSet::addDataToCurrentImage(
 		{
 		currentImageList.cellsList.push_front(newCell);
 		currentImageList.minNum = numNewCell;
-		currentImageList.maxNum = max(currentImageList.maxNum,
-			currentImageList.minNum);
+		currentImageList.maxNum = max(currentImageList.maxNum, currentImageList.minNum);
 		(*resIt) = currentImageList.cellsList.begin();
 		}
 	    else
@@ -2069,8 +2753,7 @@ void ViabiBitSet::addDataToCurrentImage(
 	}
     }
 
-void ViabiBitSet::computeDiscreteImageOfPoint(double *doublePointCoords,
-	unsigned long long int *intPointCoords)
+void ViabiBitSet::computeDiscreteImageOfPoint(double *doublePointCoords, unsigned long long int *intPointCoords)
     {
 
     //double testV[dim];
@@ -2099,16 +2782,14 @@ void ViabiBitSet::computeDiscreteImageOfPoint(double *doublePointCoords,
 	 * si \f$ u\in U(x)\f$  (contr�le admissible) on calcule l'image r�elle par la dynamique
 	 *  discr�tis�e  en temps  du point x avec le controle u
 	 */
-	if (dynsys->constraintsXU(doublePointCoords,
-		controlCoords[cu])<PLUS_INF)
+	if (dynsys->constraintsXU(doublePointCoords, controlCoords[cu]) < PLUS_INF)
 	    {
 	    //////printf("  contraintes sur U et X  ok\n");
 	    //  ////printf( " x= ");
 	    // printVector(doublePointCoords,dim);
 	    rho = dynsys->calculRho_local(doublePointCoords);
 
-	    (dynsys->*(dynsys->discretDynamics))(doublePointCoords,
-		    controlCoords[cu], doubleVect1, rho);
+	    (dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[cu], doubleVect1, rho);
 
 	    // cout<< " retrour dnamique discrete ";
 	    // printVector(doubleVect1, dim);
@@ -2245,8 +2926,7 @@ void ViabiBitSet::computeDiscreteImageOfPoint(double *doublePointCoords,
 
     }
 
-void ViabiBitSet::computeDiscreteImageOfPoint_noControl(
-	double *doublePointCoords, unsigned long long int *intPointCoords)
+void ViabiBitSet::computeDiscreteImageOfPoint_noControl(double *doublePointCoords, unsigned long long int *intPointCoords)
     {
 
     //double testV[dim];
@@ -2271,8 +2951,7 @@ void ViabiBitSet::computeDiscreteImageOfPoint_noControl(
      */
 
     // printVector(doublePointCoords,dim);
-    (dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[0],
-	    doubleVect1, 1.0);
+    (dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[0], doubleVect1, 1.0);
 
     // cout<< " retrour dnamique discrete ";
     //printVector(doubleVect1, dim);
@@ -2460,23 +3139,19 @@ void ViabiBitSet::computeViableTrajectories()
 	    {
 	    if (typeTraj == VD)
 		{
-		os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1
-			<< ".dat";
+		os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1 << ".dat";
 		fileName = os.str();
 		os.str("");
 
-		computeViableTrajectorySetVal(avp->INIT_POINTS + tr * dim, T,
-			fileName);
+		computeViableTrajectorySetVal_bis(avp->INIT_POINTS + tr * dim, T, fileName);
 		}
 	    if (typeTraj == VL)
 		{
-		os << "../OUTPUT/" << filePrefix << "-traj-H-" << tr + 1
-			<< ".dat";
+		os << "../OUTPUT/" << filePrefix << "-traj-H-" << tr + 1 << ".dat";
 		fileName = os.str();
 		os.str("");
 
-		computeViableTrajectoryHeavy(avp->INIT_POINTS + tr * dim,
-			avp->INIT_CONTROLS + tr * dimC, T, fileName);
+		computeViableTrajectoryHeavy(avp->INIT_POINTS + tr * dim, avp->INIT_CONTROLS + tr * dimC, T, fileName);
 		}
 	    }
 	}
@@ -2502,49 +3177,8 @@ void ViabiBitSet::CaptureBasin()
 	    CaptureBasin_DiscreteDynamics();
 	    }
 	}
-    os << "../OUTPUT/" << filePrefix << "-Capture.dat";
-    fileName = os.str();
-    os.str("");
-    if (avp->SAVE_VIAB_LIGHT)
-	{
-	grid->saveValOnGridLight(fileName);
-	}
-    else
-	{
-	grid->saveValOnGrid(fileName);
-	}
-    if (avp->SAVE_SLICE)
-	{
-	os << "../OUTPUT/" << filePrefix << "-CaptureSlice.dat";
-	fileName = os.str();
-	os.str("");
-	grid->saveCoupe(fileName);
-	}
-    if (avp->SAVE_SLICE_BOUND)
-	{
-	os << "../OUTPUT/" << filePrefix << "-CaptureSliceBound" << ".dat";
-	fileName = os.str();
-	os.str("");
-	grid->saveCoupeBoundary(fileName);
-	}
-    if (avp->SAVE_BOUNDARY)
-	{
-	os << "../OUTPUT/" << filePrefix << "-Capture-bound.dat";
-	fileName = os.str();
-	os.str("");
-	grid->saveBoundary(fileName);
-	}
 
-    if (avp->SAVE_PROJECTION)
-	{
-	os << "../OUTPUT/" << filePrefix << "-Capture-proj" << ".dat";
-	fileName = os.str();
-	os.str("");
-	/*
-	 *  calcul et sauvegarde  de la projection du  noyau
-	 */
-	grid->saveProjetion(fileName, avp->PROJECTION);
-	}
+    this->saveViableSets();
 
     }
 
@@ -2628,9 +3262,7 @@ void ViabiBitSet::createPointsList()
     currentImagePointsList.minNum = currentImageList.minNum;
 
     int nbPointsCube = (int) pow(2.0, dim);	//pow(2.0, dim);
-    list<unsigned long long int>::iterator itCell =
-	    currentImageList.cellsList.begin(), itLast =
-	    currentImageList.cellsList.end();
+    list<unsigned long long int>::iterator itCell = currentImageList.cellsList.begin(), itLast = currentImageList.cellsList.end();
     int i;
 
     long long int *indicesDecalCell = grid->getIndicesDecalCell();
@@ -2671,9 +3303,7 @@ void ViabiBitSet::createPointsList()
 
     }
 
-void ViabiBitSet::addDataToPointsList(
-	list<unsigned long long int>::iterator *startIt,
-	unsigned long long int newPoint,
+void ViabiBitSet::addDataToPointsList(list<unsigned long long int>::iterator *startIt, unsigned long long int newPoint,
 	list<unsigned long long int>::iterator *resIt)
     {
     /*!
@@ -2707,8 +3337,7 @@ void ViabiBitSet::addDataToPointsList(
 	}
     else
 	{
-	if (numnewPoint
-		> (unsigned long long int) currentImagePointsList.maxNum)
+	if (numnewPoint > (unsigned long long int) currentImagePointsList.maxNum)
 	    {
 	    currentImagePointsList.pointsList.push_back(newPoint);
 	    currentImagePointsList.maxNum = numnewPoint;
@@ -2718,8 +3347,7 @@ void ViabiBitSet::addDataToPointsList(
 	    }
 	else
 	    {
-	    if (numnewPoint
-		    < (unsigned long long int) currentImagePointsList.minNum)
+	    if (numnewPoint < (unsigned long long int) currentImagePointsList.minNum)
 		{
 		currentImagePointsList.pointsList.push_front(newPoint);
 		currentImagePointsList.minNum = numnewPoint;
@@ -2742,8 +3370,7 @@ void ViabiBitSet::addDataToPointsList(
 		    if (numnewPoint > (*itCell))
 			{
 			itCell++;
-			currentImagePointsList.pointsList.insert(itCell,
-				newPoint);
+			currentImagePointsList.pointsList.insert(itCell, newPoint);
 			}
 
 		    (*resIt) = itCell;
@@ -2758,8 +3385,7 @@ void ViabiBitSet::addDataToPointsList(
 			}
 		    if (numnewPoint < (*itCell))
 			{
-			currentImagePointsList.pointsList.insert(itCell,
-				newPoint);
+			currentImagePointsList.pointsList.insert(itCell, newPoint);
 			}
 
 		    (*resIt) = itCell;
@@ -2775,9 +3401,7 @@ void ViabiBitSet::addDataToPointsList(
 void ViabiBitSet::computeCurrentImage(int iter)
     {
 
-    cout << "  Compute Current Image . Iteration num " << iter
-	    << " points dans Cn = " << currentImagePointsList.pointsList.size()
-	    << endl;
+    cout << "  Compute Current Image . Iteration num " << iter << " points dans Cn = " << currentImagePointsList.pointsList.size() << endl;
 
     double t1, t2, elapsed_time;
 
@@ -2809,9 +3433,8 @@ void ViabiBitSet::computeCurrentImage(int iter)
     currentImageList.maxNum = -1;
     currentImageList.minNum = PLUS_INF;
 
-    list<unsigned long long int>::iterator itPoint =
-	    currentImagePointsList.pointsList.begin(), itLastPoint =
-	    currentImagePointsList.pointsList.end(), itTemp;
+    list<unsigned long long int>::iterator itPoint = currentImagePointsList.pointsList.begin(), itLastPoint = currentImagePointsList.pointsList.end(),
+	    itTemp;
     itStart = this->currentImageList.cellsList.begin();
 
     while (itPoint != itLastPoint)
@@ -2881,9 +3504,8 @@ int ViabiBitSet::addNewPoints()
 
     int nbNewPoints = 0;
 
-    list<unsigned long long int>::iterator itPoint =
-	    currentImagePointsList.pointsList.begin(), itLastPoint =
-	    currentImagePointsList.pointsList.end(), itTemp;
+    list<unsigned long long int>::iterator itPoint = currentImagePointsList.pointsList.begin(), itLastPoint = currentImagePointsList.pointsList.end(),
+	    itTemp;
     list<triple>::iterator itLastR, itR;
     unsigned long long int pointNum;
 
@@ -2935,8 +3557,7 @@ void ViabiBitSet::noyauViabi_sansControle(bool sortieOK, int nbArret)
     //    cout<<"masque points enleves cree"<<masquePointsEnleves;
     unsigned long long int longTrame = grid->getLongTrame();
     boost::dynamic_bitset<> masque;
-    boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(
-	    longTrame, 0);
+    boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(longTrame, 0);
     boost::dynamic_bitset<> **gridTab = grid->getGridTab();
 
     //pointeur sur la fonction d'analyse d'un point
@@ -2992,18 +3613,15 @@ void ViabiBitSet::noyauViabi_sansControle(bool sortieOK, int nbArret)
 
 		    for (int j = dirTramage + 1; j < dim; j++)
 			{
-			xCoordsDouble[j] = limInf[j]
-				+ indice[j - 1] * gridStep[j];
+			xCoordsDouble[j] = limInf[j] + indice[j - 1] * gridStep[j];
 			}
 		    ///cout<< " Analyse en cours "<<endl;
 		    for (unsigned long long int k = 0; k < longTrame; k++)
 			{
 			if (masque[k])
 			    {
-			    xCoordsDouble[dirTramage] = limInf[dirTramage]
-				    + k * gridStep[dirTramage];
-			    testNonVide = this->findViabImagePoint_noControl(
-				    xCoordsDouble, false);
+			    xCoordsDouble[dirTramage] = limInf[dirTramage] + k * gridStep[dirTramage];
+			    testNonVide = this->findViabImagePoint_noControl(xCoordsDouble, false);
 			    //cout<<" "<<testNonVide;
 			    if (!testNonVide)
 				{
@@ -3012,10 +3630,9 @@ void ViabiBitSet::noyauViabi_sansControle(bool sortieOK, int nbArret)
 				}
 			    }	// fin de if masque[k]
 			}	// fin de for  de parcours de masque
-				//cout<< " fini"<<endl;
-				//cout<< " masque points enleves "<<*masquePointsEnleves<<endl;
-		    if (masquePointsEnleves->count()
-			    < (unsigned long long int) longTrame)
+		    //cout<< " fini"<<endl;
+		    //cout<< " masque points enleves "<<*masquePointsEnleves<<endl;
+		    if (masquePointsEnleves->count() < (unsigned long long int) longTrame)
 			{
 
 			*gridTab[posX] &= (*masquePointsEnleves);
@@ -3027,9 +3644,7 @@ void ViabiBitSet::noyauViabi_sansControle(bool sortieOK, int nbArret)
 
 	    }				// fin de for de parcours de la trame
 
-	cout << "Itération " << nbIter
-		<< " terminée. Nombre de points  points enlevés: "
-		<< comptEnleves << "\n";
+	cout << "Itération " << nbIter << " terminée. Nombre de points  points enlevés: " << comptEnleves << "\n";
 
 	nbIter++;
 
@@ -3063,86 +3678,76 @@ void ViabiBitSet::noyauViabi_sansControle_omp(bool sortieOK, int nbArret)
 	double *xCoordsDouble;
 	unsigned long long int *indice;
 #pragma omp parallel  num_threads(nbOMPThreads)  reduction(+:comptEnleves) private(posX, xCoordsDouble, indice)  shared( gridTab, gridTabNew,subGridSize) default(none)
-	    {
-	    xCoordsDouble = new double[dim];
+	{
+	xCoordsDouble = new double[dim];
 
-	    indice = new unsigned long long int[dim];
+	indice = new unsigned long long int[dim];
 #pragma omp for
-	    for (posX = 0; posX < subGridSize; posX++)
+	for (posX = 0; posX < subGridSize; posX++)
+	    {
+	    int tid = omp_get_thread_num();
+	    int dirTramage = grid->getDirTram();
+
+	    unsigned long long int *nbPointsSub = grid->getNbPointsSubGrid();
+
+	    unsigned long long int longTrame = grid->getLongTrame();
+
+	    double *limInf = grid->limInf;
+	    double *gridStep = grid->step;
+
+	    bool testNonVide;
+	    //printf("thread numero %d nouvelle boucle while\n", tid);
+	    boost::dynamic_bitset<> masque;
+	    boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(longTrame, 0);
+
+	    //  cout<< " posX="<<posX<< " size "<<gridTab->size()<<endl;
+	    if (!gridTab[posX]->none())
 		{
-		int tid = omp_get_thread_num();
-		int dirTramage = grid->getDirTram();
+		numToIntCoords_gen(posX, dim - 1, nbPointsSub, indice);
+		masque = grid->analyseTrameMasqueBis(posX, 1 - tid);
 
-		unsigned long long int *nbPointsSub =
-			grid->getNbPointsSubGrid();
-
-		unsigned long long int longTrame = grid->getLongTrame();
-
-		double *limInf = grid->limInf;
-		double *gridStep = grid->step;
-
-		bool testNonVide;
-		//printf("thread numero %d nouvelle boucle while\n", tid);
-		boost::dynamic_bitset<> masque;
-		boost::dynamic_bitset<> *masquePointsEnleves =
-			new boost::dynamic_bitset<>(longTrame, 0);
-
-		//  cout<< " posX="<<posX<< " size "<<gridTab->size()<<endl;
-		if (!gridTab[posX]->none())
+		masquePointsEnleves->set();
+		if (!masque.none())
 		    {
-		    numToIntCoords_gen(posX, dim - 1, nbPointsSub, indice);
-		    masque = grid->analyseTrameMasqueBis(posX, 1 - tid);
-
-		    masquePointsEnleves->set();
-		    if (!masque.none())
+		    for (int j = 0; j < dirTramage; j++)
 			{
-			for (int j = 0; j < dirTramage; j++)
-			    {
-			    xCoordsDouble[j] = limInf[j]
-				    + indice[j] * gridStep[j];
-			    }
-
-			for (int j = dirTramage + 1; j < dim; j++)
-			    {
-			    xCoordsDouble[j] = limInf[j]
-				    + indice[j - 1] * gridStep[j];
-			    }
-			for (unsigned long long int k = 0; k < longTrame; k++)
-			    {
-			    if (masque[k])
-				{
-				xCoordsDouble[dirTramage] = limInf[dirTramage]
-					+ k * gridStep[dirTramage];
-				testNonVide =
-					this->findViabImagePoint_noControl(
-						xCoordsDouble, false);
-
-				if (!testNonVide)
-				    {
-
-				    masquePointsEnleves->set(k, false);
-				    comptEnleves++;
-				    }
-				}			// fin de if masque[k]
-			    }		// fin de for  de parcours de masque
-
-			if (masquePointsEnleves->count()
-				< (unsigned long long int) longTrame)
-			    {
-			    (*gridTabNew[posX]) &= (*masquePointsEnleves);
-			    }
+			xCoordsDouble[j] = limInf[j] + indice[j] * gridStep[j];
 			}
-		    }			//fin de if la trame n'est pas vide
 
-		}					//fin de for OMP
-	    delete[] xCoordsDouble;
-	    delete[] indice;
-	    }
+		    for (int j = dirTramage + 1; j < dim; j++)
+			{
+			xCoordsDouble[j] = limInf[j] + indice[j - 1] * gridStep[j];
+			}
+		    for (unsigned long long int k = 0; k < longTrame; k++)
+			{
+			if (masque[k])
+			    {
+			    xCoordsDouble[dirTramage] = limInf[dirTramage] + k * gridStep[dirTramage];
+			    testNonVide = this->findViabImagePoint_noControl(xCoordsDouble, false);
+
+			    if (!testNonVide)
+				{
+
+				masquePointsEnleves->set(k, false);
+				comptEnleves++;
+				}
+			    }			// fin de if masque[k]
+			}		// fin de for  de parcours de masque
+
+		    if (masquePointsEnleves->count() < (unsigned long long int) longTrame)
+			{
+			(*gridTabNew[posX]) &= (*masquePointsEnleves);
+			}
+		    }
+		}			//fin de if la trame n'est pas vide
+
+	    }					//fin de for OMP
+	delete[] xCoordsDouble;
+	delete[] indice;
+	}
 	grid->copyGrid(gridTabNew, gridTab);
 
-	cout << "Itération " << nbIter
-		<< " terminée. Nombre de points  points enlevés: "
-		<< comptEnleves << "\n";
+	cout << "Itération " << nbIter << " terminée. Nombre de points  points enlevés: " << comptEnleves << "\n";
 	nbIter++;
 
 	}
@@ -3151,7 +3756,52 @@ void ViabiBitSet::noyauViabi_sansControle_omp(bool sortieOK, int nbArret)
 
 void ViabiBitSet::GarantedViabilityKernel(bool sortieOK, int nbArret)
     {
+    dynsys->setDynamicsForward();
+    algoViabiParams *avp = modelParams->getAlgoParameters();
+    int refine = avp->GRID_REFINMENTS_NUMBER;
 
+    ostringstream os;
+    string fileName;
+    double t1, t2, elapsed_time, t1_glob, t2_glob, elapsed_time_glob;
+    timeval tim, tim_glob;
+    //  raffinements successifs ( y compris le premier calcul si refine=0)
+    int refIter = -1;
+    int seuilArret = nbArret;
+
+    cout << " debut de la boucle de rafinements nb refine = " << refine << endl;
+    while (refIter < refine)
+	{
+	gettimeofday(&tim, NULL);              //mesure le temps d'execution
+	t1 = tim.tv_sec + (tim.tv_usec / 1000000.0);
+	//  Calcul du noyau de viabilité
+	cout << "=============================Debut viab kernel ==============================" << endl;
+	GuarantedViabilityKernelSimple(1, seuilArret);
+	cout << "==============================================================================" << endl;
+	gettimeofday(&tim, NULL);
+	t2 = tim.tv_sec + (tim.tv_usec / 1000000.0);
+	elapsed_time = (double) ((t2 - t1));
+	cout << "Elapsed time : " << elapsed_time << " sec." << endl << endl;
+	//   cout<< "=============================================================================="<<endl;
+	/*  * sauvegardes
+	 */
+	if (avp->INTERMEDIATE_SAVINGS)
+	    {
+	    this->saveIntermediateViableSets(refIter + 1);
+	    }
+
+	refIter++;
+	seuilArret *= 2;
+	/*
+	 * raffinement du maillage
+	 */
+
+	if (refIter < refine)
+	    {
+	    grid->refine();
+	    }
+	}
+
+    this->saveViableSets();
     }
 
 SysDyn* ViabiBitSet::GetSysDynForViabProblem()
@@ -3167,41 +3817,29 @@ void ViabiBitSet::loadViableSets()
 
     ostringstream os;
     string fileName;
+    string setName;
+    switch (avp->SET_TYPE)
+	{
+    case 1:
+	setName = "viab";
+	break;
+    case 2:
+	setName = "capt";
+	break;
+    case 3:
+	setName = "viabG";
+	break;
+    default:
+	setName = "viab";
+	break;
+	}
     // on charge dans la mémoire l'ensemble calculé et enregistré
     // correspondant au dernier raffinement
-    os << "../OUTPUT/" << filePrefix << "-viab-" << refine << ".dat";
+    os << "../OUTPUT/" << filePrefix << "-" << setName << ".dat";
     fileName = os.str();
     os.str("");
     grid->loadSet(fileName);
 
-    if (avp->SAVE_SLICE)
-	{
-	os << "../OUTPUT/" << filePrefix << "-viab-" << refine << "-Slice"
-		<< ".dat";
-	fileName = os.str();
-	os.str("");
-	grid->saveCoupe(fileName);
-	}
-    if (avp->SAVE_SLICE_BOUND)
-	{
-	os << "../OUTPUT/" << filePrefix << "-viab-" << refine << "-SliceBound"
-		<< ".dat";
-	fileName = os.str();
-	os.str("");
-	grid->saveCoupeBoundary(fileName);
-	}
-
-    if (avp->SAVE_PROJECTION)
-	{
-	os << "../OUTPUT/" << filePrefix << "-viab-" << refine << "-proj"
-		<< ".dat";
-	fileName = os.str();
-	os.str("");
-	/*
-	 *  calcul et sauvegarde  de la projection du  noyau
-	 */
-	grid->saveProjetion(fileName, avp->PROJECTION);
-	}
     }
 
 void ViabiBitSet::saveViableSets()
@@ -3209,8 +3847,24 @@ void ViabiBitSet::saveViableSets()
     ostringstream os;
     string fileName;
     algoViabiParams *avp = modelParams->getAlgoParameters();
-    int refine = avp->GRID_REFINMENTS_NUMBER;
-    os << "../OUTPUT/" << filePrefix << "-viab-" << refine << ".dat";
+    string setName;
+    switch (avp->SET_TYPE)
+	{
+    case 1:
+	setName = "viab";
+	break;
+    case 2:
+	setName = "capt";
+	break;
+    case 3:
+	setName = "viabG";
+	break;
+    default:
+	setName = "viab";
+	break;
+	}
+
+    os << "../OUTPUT/" << filePrefix << "-" << setName << ".dat";
     fileName = os.str();
     os.str("");
     if (avp->SAVE_VIAB_LIGHT)
@@ -3223,23 +3877,21 @@ void ViabiBitSet::saveViableSets()
 	}
     if (avp->SAVE_SLICE)
 	{
-	os << "../OUTPUT/" << filePrefix << "-viab-" << refine << "-Slice"
-		<< ".dat";
+	os << "../OUTPUT/" << filePrefix << "-" << setName << "-Slice.dat";
 	fileName = os.str();
 	os.str("");
 	grid->saveCoupe(fileName);
 	}
     if (avp->SAVE_SLICE_BOUND)
 	{
-	os << "../OUTPUT/" << filePrefix << "-viab-" << refine << "-SliceBound"
-		<< ".dat";
+	os << "../OUTPUT/" << filePrefix << "-" << setName << "-SliceBound.dat";
 	fileName = os.str();
 	os.str("");
 	grid->saveCoupeBoundary(fileName);
 	}
     if (avp->SAVE_BOUNDARY)
 	{
-	os << "../OUTPUT/" << filePrefix << "-viab-" << refine << "-bound.dat";
+	os << "../OUTPUT/" << filePrefix << "-" << setName << "-bound.dat";
 	fileName = os.str();
 	os.str("");
 	grid->saveBoundary(fileName);
@@ -3247,8 +3899,74 @@ void ViabiBitSet::saveViableSets()
 
     if (avp->SAVE_PROJECTION)
 	{
-	os << "../OUTPUT/" << filePrefix << "-viab-" << refine << "-proj"
-		<< ".dat";
+	os << "../OUTPUT/" << filePrefix << "-" << setName << "-proj.dat";
+	fileName = os.str();
+	os.str("");
+	/*
+	 *  calcul et sauvegarde  de la projection du  noyau
+	 */
+	grid->saveProjetion(fileName, avp->PROJECTION);
+	}
+    }
+
+void ViabiBitSet::saveIntermediateViableSets(int refine)
+    {
+    ostringstream os;
+    string fileName;
+    algoViabiParams *avp = modelParams->getAlgoParameters();
+    string setName;
+    switch (avp->SET_TYPE)
+	{
+    case 1:
+	setName = "viab";
+	break;
+    case 2:
+	setName = "capt";
+	break;
+    case 3:
+	setName = "viabG";
+	break;
+    default:
+	setName = "viab";
+	break;
+	}
+
+    os << "../OUTPUT/" << filePrefix << "-" << setName << "-" << refine << ".dat";
+    fileName = os.str();
+    os.str("");
+    if (avp->SAVE_VIAB_LIGHT)
+	{
+	grid->saveValOnGridLight(fileName);
+	}
+    else
+	{
+	grid->saveValOnGrid(fileName);
+	}
+    if (avp->SAVE_SLICE)
+	{
+	os << "../OUTPUT/" << filePrefix << "-" << setName << "-" << refine << "-Slice" << ".dat";
+	fileName = os.str();
+	os.str("");
+	grid->saveCoupe(fileName);
+	}
+    if (avp->SAVE_SLICE_BOUND)
+	{
+	os << "../OUTPUT/" << filePrefix << "-" << setName << "-" << refine << "-SliceBound" << ".dat";
+	fileName = os.str();
+	os.str("");
+	grid->saveCoupeBoundary(fileName);
+	}
+    if (avp->SAVE_BOUNDARY)
+	{
+	os << "../OUTPUT/" << filePrefix << "-" << setName << "-" << refine << "-bound.dat";
+	fileName = os.str();
+	os.str("");
+	grid->saveBoundary(fileName);
+	}
+
+    if (avp->SAVE_PROJECTION)
+	{
+	os << "../OUTPUT/" << filePrefix << "-" << setName << "-" << refine << "-proj" << ".dat";
 	fileName = os.str();
 	os.str("");
 	/*
@@ -3278,13 +3996,9 @@ void ViabiBitSet::ViabilityKernel(bool sortieOK, int nbArret)
 	gettimeofday(&tim, NULL);              //mesure le temps d'execution
 	t1 = tim.tv_sec + (tim.tv_usec / 1000000.0);
 	//  Calcul du noyau de viabilité
-	cout
-		<< "=============================Debut viab kernel =============================="
-		<< endl;
+	cout << "=============================Debut viab kernel ==============================" << endl;
 	ViabilityKernelSimple(1, seuilArret);
-	cout
-		<< "=============================================================================="
-		<< endl;
+	cout << "==============================================================================" << endl;
 	gettimeofday(&tim, NULL);
 	t2 = tim.tv_sec + (tim.tv_usec / 1000000.0);
 	elapsed_time = (double) ((t2 - t1));
@@ -3294,55 +4008,7 @@ void ViabiBitSet::ViabilityKernel(bool sortieOK, int nbArret)
 	 */
 	if (avp->INTERMEDIATE_SAVINGS)
 	    {
-	    os << "../OUTPUT/" << filePrefix << "-viab-" << refIter + 1
-		    << ".dat";
-	    fileName = os.str();
-	    os.str("");
-	    if (avp->SAVE_VIAB_LIGHT)
-		{
-		grid->saveValOnGridLight(fileName);
-		}
-	    else
-		{
-		grid->saveValOnGrid(fileName);
-		}
-
-	    if (avp->SAVE_SLICE)
-		{
-		os << "../OUTPUT/" << filePrefix << "-viab-" << refIter + 1
-			<< "-Slice" << ".dat";
-		fileName = os.str();
-		os.str("");
-		grid->saveCoupe(fileName);
-		}
-	    if (avp->SAVE_SLICE_BOUND)
-		{
-		os << "../OUTPUT/" << filePrefix << "-viab-" << refIter + 1
-			<< "-SliceBound" << ".dat";
-		fileName = os.str();
-		os.str("");
-		grid->saveCoupeBoundary(fileName);
-		}
-	    if (avp->SAVE_BOUNDARY)
-		{
-		os << "../OUTPUT/" << filePrefix << "-viab-" << refIter + 1
-			<< "-bound.dat";
-		fileName = os.str();
-		os.str("");
-		grid->saveBoundary(fileName);
-		}
-
-	    if (avp->SAVE_PROJECTION)
-		{
-		os << "../OUTPUT/" << filePrefix << "-viab-" << refIter + 1
-			<< "-proj" << ".dat";
-		fileName = os.str();
-		os.str("");
-		/*
-		 *  calcul et sauvegarde  de la projection du  noyau
-		 */
-		grid->saveProjetion(fileName, avp->PROJECTION);
-		}
+	    this->saveIntermediateViableSets(refIter + 1);
 	    }
 
 	refIter++;
@@ -3353,84 +4019,13 @@ void ViabiBitSet::ViabilityKernel(bool sortieOK, int nbArret)
 
 	if (refIter < refine)
 	    {
-	    cout << "refine\n";
 	    grid->refine();
-
-	    os << "../OUTPUT/" << filePrefix << "-viab-Refined" << refIter
-		    << ".dat";
-	    fileName = os.str();
-	    os.str("");
-	    if (avp->SAVE_VIAB_LIGHT)
-		{
-		grid->saveValOnGridLight(fileName);
-		}
-	    else
-		{
-		grid->saveValOnGrid(fileName);
-		}
-
-	    if (avp->SAVE_BOUNDARY)
-		{
-		os << "../OUTPUT/" << filePrefix << "-viab-Refined" << refIter
-			<< "-bound.dat";
-		fileName = os.str();
-		os.str("");
-		grid->saveBoundary(fileName);
-		}
-	    }
-	}
-    if (!avp->INTERMEDIATE_SAVINGS)
-	{
-	os << "../OUTPUT/" << filePrefix << "-viab-" << refIter << ".dat";
-	fileName = os.str();
-	os.str("");
-	if (avp->SAVE_VIAB_LIGHT)
-	    {
-	    grid->saveValOnGridLight(fileName);
-	    }
-	else
-	    {
-	    grid->saveValOnGrid(fileName);
-	    }
-	if (avp->SAVE_SLICE)
-	    {
-	    os << "../OUTPUT/" << filePrefix << "-viab-" << refine << "-Slice"
-		    << ".dat";
-	    fileName = os.str();
-	    os.str("");
-	    grid->saveCoupe(fileName);
-	    }
-	if (avp->SAVE_SLICE_BOUND)
-	    {
-	    os << "../OUTPUT/" << filePrefix << "-viab-" << refine
-		    << "-SliceBound" << ".dat";
-	    fileName = os.str();
-	    os.str("");
-	    grid->saveCoupeBoundary(fileName);
-	    }
-	if (avp->SAVE_BOUNDARY)
-	    {
-	    os << "../OUTPUT/" << filePrefix << "-viab-" << refine
-		    << "-bound.dat";
-	    fileName = os.str();
-	    os.str("");
-	    grid->saveBoundary(fileName);
-	    }
-
-	if (avp->SAVE_PROJECTION)
-	    {
-	    os << "../OUTPUT/" << filePrefix << "-viab-" << refine << "-proj"
-		    << ".dat";
-	    fileName = os.str();
-	    os.str("");
-	    /*
-	     *  calcul et sauvegarde  de la projection du  noyau
-	     */
-	    grid->saveProjetion(fileName, avp->PROJECTION);
 	    }
 	}
 
+    this->saveViableSets();
     }
+
 void ViabiBitSet::ViabilityKernelSimple(bool sortieOK, int nbArret)
     {
     if (dynsys->getDimC() == 0)
@@ -3468,6 +4063,23 @@ void ViabiBitSet::ViabilityKernelSimple(bool sortieOK, int nbArret)
 	}
     }
 
+void ViabiBitSet::GuarantedViabilityKernelSimple(bool sortieOK, int nbArret)
+    {
+
+    if ((dynsys->getDynType() == CC) || (dynsys->getDynType() == DC))
+	{
+
+	noyauViabiGuaranti(sortieOK, nbArret);
+	}
+    else
+	{
+	if ((dynsys->getDynType() == DD))
+	    {
+	    noyauViabiGaranti_FD(sortieOK, nbArret);
+	    }
+	}
+    }
+
 void ViabiBitSet::noyauViabi(bool sortieOK, int nbArret)
     {
 
@@ -3479,8 +4091,7 @@ void ViabiBitSet::noyauViabi(bool sortieOK, int nbArret)
 
     unsigned long long int longTrame = grid->getLongTrame();
     boost::dynamic_bitset<> masque;
-    boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(
-	    longTrame, 0);
+    boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(longTrame, 0);
     boost::dynamic_bitset<> **gridTab = grid->getGridTab();
 
     //pointeur sur la fonction d'analyse d'un point
@@ -3537,18 +4148,15 @@ void ViabiBitSet::noyauViabi(bool sortieOK, int nbArret)
 
 		    for (int j = dirTramage + 1; j < dim; j++)
 			{
-			xCoordsDouble[j] = limInf[j]
-				+ indice[j - 1] * gridStep[j];
+			xCoordsDouble[j] = limInf[j] + indice[j - 1] * gridStep[j];
 			}
 
 		    for (unsigned long long int k = 0; k < longTrame; k++)
 			{
 			if (masque[k])
 			    {
-			    xCoordsDouble[dirTramage] = limInf[dirTramage]
-				    + k * gridStep[dirTramage];
-			    testNonVide = this->findViabImagePoint(
-				    xCoordsDouble, false);
+			    xCoordsDouble[dirTramage] = limInf[dirTramage] + k * gridStep[dirTramage];
+			    testNonVide = this->findViabImagePoint(xCoordsDouble, false);
 
 			    if (!testNonVide)
 				{
@@ -3558,8 +4166,7 @@ void ViabiBitSet::noyauViabi(bool sortieOK, int nbArret)
 			    }	// fin de if masque[k]
 			}	// fin de for  de parcours de masque
 
-		    if (masquePointsEnleves->count()
-			    < (unsigned long long int) longTrame)
+		    if (masquePointsEnleves->count() < (unsigned long long int) longTrame)
 			{
 			//cout<< " on enleve sur posX = "<<posX<<endl;
 			//cout<< " grid tab ici    "<< *gridTab[posX] << endl;
@@ -3575,9 +4182,119 @@ void ViabiBitSet::noyauViabi(bool sortieOK, int nbArret)
 
 	    }				// fin de for de parcours de la trame
 
-	cout << "Itération " << nbIter
-		<< " terminée. Nombre de points  points enlevés: "
-		<< comptEnleves << "\n";
+	cout << "Itération " << nbIter << " terminée. Nombre de points  points enlevés: " << comptEnleves << "\n";
+
+	nbIter++;
+
+	}
+    cout << "fini nbIter=" << nbIter;
+    //foncCarNoyau->printTrame();
+
+    }
+
+void ViabiBitSet::noyauViabiGuaranti(bool sortieOK, int nbArret)
+    {
+
+    int dirTramage = grid->getDirTram();
+
+    unsigned long long int *nbPointsSub = grid->getNbPointsSubGrid();
+
+    bool testF;
+
+    unsigned long long int longTrame = grid->getLongTrame();
+    boost::dynamic_bitset<> masque;
+    boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(longTrame, 0);
+    boost::dynamic_bitset<> **gridTab = grid->getGridTab();
+
+    //pointeur sur la fonction d'analyse d'un point
+    //permet de changer de fonction selon la dimension de l'espace de commandes
+
+    double *limInf = grid->limInf;
+    double *gridStep = grid->step;
+
+    unsigned long long int indice[dim];
+
+    double xCoordsDouble[dim];
+    bool testNonVide;
+    int nbIter = 0;
+    unsigned long long int comptEtats = 0, comptEnleves = nbArret + 1;
+    unsigned long long int subGridSize = grid->getNbPointsTotalSubGrid();
+
+    testK0();
+
+    while (comptEnleves > (unsigned long long int) nbArret)
+	{
+	cout << "nouvelle boucle while\n";
+
+	comptEnleves = 0;
+
+	//cout<<"dim etat>2\n";
+	comptEtats = 0;
+	for (unsigned long long int posX = 0; posX < subGridSize; posX++)
+	    {
+	    //        cout<< " posX="<<posX<< " size "<<gridTab->size()<<endl;
+	    if (!gridTab[posX]->none())
+		{
+		comptEtats++;
+		testF = false;
+		numToIntCoords_gen(posX, dim - 1, nbPointsSub, indice);
+
+		// cout<<  (*gridTab[posX])<<endl;
+
+		masque = grid->analyseTrameMasque(posX);
+
+		// cout<<"masque d'analyse  "<<masque<<endl;
+
+		masquePointsEnleves->set();
+
+		if (masque.none() | testF)
+		    {
+		    cout << " rien e analyser posx= " << posX << " \n";
+		    }
+		else
+		    {
+		    for (int j = 0; j < dirTramage; j++)
+			{
+			xCoordsDouble[j] = limInf[j] + indice[j] * gridStep[j];
+			}
+
+		    for (int j = dirTramage + 1; j < dim; j++)
+			{
+			xCoordsDouble[j] = limInf[j] + indice[j - 1] * gridStep[j];
+			}
+
+		    for (unsigned long long int k = 0; k < longTrame; k++)
+			{
+			if (masque[k])
+			    {
+			    xCoordsDouble[dirTramage] = limInf[dirTramage] + k * gridStep[dirTramage];
+			    testNonVide = this->findGuarantedViabImagePoint(xCoordsDouble, false);
+
+			    if (!testNonVide)
+				{
+				masquePointsEnleves->set(k, false);
+				comptEnleves++;
+				}
+			    }	// fin de if masque[k]
+			}	// fin de for  de parcours de masque
+
+		    if (masquePointsEnleves->count() < (unsigned long long int) longTrame)
+			{
+			//cout<< " on enleve sur posX = "<<posX<<endl;
+			//cout<< " grid tab ici    "<< *gridTab[posX] << endl;
+			//cout<< " masque          "	<< 	*masquePointsEnleves <<endl;
+			*gridTab[posX] &= (*masquePointsEnleves);
+			//cout<< " grid tab  APRES "<< *gridTab[posX] << endl;
+			//cout<< " =========================================================\n";
+			}
+
+		    }
+
+		}			//fin de if la trame n'est pas vide
+
+	    }				// fin de for de parcours de la trame
+
+	cout << "Itération " << nbIter << " terminée. Nombre de points  points enlevés: " << comptEnleves << "\n";
 
 	nbIter++;
 
@@ -3611,93 +4328,83 @@ void ViabiBitSet::noyauViabi_omp(bool sortieOK, int nbArret)
 	double *xCoordsDouble;
 	unsigned long long int *indice;
 #pragma omp parallel  num_threads(nbOMPThreads)  reduction(+:comptEnleves) private(posX, xCoordsDouble, indice)  shared( gridTab, gridTabNew,subGridSize) default(none)
-	    {
-	    xCoordsDouble = new double[dim];
-	    indice = new unsigned long long int[dim];
+	{
+	xCoordsDouble = new double[dim];
+	indice = new unsigned long long int[dim];
 #pragma omp for
-	    for (posX = 0; posX < subGridSize; posX++)
+	for (posX = 0; posX < subGridSize; posX++)
+	    {
+	    //int  tid = omp_get_thread_num();
+
+	    int dirTramage = grid->getDirTram();
+
+	    unsigned long long int *nbPointsSub = grid->getNbPointsSubGrid();
+
+	    unsigned long long int longTrame = grid->getLongTrame();
+
+	    double *limInf = grid->limInf;
+	    double *gridStep = grid->step;
+	    // printf("thread numero %d nouvelle boucle while\n", nbTh);
+
+	    if (!gridTab[posX]->none())
 		{
-		//int  tid = omp_get_thread_num();
+		// cout<<  (*gridTab[posX])<<endl;
 
-		int dirTramage = grid->getDirTram();
+		boost::dynamic_bitset<> masque = grid->analyseTrameMasqueBis(posX, false);
 
-		unsigned long long int *nbPointsSub =
-			grid->getNbPointsSubGrid();
+		//   cout<<"masque d'analyse  "<<masque<<endl;
 
-		unsigned long long int longTrame = grid->getLongTrame();
-
-		double *limInf = grid->limInf;
-		double *gridStep = grid->step;
-		// printf("thread numero %d nouvelle boucle while\n", nbTh);
-
-		if (!gridTab[posX]->none())
+		if (!masque.none())
 		    {
-		    // cout<<  (*gridTab[posX])<<endl;
+		    bool testNonVide;
 
-		    boost::dynamic_bitset<> masque =
-			    grid->analyseTrameMasqueBis(posX, false);
+		    boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(longTrame, 0);
+		    numToIntCoords_gen(posX, dim - 1, nbPointsSub, indice);
 
-		    //   cout<<"masque d'analyse  "<<masque<<endl;
+		    masquePointsEnleves->set();
 
-		    if (!masque.none())
+		    for (int j = 0; j < dirTramage; j++)
 			{
-			bool testNonVide;
-
-			boost::dynamic_bitset<> *masquePointsEnleves =
-				new boost::dynamic_bitset<>(longTrame, 0);
-			numToIntCoords_gen(posX, dim - 1, nbPointsSub, indice);
-
-			masquePointsEnleves->set();
-
-			for (int j = 0; j < dirTramage; j++)
-			    {
-			    xCoordsDouble[j] = limInf[j]
-				    + indice[j] * gridStep[j];
-			    }
-
-			for (int j = dirTramage + 1; j < dim; j++)
-			    {
-			    xCoordsDouble[j] = limInf[j]
-				    + indice[j - 1] * gridStep[j];
-			    }
-
-			for (unsigned long long int k = 0; k < longTrame; k++)
-			    {
-
-			    if (masque[k])
-				{
-				xCoordsDouble[dirTramage] = limInf[dirTramage]
-					+ k * gridStep[dirTramage];
-				testNonVide = this->findViabImagePoint(
-					xCoordsDouble, false);
-
-				//cout<< " fini\n";
-				if (!testNonVide)
-				    {
-				    masquePointsEnleves->set(k, false);
-				    comptEnleves++;
-				    }
-				}			// fin de if masque[k]
-			    }		// fin de for  de parcours de masque
-
-			if (masquePointsEnleves->count()
-				< (unsigned long long int) longTrame)
-			    {
-			    (*gridTabNew[posX]) &= (*masquePointsEnleves);
-			    }
+			xCoordsDouble[j] = limInf[j] + indice[j] * gridStep[j];
 			}
-		    }			//fin de if la trame n'est pas vide
 
-		}						//fin de for OMP
-	    delete[] xCoordsDouble;
-	    delete[] indice;
-	    }
+		    for (int j = dirTramage + 1; j < dim; j++)
+			{
+			xCoordsDouble[j] = limInf[j] + indice[j - 1] * gridStep[j];
+			}
+
+		    for (unsigned long long int k = 0; k < longTrame; k++)
+			{
+
+			if (masque[k])
+			    {
+			    xCoordsDouble[dirTramage] = limInf[dirTramage] + k * gridStep[dirTramage];
+			    testNonVide = this->findViabImagePoint(xCoordsDouble, false);
+
+			    //cout<< " fini\n";
+			    if (!testNonVide)
+				{
+				masquePointsEnleves->set(k, false);
+				comptEnleves++;
+				}
+			    }			// fin de if masque[k]
+			}		// fin de for  de parcours de masque
+
+		    if (masquePointsEnleves->count() < (unsigned long long int) longTrame)
+			{
+			(*gridTabNew[posX]) &= (*masquePointsEnleves);
+			}
+		    }
+		}			//fin de if la trame n'est pas vide
+
+	    }						//fin de for OMP
+	delete[] xCoordsDouble;
+	delete[] indice;
+	}
 	//cout<<"Itération "<<nbIter<< " AVANT COPIE "<<comptEnleves<<"\n";
 	grid->copyGrid(gridTabNew, gridTab);
 
-	cout << "Itération " << nbIter
-		<< " terminée. Nombre de points  points enlevés: "
-		<< comptEnleves << "\n";
+	cout << "Itération " << nbIter << " terminée. Nombre de points  points enlevés: " << comptEnleves << "\n";
 
 	nbIter++;
 
@@ -3733,8 +4440,7 @@ void ViabiBitSet::noyauViabiGaranti_FD(bool sortieOK, int nbArret)
     // cout<< "  noayu viab garanti FD bitset nbTy= "<<nbTy<<endl;
 
     boost::dynamic_bitset<> masque;
-    boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(
-	    longTrame, 0);
+    boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(longTrame, 0);
     boost::dynamic_bitset<> **gridTab = grid->getGridTab();
     //pointeur sur la fonction d'analyse d'un point
     //permet de changer de fonction selon la dimension de l'espace de commandes
@@ -3795,8 +4501,7 @@ void ViabiBitSet::noyauViabiGaranti_FD(bool sortieOK, int nbArret)
 
 			}
 
-		    if (!((masque.count() == 2)
-			    && (masque[0] && masque[longTrame - 1])))
+		    if (!((masque.count() == 2) && (masque[0] && masque[longTrame - 1])))
 			{
 
 			for (unsigned long long int k = 0; k < longTrame; k++)
@@ -3822,28 +4527,22 @@ void ViabiBitSet::noyauViabiGaranti_FD(bool sortieOK, int nbArret)
 				     for(int jj=0;jj<3;jj++)
 				     cout<< " "<<controlIntCoords[compteComm][jj];
 				     cout<<endl;*/
-				    if (dynsys->constraintsXU_fd(coordDiscretes,
-					    controlIntCoords[compteComm])<PLUS_INF)
+				    if (dynsys->constraintsXU_fd(coordDiscretes, controlIntCoords[compteComm]) < PLUS_INF)
 					{
 					// cout<< "  controle "<<controlIntCoords[compteComm][0]<<" "<<controlIntCoords[compteComm][1]<< " est autorise \n";
 
 					testAllTych = true;
-					for (compteTych = 0; compteTych < nbTy;
-						compteTych++)
+					for (compteTych = 0; compteTych < nbTy; compteTych++)
 					    {
 					    //   cout<< "  tychet "<<tychIntCoords[compteTych][0]<<endl;
-					    dynsys->dynamics_tych_fd(
-						    coordDiscretes,
-						    controlIntCoords[compteComm],
-						    tychIntCoords[compteTych],
+					    dynsys->dynamics_tych_fd(coordDiscretes, controlIntCoords[compteComm], tychIntCoords[compteTych],
 						    imageXU);
 					    // cout<<  " image ";
 					    //                                             printVector(imageXU,dim);
 
 					    if (grid->isPointInGrid_fd(imageXU))
 						{
-						testAllTych &= grid->isInSet(
-							imageXU);
+						testAllTych &= grid->isInSet(imageXU);
 
 						//   cout<< "image est dans la grille de calcul ok et test no vide est "<<testAllTych<<endl;
 						}
@@ -3869,8 +4568,7 @@ void ViabiBitSet::noyauViabiGaranti_FD(bool sortieOK, int nbArret)
 				}			// fin de if masque[k]
 			    }		// fin de for  de parcours de masque
 
-			if (masquePointsEnleves->count()
-				< (unsigned long long int) longTrame)
+			if (masquePointsEnleves->count() < (unsigned long long int) longTrame)
 			    {
 
 			    (*gridTab[posX]) &= (*masquePointsEnleves);
@@ -3888,16 +4586,12 @@ void ViabiBitSet::noyauViabiGaranti_FD(bool sortieOK, int nbArret)
 			// 	cout<<" test non vide =  ";
 			while (!testNonVide && compteComm < nbC)
 			    {
-			    if (dynsys->constraintsXU_fd(coordDiscretes,
-				    controlIntCoords[compteComm]) < PLUS_INF)
+			    if (dynsys->constraintsXU_fd(coordDiscretes, controlIntCoords[compteComm]) < PLUS_INF)
 				{
 				testAllTych = true;
-				for (compteTych = 0; compteTych < nbTy;
-					compteTych++)
+				for (compteTych = 0; compteTych < nbTy; compteTych++)
 				    {
-				    dynsys->dynamics_tych_fd(coordDiscretes,
-					    controlIntCoords[compteComm],
-					    tychIntCoords[compteTych], imageXU);
+				    dynsys->dynamics_tych_fd(coordDiscretes, controlIntCoords[compteComm], tychIntCoords[compteTych], imageXU);
 				    if (grid->isPointInGrid_fd(imageXU))
 					{
 					testAllTych &= grid->isInSet(imageXU);
@@ -3928,16 +4622,12 @@ void ViabiBitSet::noyauViabiGaranti_FD(bool sortieOK, int nbArret)
 
 			while (!testNonVide && compteComm < nbC)
 			    {
-			    if (dynsys->constraintsXU_fd(coordDiscretes,
-				    controlIntCoords[compteComm]) < PLUS_INF)
+			    if (dynsys->constraintsXU_fd(coordDiscretes, controlIntCoords[compteComm]) < PLUS_INF)
 				{
 				testAllTych = true;
-				for (compteTych = 0; compteTych < nbTy;
-					compteTych++)
+				for (compteTych = 0; compteTych < nbTy; compteTych++)
 				    {
-				    dynsys->dynamics_tych_fd(coordDiscretes,
-					    controlIntCoords[compteComm],
-					    tychIntCoords[compteTych], imageXU);
+				    dynsys->dynamics_tych_fd(coordDiscretes, controlIntCoords[compteComm], tychIntCoords[compteTych], imageXU);
 				    if (grid->isPointInGrid_fd(imageXU))
 					{
 					testAllTych &= grid->isInSet(imageXU);
@@ -3960,8 +4650,7 @@ void ViabiBitSet::noyauViabiGaranti_FD(bool sortieOK, int nbArret)
 			    comptEnleves++;
 			    }
 
-			if (masquePointsEnleves->count()
-				< (unsigned long long int) longTrame)
+			if (masquePointsEnleves->count() < (unsigned long long int) longTrame)
 			    {
 			    (*gridTab[posX]) &= (*masquePointsEnleves);
 			    }
@@ -4004,8 +4693,7 @@ void ViabiBitSet::saveViabRetro(string fileName)
 
 	unsigned long long int indice[dim - 1];
 
-	unsigned long long int **controlIntCoords =
-		dynsys->getControlIntCoords();
+	unsigned long long int **controlIntCoords = dynsys->getControlIntCoords();
 
 	unsigned long long int coordDiscretes[dim], imageXU[dim];
 
@@ -4060,13 +4748,11 @@ void ViabiBitSet::saveViabRetro(string fileName)
 			     for(int jj=0;jj<3;jj++)
 			     cout<< " "<<controlIntCoords[compteComm][jj];
 			     cout<<endl;*/
-			    if (dynsys->constraintsXU_fd(coordDiscretes,
-				    controlIntCoords[compteComm]) < PLUS_INF)
+			    if (dynsys->constraintsXU_fd(coordDiscretes, controlIntCoords[compteComm]) < PLUS_INF)
 				{
 				//cout<< "  controle "<<controlIntCoords[compteComm][0]<<" "<<controlIntCoords[compteComm][1]<< " est autorise \n";
 
-				dynsys->dynamics_fd(coordDiscretes,
-					controlIntCoords[compteComm], imageXU);
+				dynsys->dynamics_fd(coordDiscretes, controlIntCoords[compteComm], imageXU);
 				// cout<< " image "; printVector(imageXU,dim);
 				//cout<<  " image ";
 				//printVector(imageXU,dim);
@@ -4098,18 +4784,16 @@ void ViabiBitSet::saveViabRetro(string fileName)
 			    }
 			// system("pause");
 			fichierB << images.size() << " ";
-			for (unsigned long long int jj = 0; jj < images.size();
-				jj++)
+			for (unsigned long long int jj = 0; jj < images.size(); jj++)
 			    {
-			    fichierB << viabControls.at(jj) << " "
-				    << images.at(jj) << " ";
+			    fichierB << viabControls.at(jj) << " " << images.at(jj) << " ";
 			    }
 			fichierB << endl;
 			//cout<< " fini\n";
 
 			}				// fin de if masque[k]
 		    }			// fin de for  de parcours de masque
-					//system("pause");
+		//system("pause");
 
 		}			//fin de if la trame n'est pas vide
 	    }				// fin de for de parcours de la trame
@@ -4152,8 +4836,7 @@ void ViabiBitSet::saveViabGarantiRetro(string fileName)
 	boost::dynamic_bitset<> **gridTab = grid->getGridTab();
 	unsigned long long int indice[dim - 1];
 
-	unsigned long long int **controlIntCoords =
-		dynsys->getControlIntCoords();
+	unsigned long long int **controlIntCoords = dynsys->getControlIntCoords();
 	unsigned long long int **tychIntCoords = dynsys->getTychIntCoords();
 
 	unsigned long long int coordDiscretes[dim], imageXU[dim];
@@ -4214,18 +4897,14 @@ void ViabiBitSet::saveViabGarantiRetro(string fileName)
 			     for(int jj=0;jj<3;jj++)
 			     cout<< " "<<controlIntCoords[compteComm][jj];
 			     cout<<endl;*/
-			    if (dynsys->constraintsXU_fd(coordDiscretes,
-				    controlIntCoords[compteComm]) < PLUS_INF)
+			    if (dynsys->constraintsXU_fd(coordDiscretes, controlIntCoords[compteComm]) < PLUS_INF)
 				{
 				//cout<< "  controle "<<controlIntCoords[compteComm][0]<<" "<<controlIntCoords[compteComm][1]<< " est autorise \n";
 
 				testAllTych = true;
-				for (compteTych = 0; compteTych < nbTy;
-					compteTych++)
+				for (compteTych = 0; compteTych < nbTy; compteTych++)
 				    {
-				    dynsys->dynamics_tych_fd(coordDiscretes,
-					    controlIntCoords[compteComm],
-					    tychIntCoords[compteTych], imageXU);
+				    dynsys->dynamics_tych_fd(coordDiscretes, controlIntCoords[compteComm], tychIntCoords[compteTych], imageXU);
 				    if (grid->isPointInGrid_fd(imageXU))
 					{
 					testAllTych &= grid->isInSet(imageXU);
@@ -4250,12 +4929,9 @@ void ViabiBitSet::saveViabGarantiRetro(string fileName)
 
 				//	 	cout<< " numero image "<<posIm<<endl;
 				viabControls.push_back(compteComm);
-				for (compteTych = 0; compteTych < nbTy;
-					compteTych++)
+				for (compteTych = 0; compteTych < nbTy; compteTych++)
 				    {
-				    dynsys->dynamics_tych_fd(coordDiscretes,
-					    controlIntCoords[compteComm],
-					    tychIntCoords[compteTych], imageXU);
+				    dynsys->dynamics_tych_fd(coordDiscretes, controlIntCoords[compteComm], tychIntCoords[compteTych], imageXU);
 				    grid->intCoordsToNum(imageXU, &posIm);
 				    images.push_back(posIm);
 				    }
@@ -4266,12 +4942,10 @@ void ViabiBitSet::saveViabGarantiRetro(string fileName)
 			// system("pause");
 			fichierB << viabControls.size() << " ";
 			int cptIm = 0;
-			for (unsigned long long int jj = 0;
-				jj < viabControls.size(); jj++)
+			for (unsigned long long int jj = 0; jj < viabControls.size(); jj++)
 			    {
 			    fichierB << viabControls.at(jj) << " ";
-			    for (compteTych = 0; compteTych < nbTy;
-				    compteTych++)
+			    for (compteTych = 0; compteTych < nbTy; compteTych++)
 				{
 				fichierB << images.at(cptIm) << " ";
 				cptIm++;
@@ -4282,7 +4956,7 @@ void ViabiBitSet::saveViabGarantiRetro(string fileName)
 
 			}				// fin de if masque[k]
 		    }			// fin de for  de parcours de masque
-					//system("pause");
+		//system("pause");
 
 		}			//fin de if la trame n'est pas vide
 	    }				// fin de for de parcours de la trame

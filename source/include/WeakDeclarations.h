@@ -44,13 +44,17 @@ double l_tych_fd(unsigned long long int *x, unsigned long long int *u,
 double dynConstraintsForTraj_default(double *x, double *image);
 
 void dynamics(double *x, double *u, double *image) __attribute__((weak));
+void dynamics_tych(double *x, double *u, double *v, double *image) __attribute__((weak));
 void jacobian(double *x, double *u, double **jacob) __attribute__((weak));
+void jacobian_tych(double *x, double *u, double *v, double **jacob) __attribute__((weak));
 void localDynBounds(double *x, double *res) __attribute__((weak));
 double constraintsXU(double *x, double *u) __attribute__((weak));
 double constraintsX(double *x) __attribute__((weak));
 double target(double *x) __attribute__((weak));
 double l(double *x, double *u) __attribute__((weak));
 double m(double *x, double *u) __attribute__((weak));
+double l_tych(double *x, double *u, double *v) __attribute__((weak));
+double m_tych(double *x, double *u, double *v) __attribute__((weak));
 void dynamics_hybrid(double *x, double *u, double *image) __attribute__((weak));
 void postProcess(ParametersManager *PM) __attribute__((weak));
 
@@ -59,6 +63,14 @@ inline double l_default(double *x, double *u)
     return 1.0;
     }
 inline double m_default(double *x, double *u)
+    {
+    return 0.0;
+    }
+inline double l_tych_default(double *x, double *u, double *v)
+    {
+    return 1.0;
+    }
+inline double m_tych_default(double *x, double *u, double *v)
     {
     return 0.0;
     }
@@ -100,7 +112,15 @@ inline void jacobian_default(double *x, double *u, double **jacob)
     {
 
     }
+inline void jacobian_tych_default(double *x, double *u, double *v, double **jacob)
+    {
+
+    }
 inline void dynamics_default(double *x, double *u, double *image)
+    {
+
+    }
+inline void dynamics_tych_default(double *x, double *u, double *v, double *image)
     {
 
     }

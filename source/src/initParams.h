@@ -44,6 +44,15 @@ ParametersManager* initParams(gridParams &gp, algoViabiParams &avp,
 	{
 	sp.DYNAMICS = &dynamics_default;
 	}
+
+    if (dynamics_tych)
+    	{
+    	sp.DYNAMICS_TYCH = &dynamics_tych;
+    	}
+        else
+    	{
+    	sp.DYNAMICS_TYCH = &dynamics_tych_default;
+    	}
     if (sp.DYN_TYPE == 4)
 	{
 	sp.DYNAMICS = &dynamics_hybrid;
@@ -94,6 +103,14 @@ ParametersManager* initParams(gridParams &gp, algoViabiParams &avp,
 	{
 	sp.JACOBIAN = &jacobian_default;
 	}
+    if (jacobian_tych)
+    	{
+    	sp.JACOBIAN_TYCH = &jacobian_tych;
+    	}
+        else
+    	{
+    	sp.JACOBIAN_TYCH = &jacobian_tych_default;
+    	}
     if (localDynBounds)
 	{
 	sp.LOCAL_DYN_BOUNDS = &localDynBounds;
@@ -118,6 +135,24 @@ ParametersManager* initParams(gridParams &gp, algoViabiParams &avp,
 	{
 	sp.L_FUNC = &l_default;
 	}
+
+    if (m_tych)
+    	{
+    	sp.M_FUNC_TYCH = &m_tych;
+    	}
+        else
+    	{
+    	sp.M_FUNC_TYCH = &m_tych_default;
+    	}
+        if (l_tych)
+    	{
+    	sp.L_FUNC_TYCH = &l_tych;
+    	}
+        else
+    	{
+    	sp.L_FUNC_TYCH = &l_tych_default;
+    	}
+
     if (target)
 	{
 	sp.TARGET = &target;

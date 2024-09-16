@@ -35,6 +35,8 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid *grRef)
     dynamics = SP.DYNAMICS;
     dynamics_fd = SP.DYNAMICS_FD;
     dynamics_tych_fd = SP.DYNAMICS_TYCH_FD;
+    dynamics_tych = SP.DYNAMICS_TYCH;
+
     dynType = SP.DYN_TYPE;
 
     if (SP.DYN_TYPE == DD)
@@ -78,13 +80,16 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid *grRef)
     computeLC = SP.COMPUTE_LC;
 
     jacobian = SP.JACOBIAN;
+    jacobian_tych = SP.JACOBIAN_TYCH;
     localDynBounds = SP.LOCAL_DYN_BOUNDS;
 
     lFunc = SP.L_FUNC;
+    lFunc_tych = SP.L_FUNC_TYCH;
     lFunc_fd = SP.L_FUNC_FD;
     lFunc_tych_fd = SP.L_FUNC_TYCH_FD;
     muFunc_fd = SP.MU_FUNC_FD;
     mFunc = SP.M_FUNC;
+    mFunc_tych = SP.M_FUNC_TYCH;
 
     jacob = new double*[dimS];
 
@@ -111,6 +116,7 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid *grRef)
     double h = (gr)->getMaxStep();
     rho = sqrt((2.0 * h) / (max(L, lfunc_L) * max(MF, lfunc_MF)));
 
+    isTychastic = (dimTy > 0);
     switch (computeMF)
 	{
     case 0:
@@ -120,20 +126,20 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid *grRef)
 	SysDyn::calcul_M = &SysDyn::calculMF_local_ana;
 	break;
     case 2:
-	SysDyn::calcul_M = &SysDyn::calculMF_local_num;
+	SysDyn::calcul_M = isTychastic ? &SysDyn::calculMF_local_num_tych : &SysDyn::calculMF_local_num;
 	break;
 	}
 
     switch (computeLC)
 	{
     case 0:
-	SysDyn::calcul_L = &SysDyn::returnL_local_ana;
+	SysDyn::calcul_L =  &SysDyn::returnL_local_ana;
 	break;
     case 1:
-	SysDyn::calcul_L = &SysDyn::calculL_local_ana;
+	SysDyn::calcul_L = isTychastic ? &SysDyn::calculL_local_ana : &SysDyn::calculL_local_ana;
 	break;
     case 2:
-	SysDyn::calcul_L = &SysDyn::calculL_local_num;
+	SysDyn::calcul_L = isTychastic ? &SysDyn::calculL_local_num_tych : &SysDyn::calculL_local_num;
 	break;
 	}
 
@@ -148,15 +154,19 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid *grRef)
 	{
     case 0:
 	SysDyn::discretDynamics = &SysDyn::FDiscret;
+	SysDyn::discretDynamics_tych = &SysDyn::FDiscret_tych;
 	break;
     case 1:
 	SysDyn::discretDynamics = &SysDyn::FDiscretEuler;
+	SysDyn::discretDynamics_tych = &SysDyn::FDiscretEuler_tych;
 	break;
     case 2:
 	SysDyn::discretDynamics = &SysDyn::FDiscretRK2;
+	SysDyn::discretDynamics_tych = &SysDyn::FDiscretRK2_tych;
 	break;
     case 3:
 	SysDyn::discretDynamics = &SysDyn::FDiscretRK4;
+	SysDyn::discretDynamics_tych = &SysDyn::FDiscretRK4_tych;
 	break;
 	}
     dynSignFactor = 1.0; //forward by default
@@ -224,6 +234,7 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid *grRef)
 
     if (dimTy > 0)
 	{
+
 	spdlog::warn("[System] : dynamic system with tychastic control");
 	spdlog::debug("[System] : Tychastic control dimansion {}", dimTy);
 	stepTy = new double[dimTy];
@@ -364,10 +375,33 @@ void SysDyn::FDiscretEuler(double *x, double *u, double *res, double rho)
 
     }
 
+void SysDyn::FDiscretEuler_tych(double *x, double *u, double *v, double *res, double rho)
+    {
+
+    int i;
+
+    (*dynamics_tych)(x, u, v, res);
+
+    for (i = 0; i < dimS; i++)
+	{
+	res[i] = x[i] + rho * dynSignFactor * res[i];
+	}
+
+    gr->periodizePoint(res);
+
+    }
+
 void SysDyn::FDiscret(double *x, double *u, double *res, double rho)
     {
 
     (*dynamics)(x, u, res);
+    gr->periodizePoint(res);
+    }
+
+void SysDyn::FDiscret_tych(double *x, double *u, double *v, double *res, double rho)
+    {
+
+    (*dynamics_tych)(x, u, v, res);
     gr->periodizePoint(res);
     }
 
@@ -433,6 +467,67 @@ void SysDyn::FDiscretRK4(double *x, double *u, double *res, double rho)
     delete[] y;
     }
 
+void SysDyn::FDiscretRK4_tych(double *x, double *u, double *v, double *res, double rho)
+    {
+    int i;
+    double *ki, *y;
+    ki = new double[dimS];
+    y = new double[dimS];
+    (*dynamics_tych)(x, u, v, ki);
+
+    for (i = 0; i < dimS; i++)
+	{
+	res[i] = x[i] + rho * dynSignFactor * ki[i] / 6.0;
+	y[i] = x[i] + 0.5 * rho * dynSignFactor * ki[i];
+	}
+    gr->periodizePoint(y);
+
+    /*
+     * k2=f(x+0.5*rho*k1,u)
+     * res=res+rho*k2/3;
+     *
+     */
+    (*dynamics_tych)(y, u, v, ki);
+
+    for (i = 0; i < dimS; i++)
+	{
+	y[i] = x[i] + 0.5 * rho * dynSignFactor * ki[i];
+	res[i] = res[i] + rho * dynSignFactor * ki[i] / 3.0;
+	}
+
+    gr->periodizePoint(y);
+    /*
+     * k3=f(x+0.5*rho*k2,u)
+     * res=res+rho*k3/3;
+     *
+     */
+    (*dynamics_tych)(y, u, v, ki);
+
+    for (i = 0; i < dimS; i++)
+	{
+	y[i] = x[i] + rho * dynSignFactor * ki[i];
+	res[i] = res[i] + rho * dynSignFactor * ki[i] / 3.0;
+	}
+
+    gr->periodizePoint(y);
+
+    /*
+     * k4=f(x+rho*k3,u)
+     * res=res+rho*k4/6;
+     *
+     */
+    (*dynamics_tych)(y, u, v, ki);
+
+    for (i = 0; i < dimS; i++)
+	{
+	res[i] = res[i] + rho * dynSignFactor * ki[i] / 6.0;
+	}
+
+    gr->periodizePoint(res);
+    delete[] ki;
+    delete[] y;
+    }
+
 
 double SysDyn::calculRho_local(double *x)
     {
@@ -474,6 +569,36 @@ void SysDyn::FDiscretRK2(double *x, double *u, double *res, double rho)
     gr->periodizePoint(res);
 
     (*dynamics)(res, u, Fres);
+
+    for (i = 0; i < dimS; i++)
+	{
+	res[i] = x[i] + 0.5 * rho * dynSignFactor * (Fx[i] + Fres[i]);
+	}
+
+    gr->periodizePoint(res);
+    delete[] Fx;
+    delete[] Fres;
+    }
+
+void SysDyn::FDiscretRK2_tych(double *x, double *u, double *v, double *res, double rho)
+    {
+
+    int i;
+    double *Fx, *Fres;
+    Fx = new double[dimS];
+    Fres = new double[dimS];
+    (*dynamics_tych)(x, u, v, Fx);
+
+    //   calculRho_local(x  );
+
+    for (i = 0; i < dimS; i++)
+	{
+	res[i] = x[i] + rho * dynSignFactor * Fx[i];
+	}
+
+    gr->periodizePoint(res);
+
+    (*dynamics_tych)(res, u, v, Fres);
 
     for (i = 0; i < dimS; i++)
 	{
@@ -565,6 +690,89 @@ double SysDyn::calculL_local_num(double *x)
     return max(L1, lfunc_L);
     }
 
+double SysDyn::calculL_local_num_tych(double *x)
+    {
+    double *xTempL = new double[dimS];
+    double *FXmoinsHL = new double[dimS];
+    double *FXplusHL = new double[dimS];
+
+    double *infX = gr->limInf;
+    double *pasX = gr->step;
+    double *supX = gr->limSup;
+
+    int i, j, k;
+    for (i = 0; i < dimS; i++)
+	{
+	xTempL[i] = x[i];
+	}
+    double L1 = 0;
+
+    bool test = false;
+
+    for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
+	{
+	for (unsigned long long int nv = 0; nv < totalNbPointsTych; nv++)
+	    {
+	    for (j = 0; j < dimS; j++)
+		{
+		test = false;
+		xTempL[j] = xTempL[j] - pasX[j];
+		//on teste si l'indice courant de l'ensemble dilate n'est pas en dehors de l'espace
+		if ((xTempL[j] <= supX[j]) && (xTempL[j] >= infX[j]))
+		    {
+		    // si l'indice est dans les limites de l'espace on  calcule le max de F(x,u) sur u
+
+		    (*dynamics_tych)(xTempL, controlCoords[nu], tychCoords[nv], FXmoinsHL);
+		    xTempL[j] = xTempL[j] + 2.0 * pasX[j];
+		    }
+		else
+		    {
+		    xTempL[j] = x[j];
+		    (*dynamics_tych)(xTempL, controlCoords[nu], tychCoords[nv], FXmoinsHL);
+		    xTempL[j] = xTempL[j] + pasX[j];
+		    test = true;
+		    }
+
+		if ((xTempL[j] <= supX[j]) && (xTempL[j] >= infX[j]))
+		    {
+		    // si l'indice est dans les limites de l'espace on  calcule le max de F(x,u) sur u
+
+		    (*dynamics_tych)(xTempL, controlCoords[nu], tychCoords[nv], FXplusHL);
+		    xTempL[j] = xTempL[j] - pasX[j];
+		    }
+		else
+		    {
+		    xTempL[j] = xTempL[j] - pasX[j];
+		    (*dynamics_tych)(xTempL, controlCoords[nu], tychCoords[nv], FXplusHL);
+		    test = true;
+		    }
+
+		for (k = 0; k < dimS; k++)
+		    {
+		    FXmoinsHL[k] = fabs(FXmoinsHL[k] - FXplusHL[k]);
+		    if (test)
+			{
+			FXmoinsHL[k] /= pasX[k];
+			}
+		    else
+			{
+			FXmoinsHL[k] /= (2.0 * pasX[k]);
+			}
+
+		    if (FXmoinsHL[k] > L1)
+			{
+			L1 = FXmoinsHL[k];
+			}
+		    }
+		}
+	    }
+	}
+    delete[] xTempL;
+    delete[] FXplusHL;
+    delete[] FXmoinsHL;
+    return max(L1, lfunc_L);
+    }
+
 double SysDyn::calculL_local_ana(double *x)
     {
     int j, k;
@@ -589,6 +797,43 @@ double SysDyn::calculL_local_ana(double *x)
 		}
 	    }
 	L1 = max(L1, norme);
+	}
+
+    for (int i = 0; i < dimS; i++)
+	{
+	delete[] jacob[i];
+	}
+    delete[] jacob;
+    return max(L1, lfunc_L);
+    }
+
+double SysDyn::calculL_local_ana_tych(double *x)
+    {
+    int j, k;
+    double **jacob = new double*[dimS];
+
+    for (int i = 0; i < dimS; i++)
+	{
+	jacob[i] = new double[dimS];
+	}
+    double L1 = 0;
+    double norme;
+    for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
+	{
+	for (unsigned long long int nv = 0; nv < totalNbPointsTych; nv++)
+	    {
+
+	    (*jacobian_tych)(x, controlCoords[nu], tychCoords[nv], jacob);
+	    norme = 0.;
+	    for (k = 0; k < dimS; k++)
+		{
+		for (j = 0; j < dimS; j++)
+		    {
+		    norme = max(norme, abs(jacob[k][j]));
+		    }
+		}
+	    L1 = max(L1, norme);
+	    }
 	}
 
     for (int i = 0; i < dimS; i++)
@@ -632,6 +877,34 @@ double SysDyn::calculMF_local_num(double *x)
     delete[] image;
     return max(MF1, lfunc_MF);
     }
+
+double SysDyn::calculMF_local_num_tych(double *x)
+    {
+
+    //calcul de la taille e prevoir pour les coordonnees des indices de debut de parcours
+    //que la methode GPU va renvoyer
+
+    double *image = new double[dimS];
+
+    double MF1 = 0.0;
+    double normeImage;
+    for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
+	{
+	for (unsigned long long int nv = 0; nv < totalNbPointsTych; nv++)
+	    {
+	    (*dynamics_tych)(x, controlCoords[nu], tychCoords[nv], image);
+	    normeImage = 0.0;
+	    for (int k = 0; k < dimS; k++)
+		{
+		normeImage = max(normeImage, abs(image[k]));
+		}
+	    MF1 = max(MF1, normeImage);
+	    }
+	}
+    delete[] image;
+    return max(MF1, lfunc_MF);
+    }
+
 
 double SysDyn::calculMF_local_ana(double *x)
     {

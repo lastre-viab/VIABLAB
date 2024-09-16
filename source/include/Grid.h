@@ -252,6 +252,8 @@ public:
     bool isPointInGrid(double *coords);
     bool isPointInGrid_fd(unsigned long long int *coords);
 
+
+
     /*!
      * Méthode d'accès
      * @return Le nombre total de mailles de la grille
