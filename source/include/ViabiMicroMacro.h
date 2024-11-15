@@ -84,6 +84,7 @@
 #include "GridMicroMacro.h"
 #include "ParametersManager.h"
 #include "ViabiMicroMacroTrajectoryHelper.h"
+#include "DiscretPointImage.h"
 
 class ViabiMicroMacro: public Viabi
     {
@@ -121,6 +122,7 @@ public:
     virtual void saveViableSets();
 
     void viabKerValFunc(unsigned long long int nbArret);
+    void viabKerValFunc_new(unsigned long long int nbArret);
     void viabKerValFunc_omp(unsigned long long int nbArret);
 
     double computeOptimalCaptTrajectory(double *initPosition, string fileName,
@@ -160,6 +162,7 @@ public:
      *
      */
     void initialiseTargetHJB();
+    void initialiseTargetHJB_new();
     void initCnIndices();
 
     /*!
@@ -235,6 +238,7 @@ private:
      *     si b=1  alors c'est un point ajouté à la dernière itération  et donc il appartient à \f$ C_n\f$
      */
     void computeCurrIm_tmin(int iter);
+    void computeCurrIm_tmin_new(int iter);
 
     /*!
      *
@@ -247,6 +251,7 @@ private:
      *     si b=1  alors c'est un point ajouté à la dernière itération  et donc il appartient à \f$ C_n\f$
      */
     void computeCurrIm_Lmin(int iter);
+    void computeCurrIm_Lmin_new(int iter);
 
     void addDataToCurrentImage(list<imageCell>::iterator *startIt,
 	    imageCell newCell, list<imageCell>::iterator *resIt);
@@ -275,6 +280,7 @@ private:
      */
 
     int addNewPoints();
+    int addNewPoints_new();
 
     int (ViabiMicroMacro::*addNewPointsToSet)();
 
@@ -288,6 +294,7 @@ private:
      */
 
     void createPointsList();
+    void createPointsList_new();
 
     void (ViabiMicroMacro::*createCurrentPointsList)();
 
@@ -381,17 +388,17 @@ private:
      * \see addDataToCurrentImage
      * \see computeCurrentImageGlobalRho
      */
-    imageCellsList currentImageList;
+
+    map<unsigned long long int, double> currentCellsImage;
     /*!
      * \brief La liste de structures représentant  des points d'une image en construction
      * Attention! Les méthodes suivantes modifient  cette variable comme étant globale
      * \see createPointsListGlobalRho
      * \see addDataToPointsList
      */
-    imagePointsList currentImagePointsList;
+    map<unsigned long long int, double> currentPointsImage;
 
-    std::list<imagePoint> *tempPointsList1;
-    std::list<imagePoint> *tempPointsList2;
+
     int whichPointListToUse;
 
     /*!
@@ -439,7 +446,9 @@ private:
      */
 
     void computeConvexifiedImage_tmin(int iter);
+    void computeConvexifiedImage_tmin_new(int iter);
     void computeConvexifiedImage_Lmin(int iter);
+    void computeConvexifiedImage_Lmin_new(int iter);
 
     void (ViabiMicroMacro::*computeFirstConvexifiedImage)(int iter);
 
@@ -462,6 +471,7 @@ private:
     void addConvexCombinations(list<imagePoint>::iterator itPoint,
 	    unsigned long long int numCell, imageCell *tempImageCell,
 	    double rho, list<imageCell>::iterator *itStart);
+    void addConvexCombinations_new(unsigned long long int posX, double pointVal, double newCellVal, unsigned long long int numCell, double rho);
 
     bool testConstraintesForCell(unsigned long long int numCell);
 

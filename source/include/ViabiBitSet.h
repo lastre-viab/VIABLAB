@@ -27,6 +27,7 @@
 #include "Viabi.h"
 #include "GridBitSet.h"
 #include "ParametersManager.h"
+#include "DiscretPointImage.h"
 
 class ViabiBitSet: public Viabi
     {
@@ -59,24 +60,18 @@ public:
     bool findGuarantedViabImagePoint(double *xCoordsDouble, bool print);
     bool findViabImagePoint_noControl(double *xCoordsDouble, bool print);
     void initialiseTargetPointList();
-    int computeViableTrajectorySetVal(double *initPosition, double finalTime,
-	    string fileName);
-    int computeViableTrajectoryHeavy(double *initPosition, double *initControl,
-	    double finalTime, string fileName);
+    int computeViableTrajectorySetVal(double *initPosition, double finalTime, string fileName);
+    int computeViableTrajectoryHeavy(double *initPosition, double *initControl, double finalTime, string fileName);
 
-    int computeViableTrajectory(double *initPosition, double finalTime,
-	    string fileName);
-    int findViabControl(double *currentPos, double &dt, int nbStepIter,
-	    double stepCoeff, double *resPos, int &nbViabVoisins, bool &succes);
+    int computeViableTrajectory(double *initPosition, double finalTime, string fileName);
+    int findViabControl(double *currentPos, double &dt, int nbStepIter, double stepCoeff, double *resPos, int &nbViabVoisins, bool &succes);
 private:
     Grid_BitSet *grid;
     void InitViabiBitSet(algoViabiParams avbp);
     void ViabilityKernelSimple(bool sortieOK, int nbArret);
     void GuarantedViabilityKernelSimple(bool sortieOK, int nbArret);
-    void computeDiscreteImageOfPoint(double *doublePointCoords,
-	    unsigned long long int *intPointCoords);
-    void computeDiscreteImageOfPoint_noControl(double *doublePointCoords,
-	    unsigned long long int *intPointCoords);
+    void computeDiscreteImageOfPoint(double *doublePointCoords, unsigned long long int *intPointCoords);
+    void computeDiscreteImageOfPoint_noControl(double *doublePointCoords, unsigned long long int *intPointCoords);
 
     void noyauViabi_FD(bool sortieOK, int nbArret);
     void noyauViabi(bool sortieOK, int nbArret);
@@ -88,7 +83,8 @@ private:
     void CaptureBasin_ContinuousDynamics();
     void CaptureBasin_DiscreteDynamics();
     unsigned long long int findViableDiscreteSuccessor(unsigned long long int pos, double dt);
-    int findViabControl_bis(double *currentPos, unsigned long long int optimDiscreteSuccessor, double &dt, int nbStepIter, double stepCoeff, double *resPos, bool &succes);
+    int findViabControl_bis(double *currentPos, unsigned long long int optimDiscreteSuccessor, double &dt, int nbStepIter, double stepCoeff,
+	    double *resPos, bool &succes);
     void computeViableTrajectories();
     int computeViableTrajectorySetVal_bis(double *initPosition, double finalTime, string fileName);
     /*!
@@ -114,6 +110,15 @@ private:
      */
     discretImageSet_simple pointDI;
 
+    map<unsigned long long int, double> currentCellsImage;
+    /*!
+     * \brief La liste de structures représentant  des points d'une image en construction
+     * Attention! Les méthodes suivantes modifient  cette variable comme étant globale
+     * \see createPointsListGlobalRho
+     * \see addDataToPointsList
+     */
+    map<unsigned long long int, double> currentPointsImage;
+
     double *doubleVect, *doubleVect1;
     unsigned long long int *imageCells;
 
@@ -132,19 +137,14 @@ private:
      */
     imagePointsIntList currentImagePointsList;
 
-    void addConvexCombinations(unsigned long long int posX,
-	    unsigned long long int numCell,
-	    unsigned long long int *tempImageCell, double rho,
-	    list<unsigned long long int>::iterator *itStart);
+    void addConvexCombinations(unsigned long long int posX, double pointVal, double newCellVal, unsigned long long int numCell, double rho);
     void computeConvexifiedImage(int iter);
-    void addDataToCurrentImage(list<unsigned long long int>::iterator *startIt,
-	    unsigned long long int newCell,
+    void addDataToCurrentImage(list<unsigned long long int>::iterator *startIt, unsigned long long int newCell,
 	    list<unsigned long long int>::iterator *resIt);
     int addNewPoints();
     void computeCurrentImage(int iter);
     void createPointsList();
-    void addDataToPointsList(list<unsigned long long int>::iterator *startIt,
-	    unsigned long long int newPoint,
+    void addDataToPointsList(list<unsigned long long int>::iterator *startIt, unsigned long long int newPoint,
 	    list<unsigned long long int>::iterator *resIt);
 
     };

@@ -74,8 +74,7 @@ GridMicroMacro::GridMicroMacro(gridParams gp)
 	unboundedDomain |= (sortieOKinf[d] == 1) | (sortieOKsup[d] == 1);
 	d++;
 	}
-    spdlog::debug("[GridMicorMacro] : check unbounded domain : {}",
-	    unboundedDomain);
+    spdlog::debug("[GridMicorMacro] : check unbounded domain : {}", unboundedDomain);
 
     gridDataFile << dim << endl;
     for (int k = 0; k < dim; k++)
@@ -131,13 +130,10 @@ GridMicroMacro::GridMicroMacro(gridParams gp)
 	{
 	gridPtr = new double[nbTotalPoints];
 	}
-    catch (const std::bad_alloc &e)
+    catch (...)
 	{
-	spdlog::critical(
-		"[GridMicroMacro] : Allocation failed: in initialisation of the value function tab nbTotalPoints = {}",
-		nbTotalPoints);
-	spdlog::critical(e.what());
-	exit(1);
+	cout << " error while allocating ";
+	throw;
 	}
 
     if (nbOMPThreads > 1)
@@ -146,13 +142,10 @@ GridMicroMacro::GridMicroMacro(gridParams gp)
 	    {
 	    gridPtr_tmp = new double[nbTotalPoints];
 	    }
-	catch (const std::bad_alloc &e)
+	catch (...)
 	    {
-	    spdlog::critical(
-		    "[GridMicroMacro] : Allocation failed: in initialisation of the value function tab nbTotalPoints = {}",
-		    nbTotalPoints);
-	    spdlog::critical(e.what());
-	    exit(1);
+	    cout << " error while allocating ";
+	    throw;
 	    }
 	}
 
@@ -449,8 +442,7 @@ void GridMicroMacro::saveCoupeBoundary(string fileName)
 	    test = true;
 	    for (int k = 0; k < (int) dirs.size(); k++)
 		{
-		test = test
-			& (abs(xReel[dirs[k]] - values[k]) <= step[dirs[k]]);
+		test = test & (abs(xReel[dirs[k]] - values[k]) <= step[dirs[k]]);
 		}
 	    if (test)
 		{
@@ -626,11 +618,9 @@ void GridMicroMacro::computeMinMaxValues(double &minV, double &maxV)
 	}
     }
 
-void GridMicroMacro::saveProjetion(string fileName,
-	unsigned long long int *projection)
+void GridMicroMacro::saveProjetion(string fileName, unsigned long long int *projection)
     {
-    unsigned long long int *reducedNbPoints =
-	    new unsigned long long int[dim - 1];
+    unsigned long long int *reducedNbPoints = new unsigned long long int[dim - 1];
     double *reducedLimInf = new double[dim - 1];
     double *reducedStep = new double[dim - 1];
     unsigned long long int *tempVect = new unsigned long long int[dim - 1];

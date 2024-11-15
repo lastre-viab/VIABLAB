@@ -46,45 +46,6 @@ ParametersManager::ParametersManager(gridParams *gp, algoViabiParams *avp, contr
     parametersFileName = paramsFile;
     ptree allParamsRoot, dataRoot;
 
-    string input_tempfile = "../INPUT/" + parametersFileName;
-    spdlog::info("[ParametrManager] : Reading of Grid parameters");
-    spdlog::info("[ParametrManager] : Input json file {}", input_tempfile.c_str());
-
-    //- loading data from input file
-    read_json(input_tempfile, allParamsRoot);
-    dataRoot = allParamsRoot.find("GRID_PARAMETERS")->second;
-
-    string modelFilePrefix = dataRoot.get<string>("OUTPUT_FILE_PREFIX", "Model-");
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-
-    std::ostringstream oss;
-    oss << std::put_time(&tm, "%d-%m-%Y_%H-%M-%S");
-    auto str = oss.str();
-    string logFileName = "../LOG/" + modelFilePrefix + str + ".log";
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFileName, true);
-    file_sink->set_level(spdlog::level::trace);
-
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    console_sink->set_level(spdlog::level::info);
-    console_sink->set_pattern("[ViabLog] [%^%l%$] %v");
-
-    spdlog::sinks_init_list sink_list =
-	    {
-		    file_sink, console_sink
-	    };
-
-    spdlog::logger logger("multi_sink", sink_list.begin(), sink_list.end());
-
-    // or you can even set multi_sink logger as default logger
-    spdlog::set_default_logger(std::make_shared<spdlog::logger>("ViabLog", spdlog::sinks_init_list(
-	    {
-    console_sink, file_sink
-	    })));
-
-    spdlog::set_level(spdlog::level::trace);
-
-    spdlog::flush_every(std::chrono::seconds(10));
 
     this->readControlParametersFromJson();
     this->readGridParametersFromJson();

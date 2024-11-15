@@ -99,8 +99,9 @@ using namespace boost::property_tree;
  */
 #define CC  1  /*! continuous dynamics*/
 #define DC  2  /*! discrete time dynamics*/
-#define HD  4  /*! hybrid dynamics*/
 #define DD  3  /*! full discrete ( time and space) dynamics*/
+#define HD  4  /*! hybrid dynamics*/
+
 /*
  * Valeurs pour la constante qui définit la méthode de
  * représentation de l'ensemble
@@ -196,15 +197,12 @@ struct systemParams
     {
     void (*DYNAMICS)(double*, double*, double*);
     void (*DYNAMICS_TYCH)(double*, double*, double*, double*);
-    void (*DYNAMICS_FD)(unsigned long long int*, unsigned long long int*,
-	    unsigned long long int*);
-    void (*DYNAMICS_TYCH_FD)(unsigned long long int*, unsigned long long int*,
-	    unsigned long long int*, unsigned long long int*);
+    void (*DYNAMICS_FD)(unsigned long long int*, unsigned long long int*, unsigned long long int*);
+    void (*DYNAMICS_TYCH_FD)(unsigned long long int*, unsigned long long int*, unsigned long long int*, unsigned long long int*);
 
     double (*CONSTR_XU)(double*, double *u);
     double (*CONSTR_XU_fd)(unsigned long long int*, unsigned long long int*);
-    double (*CONTROL_ELIGIBILITY_FOR_TRAJ_fd)(unsigned long long int*,
-	    unsigned long long int*, unsigned long long int*);
+    double (*CONTROL_ELIGIBILITY_FOR_TRAJ_fd)(unsigned long long int*, unsigned long long int*, unsigned long long int*);
 
     double (*CONSTR_X)(double*);
     double (*CONSTR_X_fd)(unsigned long long int*);
@@ -212,8 +210,7 @@ struct systemParams
     double (*TARGET)(double*);
     double (*TARGET_FD)(unsigned long long int*);
     double (*L_FUNC_FD)(unsigned long long int*, unsigned long long int*);
-    double (*L_FUNC_TYCH_FD)(unsigned long long int*, unsigned long long int*,
-	    unsigned long long int*);
+    double (*L_FUNC_TYCH_FD)(unsigned long long int*, unsigned long long int*, unsigned long long int*);
 
     double (*L_FUNC)(double*, double*);
     double (*L_FUNC_TYCH)(double*, double*, double*);
@@ -429,9 +426,7 @@ inline bool imageCellCompare(imageCell c1, imageCell c2)
  *  � partir du num�ro du point dans la num�rotation alpha-num�rique
  * on obient le vecteur des coordonn�s enti�res
  */
-inline void numToIntCoords_gen(unsigned long long int num,
-	unsigned long long int dim, unsigned long long int *nbPoints,
-	unsigned long long int *res)
+inline void numToIntCoords_gen(unsigned long long int num, unsigned long long int dim, unsigned long long int *nbPoints, unsigned long long int *res)
     {
     int temp = num;
 
@@ -444,8 +439,7 @@ inline void numToIntCoords_gen(unsigned long long int num,
 
     }
 
-inline void numToIntDoubleCoords_gen(unsigned long long int num,
-	unsigned long long int dim, unsigned long long int *nbPoints,
+inline void numToIntDoubleCoords_gen(unsigned long long int num, unsigned long long int dim, unsigned long long int *nbPoints,
 	unsigned long long int *res)
     {
     int temp = num;
@@ -461,8 +455,7 @@ inline void numToIntDoubleCoords_gen(unsigned long long int num,
  *  *  � partir du num�ro des coordonn�es enti�res du points dans la grille
  *  sont num�ro
  */
-inline void intCoordsToNum_gen(unsigned long long int dim,
-	unsigned long long int *nbPoints, unsigned long long int *coords,
+inline void intCoordsToNum_gen(unsigned long long int dim, unsigned long long int *nbPoints, unsigned long long int *coords,
 	unsigned long long int *res)
     {
     (*res) = coords[0];
@@ -519,8 +512,7 @@ inline void printVector(int *vect, unsigned long long int dim)
 	}
     cout << endl;
     }
-inline void printVector(unsigned long long int *vect,
-	unsigned long long int dim)
+inline void printVector(unsigned long long int *vect, unsigned long long int dim)
     {
     for (unsigned long long int k = 0; k < dim; k++)
 	{
@@ -550,8 +542,7 @@ inline void logVector(string msg, int *vect, unsigned long long int dim)
 	}
     spdlog::debug(os.str().c_str());
     }
-inline void logVector(string msg, unsigned long long int *vect,
-	unsigned long long int dim)
+inline void logVector(string msg, unsigned long long int *vect, unsigned long long int dim)
     {
     ostringstream os;
     os << msg;
@@ -584,32 +575,25 @@ struct imageDDPoint
 /*
  * Fonctions de changement d'échelle universel
  */
-inline void fScale(const double *x, double *res, double *STATE_MINreel,
-	double *STATE_MAXreel, int *scaling, int dim)
+inline void fScale(const double *x, double *res, double *STATE_MINreel, double *STATE_MAXreel, int *scaling, int dim)
     {
     /*
      * le changement de variables est efectif seulement si scaling[i]=1
      */
     for (int i = 0; i < dim; i++)
 	{
-	res[i] = scaling[i]
-		* ((x[i] - STATE_MINreel[i])
-			/ (STATE_MAXreel[i] - STATE_MINreel[i]))
-		+ (1 - scaling[i]) * x[i];
+	res[i] = scaling[i] * ((x[i] - STATE_MINreel[i]) / (STATE_MAXreel[i] - STATE_MINreel[i])) + (1 - scaling[i]) * x[i];
 	}
     }
 
-inline void fScaleInv(const double *x, double *res, double *STATE_MINreel,
-	double *STATE_MAXreel, int *scaling, int dim)
+inline void fScaleInv(const double *x, double *res, double *STATE_MINreel, double *STATE_MAXreel, int *scaling, int dim)
     {
     /*
      * le changement de variables est efectif seulement si scaling[i]=1
      */
     for (int i = 0; i < dim; i++)
 	{
-	res[i] = scaling[i]
-		* (x[i] * (STATE_MAXreel[i] - STATE_MINreel[i])
-			+ STATE_MINreel[i]) + (1 - scaling[i]) * x[i];
+	res[i] = scaling[i] * (x[i] * (STATE_MAXreel[i] - STATE_MINreel[i]) + STATE_MINreel[i]) + (1 - scaling[i]) * x[i];
 	}
     }
 
@@ -628,47 +612,39 @@ inline double fTimeScaleInv(const double x, double scaleL, int timeScaling)
     return (timeScaling * ((x) / scaleL) + (1 - timeScaling) * x);
     }
 
-inline void fScalePrime(double *res, double *STATE_MINreel,
-	double *STATE_MAXreel, int *scaling, int dim)
+inline void fScalePrime(double *res, double *STATE_MINreel, double *STATE_MAXreel, int *scaling, int dim)
     {
     /*
      * le changement de variables est efectif seulement si scaling[i]=1
      */
     for (int i = 0; i < dim; i++)
 	{
-	res[i] = scaling[i] / (STATE_MAXreel[i] - STATE_MINreel[i])
-		+ (1 - scaling[i]);
+	res[i] = scaling[i] / (STATE_MAXreel[i] - STATE_MINreel[i]) + (1 - scaling[i]);
 	}
     }
 
-inline double fScaleComponent(const double x, int i, double *STATE_MINreel,
-	double *STATE_MAXreel, int *scaling)
+inline double fScaleComponent(const double x, int i, double *STATE_MINreel, double *STATE_MAXreel, int *scaling)
     {
     /*
      * le changement de variables est efectif seulement si scaling[i]=1
      */
-    return scaling[i] * (x - STATE_MINreel[i])
-	    / (STATE_MAXreel[i] - STATE_MINreel[i]) + (1 - scaling[i]) * x;
+    return scaling[i] * (x - STATE_MINreel[i]) / (STATE_MAXreel[i] - STATE_MINreel[i]) + (1 - scaling[i]) * x;
 
     }
 
-inline double fScaleInvComponent(const double x, int i, double *STATE_MINreel,
-	double *STATE_MAXreel, int *scaling)
+inline double fScaleInvComponent(const double x, int i, double *STATE_MINreel, double *STATE_MAXreel, int *scaling)
     {
     /*
      * le changement de variables est efectif seulement si scaling[i]=1
      */
 
-    return scaling[i]
-	    * ((x * (STATE_MAXreel[i] - STATE_MINreel[i]) + STATE_MINreel[i]))
-	    + (1 - scaling[i]) * x;
+    return scaling[i] * ((x * (STATE_MAXreel[i] - STATE_MINreel[i]) + STATE_MINreel[i])) + (1 - scaling[i]) * x;
 
     }
 /*
  * le changement de variables est efectif seulement si scaling[i]=1
  */
-inline double fScalePrimeComponent(int i, double *STATE_MINreel,
-	double *STATE_MAXreel, int *scaling)
+inline double fScalePrimeComponent(int i, double *STATE_MINreel, double *STATE_MAXreel, int *scaling)
     {
     return scaling[i] / (STATE_MAXreel[i] - STATE_MINreel[i]) + (1 - scaling[i]);
     }

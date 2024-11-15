@@ -54,8 +54,46 @@ int main(int argc, char **argv)
     char cCurrentPath[FILENAME_MAX];
     cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */
 
-    //initialisation des structures à partir des données de l'utilisateur
+    ptree allParamsRoot, dataRoot;
+    string input_tempfile = "../INPUT/" + paramsFile;
+    //- loading data from input file
+    read_json(input_tempfile, allParamsRoot);
+    dataRoot = allParamsRoot.find("GRID_PARAMETERS")->second;
 
+    string modelFilePrefix = dataRoot.get<string>("OUTPUT_FILE_PREFIX", "Model-");
+
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%m-%Y_%H-%M-%S");
+    auto str = oss.str();
+    string logFileName = "../LOG/" + modelFilePrefix + str + ".log";
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFileName, true);
+    file_sink->set_level(spdlog::level::trace);
+
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    console_sink->set_level(spdlog::level::info);
+    console_sink->set_pattern("[ViabLog] [%^%l%$] %v");
+
+//	spdlog::sinks_init_list sink_list =
+//	{
+//			file_sink, console_sink
+//	};
+    spdlog::sinks_init_list sink_list =
+	{
+	console_sink
+	};
+
+    //spdlog::logger logger("multi_sink", sink_list.begin(), sink_list.end());
+
+    // or you can even set multi_sink logger as default logger
+    spdlog::set_default_logger(std::make_shared<spdlog::logger>("ViabLog", sink_list));
+
+    spdlog::set_level(spdlog::level::trace);
+
+    //spdlog::flush_every(std::chrono::seconds(30));
+    //initialisation des structures à partir des données de l'utilisateur
+    spdlog::info("Start of Viablab programm : initialization of model parameters");
     ParametersManager *PM = initParams(gp, avp, cp, sp, nbOmpThreads);
     /**********************************
      * IMPORTANT : appeler la fonction load_data ICI avant TOUT le reste
@@ -82,25 +120,35 @@ int main(int argc, char **argv)
 
 	if (avp.SET_TYPE == VIAB)
 	    { // option de calcul de noyau de viabilité a été choisie
-	    // Initialisation de l'ensemble de contraintes
+	      // Initialisation de l'ensemble de contraintes
 	    spdlog::warn("Initialization of constraints");
 	    viabProblem->initialiseConstraints();
 	    viabProblem->ViabilityKernel(true, avp.INTERATION_STOP_LEVEL);
 	    }
 	if (avp.SET_TYPE == CAPT)
 	    { // option de calcul de noyau de viabilité a été choisie
-	    // Initialisation de l'ensemble de contraintes
+	      // Initialisation de l'ensemble de contraintes
 	    spdlog::warn("Initialization of target set");
 	    viabProblem->initialiseTarget();
-	    viabProblem->CaptureBasin();
+	    try
+		{
+		cout << " debut calcul capture \n";
+		viabProblem->CaptureBasin();
+		}
+	    catch (...)
+		{
+		cout << " exception while capture baisin\n" << std::flush;
+
+		exit(1);
+		}
+
 	    }
 	if (avp.SET_TYPE == VIABG)
 	    { // option de calcul de noyau de viabilité a été choisie
-	    // Initialisation de l'ensemble de contraintes
+	      // Initialisation de l'ensemble de contraintes
 	    spdlog::warn("Initialization of constraints");
 	    viabProblem->initialiseConstraints();
-	    viabProblem->GarantedViabilityKernel(true,
-		    avp.INTERATION_STOP_LEVEL);
+	    viabProblem->GarantedViabilityKernel(true, avp.INTERATION_STOP_LEVEL);
 	    }
 
 	gettimeofday(&tim_glob, NULL);

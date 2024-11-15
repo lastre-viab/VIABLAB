@@ -1,7 +1,7 @@
 /*
  * ViabiMicroMacroDiscrete.h
  *
- *  Created on: 1 ao�t 2024
+ *  Created on: 1 ao�t 2024
  *      Author: adesi
  */
 
@@ -51,9 +51,7 @@ public:
     void viabKerValFunc(unsigned long long int nbArret);
     void viabKerGarantiValFunc(unsigned long long int nbArret);
 
-    double computeOptimalCaptTrajectory(double *initPosition, string fileName,
-	    bool &succes);
-
+    double computeOptimalCaptTrajectory(double *initPosition, string fileName, bool &succes);
 
     /*!
      *   \brief  Fonction qui initialise la cible dans la base de données représentant
@@ -79,18 +77,13 @@ public:
     int nbOMPthreads;
 
     double computeOptimalTrajectory(double *initPosition, string FileName);
-    double computeOptimalTrajectory(unsigned long long int posX,
-	    string FileName);
-    void computeEvaderCapturability(double **trajectory, double *win,
-	    double *departureTimes, unsigned long long int *capturePoints,
-	    int nbTrajPoints, string fileName);
-    void computeEvaderCapturability_proj(double **trajectory, double *win,
-	    double *departureTimes, unsigned long long int *capturePoints,
+    double computeOptimalTrajectory(unsigned long long int posX, string FileName);
+    void computeEvaderCapturability(double **trajectory, double *win, double *departureTimes, unsigned long long int *capturePoints, int nbTrajPoints,
+	    string fileName);
+    void computeEvaderCapturability_proj(double **trajectory, double *win, double *departureTimes, unsigned long long int *capturePoints,
 	    int nbTrajPoints, string fileName, unsigned long long int *proj);
 
-    void computeAllPossibleCaptureTrajectories(double *departureTimes,
-	    unsigned long long int *capturePoints, int nbTrajPoints,
-	    string prefix);
+    void computeAllPossibleCaptureTrajectories(double *departureTimes, unsigned long long int *capturePoints, int nbTrajPoints, string prefix);
 
 private:
 
@@ -162,8 +155,7 @@ private:
     void computeCurrIm(int iter);
     void computeDiscreteImageOfPoint(unsigned long long int num);
 
-    void addDataToCurrentImage(list<imageCell>::iterator *startIt,
-	    imageCell newCell, list<imageCell>::iterator *resIt);
+    void addDataToCurrentImage(list<imageCell>::iterator *startIt, imageCell newCell, list<imageCell>::iterator *resIt);
 
     /*!
      * \brief Cette fonction parcours la liste de points générée lors d'un calcul de l'image \f$  \Phi(C_{n+1}\setminus C_n)\f$
@@ -235,8 +227,7 @@ private:
      */
     void addDataToCell(list<imageCell>::iterator itCell, imageCell newCell);
 
-    void (ViabiMicroMacroDiscrete::*addDataToCurrentCell)(list<imageCell>::iterator,
-	    imageCell);
+    void (ViabiMicroMacroDiscrete::*addDataToCurrentCell)(list<imageCell>::iterator, imageCell);
 
     /*!
      * \brief Cette fonction permet de mettre à jour les données d'un point déjà présent dans
@@ -252,11 +243,9 @@ private:
      * @param itPoint pointeur sur le point à modifier dans la liste de points en construction
      * @param newPoint structure portant les données à ajouter à cette maille
      */
-    void addDataToPoint(list<imagePoint>::iterator itPoint,
-	    imagePoint newPoint);
+    void addDataToPoint(list<imagePoint>::iterator itPoint, imagePoint newPoint);
 
-    void (ViabiMicroMacroDiscrete::*addDataToCurrentPoint)(list<imagePoint>::iterator,
-	    imagePoint);
+    void (ViabiMicroMacroDiscrete::*addDataToCurrentPoint)(list<imagePoint>::iterator, imagePoint);
     /*!
      *  \brief Cette fonction permet d'ajouter un nouveau point dans la liste ordonnée et sans doublons de points de l'image
      *  \f$ \Phi(C_{n}\setminus C_{n-1})\f$ .
@@ -269,15 +258,11 @@ private:
      * la recherche suivante
      */
 
-    void addTempDataToPointsList(list<imagePoint>::iterator *startIt,
-	    imageTempPoint newPoint, list<imagePoint>::iterator *resIt);
-    void addDataToGivenPointsList(imagePointsList *tempImagePointsList,
-	    list<imagePoint>::iterator *startIt, imagePoint newPoint,
+    void addTempDataToPointsList(list<imagePoint>::iterator *startIt, imageTempPoint newPoint, list<imagePoint>::iterator *resIt);
+    void addDataToGivenPointsList(imagePointsList *tempImagePointsList, list<imagePoint>::iterator *startIt, imagePoint newPoint,
 	    list<imagePoint>::iterator *resIt);
 
-    void addDataToPointsList(list<imagePoint>::iterator *startIt,
-	    imagePoint newPoint, list<imagePoint>::iterator *resIt);
-
+    void addDataToPointsList(list<imagePoint>::iterator *startIt, imagePoint newPoint, list<imagePoint>::iterator *resIt);
 
     /*!
      *  \brief  Une structure servant à stocker les données  de l'image discréte
@@ -308,13 +293,11 @@ private:
     std::list<imagePoint> *tempPointsList2;
     int whichPointListToUse;
 
-
     bool testConstraintesForCell(unsigned long long int numCell);
 
     int targ_or_dep;
     int computeTmin;
 
     };
-
 
 #endif /* VIABIMICROMACRODISCRETE_H_ */

@@ -93,8 +93,7 @@ unsigned long long int Grid::getDim()
     {
     return dim;
     }
-void Grid::numToIntCoords(unsigned long long int num,
-	unsigned long long int *res)
+void Grid::numToIntCoords(unsigned long long int num, unsigned long long int *res)
     {
 
     unsigned long long int temp = num;
@@ -107,8 +106,7 @@ void Grid::numToIntCoords(unsigned long long int num,
 	}
 
     }
-void Grid::numToIntAndDoubleCoords(unsigned long long int num,
-	unsigned long long int *resI, double *resD)
+void Grid::numToIntAndDoubleCoords(unsigned long long int num, unsigned long long int *resI, double *resD)
     {
     bool print = false;  //(num == 5100);
     unsigned long long int temp = num;
@@ -133,8 +131,7 @@ void Grid::numToIntAndDoubleCoords(unsigned long long int num,
  *  � partir du num�ro des coordonn�es enti�res du points dans la grille
  *  sont num�ro
  */
-void Grid::intCoordsToNum(unsigned long long int *coords,
-	unsigned long long int *res)
+void Grid::intCoordsToNum(unsigned long long int *coords, unsigned long long int *res)
     {
     (*res) = coords[0];
     for (int i = 0; i < dim - 1; i++)
@@ -159,8 +156,7 @@ unsigned long long int Grid::localizePoint(double *coords)
     // cout<< " indice Cell dans localize ";
     for (int k = 0; k < dim; k++)
 	{
-	indiceCell[k] = (unsigned long long int) (floor(
-		(((coords)[k] - limInf[k]) / step[k])));
+	indiceCell[k] = (unsigned long long int) (floor((((coords)[k] - limInf[k]) / step[k])));
 
 	if (indiceCell[k] == (nbPoints[k] - 1))
 	    {
@@ -405,7 +401,6 @@ bool Grid::isPointInGrid(double *coords)
 
     }
 
-
 bool Grid::isPointInGrid_fd(unsigned long long int *coords)
     {
 
@@ -455,8 +450,7 @@ bool Grid::isPointInGridWithConstr(double *coords)
 
     while (isInGrid & (i < dim))
 	{
-	isInGrid &= (((coords[i] <= limSup[i]) | (sortieOKsup[i]))
-		& ((coords[i] >= limInf[i]) | (sortieOKinf[i])));
+	isInGrid &= (((coords[i] <= limSup[i]) | (sortieOKsup[i])) & ((coords[i] >= limInf[i]) | (sortieOKinf[i])));
 	i++;
 	}
     return isInGrid;

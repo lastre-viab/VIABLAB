@@ -1048,7 +1048,7 @@ int ViabiBitSet::findViabControl(double *currentPos, double &dt, int nbStepIter,
 			    {
 			    posTemp = cellNum + indicesDecalCell[ii];
 			    grid->numToIntAndDoubleCoords(posTemp, testI, testV);
-			    if (dynsys->dynConstraintsForTraj(xCoordsDouble, testV) < PLUS_INF)	// on v�rifie si la projection corrspond aux contraintes de dynamique
+			    if (dynsys->dynConstraintsForTraj(xCoordsDouble, testV) < PLUS_INF)	// on v�rifie si la projection corrspond aux contraintes de dynamique
 				{
 				double dist = 0.0;
 				for (int k = 0; k < dim; k++)
@@ -1545,7 +1545,7 @@ bool ViabiBitSet::findGuarantedViabImagePoint(double *xCoordsDouble, bool print)
 		else
 		    {
 		    testAllTych = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1)
-																							    && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
+						    && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
 		    }
 
 		}
@@ -1622,7 +1622,7 @@ bool ViabiBitSet::findGuarantedViabImagePoint(double *xCoordsDouble, bool print)
 			else
 			    {
 			    testAllTych = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1)
-																								    && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
+							    && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
 			    }
 
 			}
@@ -1733,37 +1733,37 @@ unsigned long long int ViabiBitSet::findViableDiscreteSuccessor(unsigned long lo
 		    testNonVide = (viabSuccessor < grid->nbTotalPoints + 1);
 
 		    /*   for (int ii = 0; ii < nbPointsCube; ii++)
-			{
-			posTemp = cellNum + indicesDecalCell[ii];
-			grid->numToIntAndDoubleCoords(posTemp, testI, testV);
+		     {
+		     posTemp = cellNum + indicesDecalCell[ii];
+		     grid->numToIntAndDoubleCoords(posTemp, testI, testV);
 
-			if (grid->isInSet(testI))
-			    {
-			    if(!atLeastOneViableSuccessorFound)
-				{
-				cout<< " viab successor found pour cu = "<<cu<<endl;
-				viabSuccessor = posTemp;
-				atLeastOneViableSuccessorFound = true;
-				}
+		     if (grid->isInSet(testI))
+		     {
+		     if(!atLeastOneViableSuccessorFound)
+		     {
+		     cout<< " viab successor found pour cu = "<<cu<<endl;
+		     viabSuccessor = posTemp;
+		     atLeastOneViableSuccessorFound = true;
+		     }
 
 
-			    int nbGoodNeighbors = grid->getNumberOfViableNeighbors(posTemp);
-			    if(nbGoodNeighbors > maxNbViableNeighbors)
-				{
-				bestViabSuccessor = posTemp;
-				maxNbViableNeighbors = nbGoodNeighbors;
-				testNonVide = true;
-				spdlog::info(" Best viab successor cu =  {}, nb voisins viables {}", cu, nbGoodNeighbors );
-				}
-			    }
-			}*/
+		     int nbGoodNeighbors = grid->getNumberOfViableNeighbors(posTemp);
+		     if(nbGoodNeighbors > maxNbViableNeighbors)
+		     {
+		     bestViabSuccessor = posTemp;
+		     maxNbViableNeighbors = nbGoodNeighbors;
+		     testNonVide = true;
+		     spdlog::info(" Best viab successor cu =  {}, nb voisins viables {}", cu, nbGoodNeighbors );
+		     }
+		     }
+		     }*/
 		    }
 		}
 	    }
 	cu++;
 	}
 
-	return viabSuccessor;
+    return viabSuccessor;
     }
 
 int ViabiBitSet::findViabControl_bis(double *currentPos, unsigned long long int optimDiscreteSuccessor, double &dt, int nbStepIter, double stepCoeff,
@@ -1853,7 +1853,7 @@ int ViabiBitSet::findViabControl_bis(double *currentPos, unsigned long long int 
 			    allInSet |= grid->isInSet(testI);
 
 			    }
-			if(allInSet)
+			if (allInSet)
 			    {
 			    testNonVide = true;
 			    double dist = 0.0;
@@ -2253,8 +2253,6 @@ int ViabiBitSet::computeViableTrajectorySetVal_bis(double *initPosition, double 
 		    // cout<< " temps= "<<newTrajPoint[dim]<<endl;
 		    traj.push_back(newTrajPoint);
 
-
-
 		    grid->numToIntAndDoubleCoords(currentDiscreteTrajPos, intCoordsOnDiscreteTraj, doubleCoordsOnDiscreteTraj);
 
 		    for (int i = 0; i < (int) dim; i++)
@@ -2269,7 +2267,6 @@ int ViabiBitSet::computeViableTrajectorySetVal_bis(double *initPosition, double 
 
 		    rho = min(rho, finalTime - time);
 
-
 		    optimSuccessor = this->findViableDiscreteSuccessor(currentDiscreteTrajPos, rho);
 		    if (optimSuccessor > grid->nbTotalPoints)
 			{
@@ -2280,7 +2277,7 @@ int ViabiBitSet::computeViableTrajectorySetVal_bis(double *initPosition, double 
 			{
 			realTimeStep = rho;
 			bestCu = this->findViabControl_bis(xCoordsDouble, optimSuccessor, realTimeStep, 10, 0.5, imageVect, testNonVide);
-			time +=realTimeStep;
+			time += realTimeStep;
 			if (testNonVide)
 			    {
 			    currentDiscreteTrajPos = optimSuccessor;
@@ -2334,12 +2331,12 @@ int ViabiBitSet::computeViableTrajectorySetVal_bis(double *initPosition, double 
 	}
 
     string fileNameD(fileName);
-    for(int k=0;k<4;k++)
+    for (int k = 0; k < 4; k++)
 	{
 	fileNameD.pop_back();
 	}
-    fileNameD+="-Discrete.dat";
-    if(succes)
+    fileNameD += "-Discrete.dat";
+    if (succes)
 	{
 	spdlog::info("Trajectory reconstruction finished with success");
 	spdlog::info("The real trajectory will be saved in the file {}, the discrete trajectory saved in the file ", fileName, fileNameD);
@@ -2347,10 +2344,9 @@ int ViabiBitSet::computeViableTrajectorySetVal_bis(double *initPosition, double 
     else
 	{
 	spdlog::warn("Trajectory reconstruction failed before attempting the target set");
-	spdlog::warn("The real partial trajectory will be saved in the file {}, the partial discrete trajectory saved in the file ", fileName, fileNameD);
+	spdlog::warn("The real partial trajectory will be saved in the file {}, the partial discrete trajectory saved in the file ", fileName,
+		fileNameD);
 	}
-
-
 
     FILE *fi;
     fi = fopen(fileName.c_str(), "w");
@@ -2392,7 +2388,6 @@ int ViabiBitSet::computeViableTrajectorySetVal_bis(double *initPosition, double 
 	}
 
     FILE *fiD;
-
 
     fiD = fopen(fileNameD.c_str(), "w");
     if (fiD == NULL)
@@ -2440,13 +2435,12 @@ void ViabiBitSet::initialiseTargetPointList()
 
     int totalPointsX = grid->getNbTotalPoints();
 
-    currentImagePointsList.maxNum = 0;
-    currentImagePointsList.minNum = 0;
-    currentImagePointsList.pointsList = list<unsigned long long int>();
+    imagePoint currentPoint;
+        currentPointsImage.clear();
+        currentCellsImage.clear();
 
     unsigned long long int pos;
 
-    list<unsigned long long int>::iterator itStart = currentImagePointsList.pointsList.begin(), itNew;
 
     /*
      *  on parcourt  tous les points de l'espace discret  fini
@@ -2469,7 +2463,7 @@ void ViabiBitSet::initialiseTargetPointList()
 
 	if ((*(dynsys->constraintsX))(xReel) < PLUS_INF)
 	    {
-
+	    double c = (*(dynsys->target))(xReel);
 	    if ((*(dynsys->target))(xReel) < PLUS_INF)
 		{
 		//				cout<<" x dans la cible posX="<<pos;
@@ -2494,8 +2488,7 @@ void ViabiBitSet::initialiseTargetPointList()
 		 */
 
 		//        cout<<" fini ajout point retour creation de base \n";//////system("pause");
-		addDataToPointsList(&itStart, pos, &itNew);
-		itStart = itNew;
+		currentPointsImage[pos] = c;
 
 		}
 	    }
@@ -2510,110 +2503,106 @@ void ViabiBitSet::initialiseTargetPointList()
 
     }
 
+
 void ViabiBitSet::computeConvexifiedImage(int iter)
     {
+    spdlog::info("Computing convexified image of the target set. number of points {}", currentPointsImage.size());
+    int posX;
 
-    cout << "  Compute First confexified  Image . Iteration num " << iter << " points dans Cn = " << currentImagePointsList.pointsList.size() << endl;
+    list<imageCell>::iterator itStart, itNew;
+    currentCellsImage.clear();
 
-    unsigned long long int posX;
-
-    list<unsigned long long int>::iterator itStart, itNew;
-
-    currentImageList.cellsList.clear();
-    currentImageList.maxNum = 0;
-    currentImageList.minNum = PLUS_INF;
+    double rho;
+    map<unsigned long long int, double>::iterator itPoint = currentPointsImage.begin(), itLastPoint = currentPointsImage.end(), itTemp;
+    map<unsigned long long int, list<unsigned long long int> >::iterator itCell, itLastCell, itCellsTemp;
     unsigned long long int intPointCoords[dim];
     double doublePointCoords[dim];
 
-    double rho;
-
-    list<unsigned long long int>::iterator itPoint = currentImagePointsList.pointsList.begin(), itLastPoint = currentImagePointsList.pointsList.end(),
-	    itTemp;
-    unsigned long long int tempImageCell;
+    DiscretPointImage *tempPointImage = new DiscretPointImage((unsigned long long int) 0, dim, dynsys, grid);
+    map<unsigned long long int, list<unsigned long long int> > *cellsWithControls = tempPointImage->GetImageCellsWithControls();
 
     while (itPoint != itLastPoint)
 	{
-	posX = (*itPoint);
-	//cout<< " posX="<<posX<<endl;
+	posX = itPoint->first;
 	grid->numToIntAndDoubleCoords(posX, intPointCoords, doublePointCoords);
-	//printVector(doublePointCoords, dim);
-	////////system("pause");
 	rho = dynsys->calculRho_local(doublePointCoords);
-	//cout<< " rho= "<<rho;
+	//	spdlog::info("[Min Time problem] : Timestep =  {}", rho);
 
-	this->computeDiscreteImageOfPoint(doublePointCoords, intPointCoords);
 	/*!
-	 * L'image calcul�e est stock�e dans la structure pointDI sous forme de tableau ordonn�
-	 *  de cellules
+	 * On calcule l'image discrète  du point
 	 */
-	unsigned long long int numCell;
+	double tempVal = itPoint->second + rho;
 
-	itStart = this->currentImageList.cellsList.begin();
+	tempPointImage->setPointNumAndRebuild(posX);
 
-	//cout<<  " analyse d'une image de point\n";
-	for (unsigned long long int i = 0; i < pointDI.nbImageCells; i++)
+	itCell = cellsWithControls->begin();
+	itLastCell = cellsWithControls->end();
+	while (itCell != itLastCell)
 	    {
-	    numCell = pointDI.tabImageCells[i];
-	    tempImageCell = numCell;
-
-	    //cout<< " ajout  de cellule \n ";
-	    addDataToCurrentImage(&itStart, tempImageCell, &itNew);
-
-	    itStart = itNew;
-	    addConvexCombinations(posX, numCell, &tempImageCell, rho, &itStart);
-	    //cout<< " ares ajout  de l'image d'un point la taille de la liste est "<<currentImageList.cellsList.size()<<endl;
-
+	    unsigned long long int cellNum = itCell->first;
+	    // cout<< "convexified image  cellnum = "<< cellNum<< " nb total de pojnts " << grid->getNbTotalPoints()<<" ";
+	    if(cellNum < grid->getNbTotalPoints())
+		{
+		if (auto result = currentCellsImage.find(cellNum); result != currentCellsImage.end())
+		    {
+		    result->second = min((double) result->second, tempVal);
+		    }
+		else
+		    {
+		    currentCellsImage[cellNum] = tempVal;
+		    }
+		addConvexCombinations(posX, itPoint->second, tempVal, itCell->first, rho);
+		}
+	    itCell++;
 	    }
-
 	itPoint++;
-
 	}
-
-    cout << " parcours de base termin�\n";
-
+    spdlog::info("[Min Time problem] : Computing convexified image finished. number of points {}", currentPointsImage.size());
     }
 
-void ViabiBitSet::addConvexCombinations(unsigned long long int posX, unsigned long long int numCell, unsigned long long int *tempImageCell,
-	double rho, list<unsigned long long int>::iterator *itStart)
+void ViabiBitSet::addConvexCombinations(unsigned long long int posX, double pointVal, double newCellVal, unsigned long long int numCell,
+	double rho)
     {
 
-    unsigned long long int intPointCoords[dim];
-    double doublePointCoords[dim];
+    /*!
+     * On appelle d'abord deux fois la fonction numToIntAndDoubleCoords()
+     * pour calculer les coordonnées réelles du point de départ x  et  du coin inférieur de la maille
+     *  appartenant é l'image \f$ \Phi(x)\f$ y.
+     */
 
-    //cout<< "add convex comnbin  posX= "<<posX<< " rho ="<<rho<<endl;
-    grid->numToIntAndDoubleCoords(posX, intPointCoords, doublePointCoords);
-    //cout<< " point de d�part ";
-    //    printVector(doublePointCoords, dim);
-    //    cout<< " numCell = "<<numCell<<endl;
-    grid->numToIntAndDoubleCoords(numCell, intPointCoords, doubleVect);
-    //cout<< " point arrivee  ";
-    //printVector(doubleVect, dim);
-    list<unsigned long long int>::iterator itNew;
+    double LVal = (newCellVal - pointVal) / rho;
+
+    double doublePointCoords[dim], doubleCellCoords[dim], doubleVect[dim], doubleVect1[dim];
+    unsigned long long int tempCoords[dim];
+
+    grid->numToIntAndDoubleCoords(posX, tempCoords, doublePointCoords);
+    grid->numToIntAndDoubleCoords(numCell, tempCoords, doubleCellCoords);
+    double *gridStep = grid->step;
+
+    list<imageCell>::iterator itNew;
     double dist = 0.;
     /*!
-     * Ensuite on calcule le vecteur diff�rence \f$ z=y-x\f$ et sa norme \f$ \|z\|_2 \f$ .
+     * Ensuite on calcule le vecteur différence \f$ z=y-x\f$ et sa norme \f$ \|z\|_2 \f$ .
      */
     for (int i = 0; i < dim; i++)
 	{
-	doubleVect[i] = doubleVect[i] - doublePointCoords[i];
+	doubleCellCoords[i] = doubleCellCoords[i] + 0.5 * gridStep[i];
+	doubleVect[i] = doubleCellCoords[i] - doublePointCoords[i];
 	dist += doubleVect[i] * doubleVect[i];
 	}
     /*!
-     * Le segment reliant \f$ x\f$ et \f$ y\simeq x-\rho F(x,u)\f$ pour un certain \f$ u\in U(x)\f$  a pour �quation
+     * Le segment reliant \f$ x\f$ et \f$ y\simeq x-\rho F(x,u)\f$ pour un certain \f$ u\in U(x)\f$  a pour équation
      * \f[
      * x+tz,\ t\in[0,1]
      * \f]
-     * On d�termine alors un pas de progression \f[
+     * On détermine alors un pas de progression \f[
      * \Delta t=\min(0.1, \frac{h_{max}}{\|z\|_2})
      * \f]
-     * de fa�on � pouvoir passer d'une maille � l'autre en avan�ant avec  ce pas le long du segment
-     * On parcourt ensuite le segment avec le pas calcul� et on ajoute � l'image les mailles crois�es
+     * de faéon é pouvoir passer d'une maille é l'autre en avanéant avec  ce pas le long du segment
+     * On parcourt ensuite le segment avec le pas calculé et on ajoute é l'image les mailles croisées
      * avec pour valeur une partie du pas de temps \f$\rho\f$ .
      */
     double deltat = min(0.1, grid->getMaxStep() / (2.0 * sqrt(dist)));
-    //    cout<< " deltat= "<<deltat<<endl;
-    //    cout<< "   norme de difference "<<sqrt(dist)<< " pas maxi "<<grid->getMaxStep()<<endl<< " difference vecteur ";
-    //printVector(doubleVect, dim);
     double t = deltat;
     unsigned long long int newCellNum, lastVisitCellNum = grid->getNbTotalCells() + 1;
     while (t < 1.0)
@@ -2624,499 +2613,89 @@ void ViabiBitSet::addConvexCombinations(unsigned long long int posX, unsigned lo
 	    doubleVect1[i] = doublePointCoords[i] + t * doubleVect[i];
 	    }
 
-	// cout<< "  point intermediaire  ";
-	// printVector(doubleVect1, dim);
 	if (grid->isPointInGrid(doubleVect1))
 	    {
-	    //cout<< " le point est das la grlle\n";
 	    /*!
-	     * Si l'image est  dans les limites de la grille on �tudie si elle v�rifie les contraintes
+	     * Si l'image est  dans les limites de la grille on étudie si elle vérifie les contraintes
 	     */
 
 	    if (dynsys->constraintsX(doubleVect1) < PLUS_INF)
 		{
-		// cout<< "  contraintes sur   X  ok\n";
 
 		/*!
-		 * Si l'image  est dans l'ensemble de contraintes sur l'�tat \f$ K \f$
-		 * on calcule le num�ro de maille qui contient cette image
+		 * Si l'image  est dans l'ensemble de contraintes sur l'état \f$ K \f$
+		 * on calcule le numéro de maille qui contient cette image
 		 */
-		newCellNum = grid->localizePoint(doubleVect1); // on enregistre le numero de maille
-		if (newCellNum != lastVisitCellNum)
+		newCellNum = grid->localizePoint(doubleVect1);
+		double tempVal = pointVal + t * rho * LVal;
+		if (auto result = currentCellsImage.find(newCellNum); result != currentCellsImage.end())
 		    {
-		    //cout<< " maille visee est "<<newCellNum<<endl;
-		    (*tempImageCell) = newCellNum;
-		    //itStart=this->currentImageList.cellsList.begin();
-		    // cout<<  "  ajout de celule "<<newCellNum<< " avec val = "<<t*rho*(dynsys->lFunc(doubleVect1,cVect))<<endl;
-		    this->addDataToCurrentImage(itStart, (*tempImageCell), &itNew);
-		    lastVisitCellNum = newCellNum;
-		    (*itStart) = itNew;
-		    //this->showCurrentImageList();
-		    ////////system("pause");
+		    result->second = min((double) result->second, tempVal);
+		    }
+		else
+		    {
+		    currentCellsImage[newCellNum] = tempVal;
 		    }
 		}
 	    }
 	t = t + deltat;
-
 	}
-    ////////system("pause");
-
     }
-void ViabiBitSet::addDataToCurrentImage(list<unsigned long long int>::iterator *startIt, unsigned long long int newCell,
-	list<unsigned long long int>::iterator *resIt)
+
+
+void ViabiBitSet::createPointsList()
     {
-    /*!
-     * Dans l'image  en construction de \f$ C_{n}\setminus C_{n-1}\f$ les mailles sont stock�es dans l'ordre croissant
-     * de leur num�ros  et chaque maille garde la m�moire de la valeur minimale ainsi que de tous les ant�c�dents
-     * de cette maille c'est � dire tous les couples viables (x,u) pour lesquels f(x,u) appartient � cette maille.
-     * En plus  on distingue les couples (x,u) minimisant la valeur  et les autres, juste viables.
-     *
-     * Pour ajouter une nouvelle maille dans cette liste  on doit faire dans l'ordre les choses suivantes :
-     *
-     *    rechercher dans la liste la place nu num�ro de maille � inserrer
-     *   deux cas de figure peuvent se pr�senter :
-     *     la maille ayant le m�me num�ro  existe d�j�: on proc�de alors � la fusion des deux,  en d�terminant la valeur optimale et
-     *    en  fusionnant les r�tro-actions
-     *     la maille n'existe pas encore; alors on l'inserre simplement  dans l'ordre croissant.
-     *
-     */
 
-    unsigned long long int numNewCell = newCell;
+    spdlog::debug("Create Current Point list. Number of cells  {}", currentCellsImage.size());
+    double t1, t2, elapsed_time;
 
-    list<unsigned long long int>::iterator itCell, itLast = currentImageList.cellsList.end();
+    timeval tim;
+    gettimeofday(&tim, NULL);
+    t1 = tim.tv_sec + (tim.tv_usec / 1000000.0);
+    unsigned long long int posX, cellNum;
+    double testV[dim];
+    unsigned long long int testI[dim];
+    currentPointsImage.clear();
 
-    if (currentImageList.cellsList.size() == 0)
+    int nbPointsCube = (int) pow(2.0, dim);	//pow(2.0, dim);
+    map<unsigned long long int, double>::iterator itCell = currentCellsImage.begin(), itLast = currentCellsImage.end();
+
+    long long int *indicesDecalCell = grid->getIndicesDecalCell();
+
+    while (itCell != itLast)
 	{
-	currentImageList.cellsList.push_back(newCell);
-	currentImageList.maxNum = numNewCell;
-	currentImageList.minNum = numNewCell;
-	(*resIt) = currentImageList.cellsList.end();
-	(*resIt)--;
-	}
-    else
-	{
-
-	if (numNewCell > currentImageList.maxNum)
+	cellNum = itCell->first;
+	// cout<< "create points liste  cellnum = "<< cellNum<< " nb total de pojnts " << grid->getNbTotalPoints()<<" ";
+	double tempVal = itCell->second;
+	for (int i = 0; i < nbPointsCube; i++)
 	    {
-	    currentImageList.cellsList.push_back(newCell);
-	    currentImageList.maxNum = numNewCell;
-	    currentImageList.minNum = min(currentImageList.maxNum, currentImageList.minNum);
-	    (*resIt) = currentImageList.cellsList.end();
-	    (*resIt)--;
-	    }
-	else
-	    {
-	    if (numNewCell < currentImageList.minNum)
+	    posX = cellNum + indicesDecalCell[i];
+	    grid->numToIntAndDoubleCoords(posX, testI, testV);
+	    if (dynsys->constraintsX(testV) < PLUS_INF)
 		{
-		currentImageList.cellsList.push_front(newCell);
-		currentImageList.minNum = numNewCell;
-		currentImageList.maxNum = max(currentImageList.maxNum, currentImageList.minNum);
-		(*resIt) = currentImageList.cellsList.begin();
-		}
-	    else
-		{
-		itCell = *startIt;
-
-		if ((numNewCell > (*itCell)))
+		if (auto result = currentPointsImage.find(posX); result != currentPointsImage.end())
 		    {
-		    while ((itCell != itLast) && (numNewCell > (*itCell)))
-			{
-			//cout<< " current cell num "<<(*itCell).cellNum<< " new cell num "<<numNewCell<<endl;
-			itCell++;
-			}
-		    if (numNewCell < (*itCell))
-			{
-			currentImageList.cellsList.insert(itCell, newCell);
-			}
-
-		    (*resIt) = itCell;
+		    result->second = min((double) result->second, tempVal);
 		    }
 		else
 		    {
-		    while ((numNewCell < (*itCell)))
-			{
-			//cout<< " current cell num "<<(*itCell).cellNum<< " new cell num "<<numNewCell<<endl;
-			itCell--;
-			}
-		    if (numNewCell > (*itCell))
-			{
-			itCell++;
-			currentImageList.cellsList.insert(itCell, newCell);
-			}
-
-		    (*resIt) = itCell;
-		    }
-
-		}
-	    }
-
-	}
-    }
-
-void ViabiBitSet::computeDiscreteImageOfPoint(double *doublePointCoords, unsigned long long int *intPointCoords)
-    {
-
-    //double testV[dim];
-    //unsigned long long int testI[dim];
-
-    //cout<< " calcul de l'image d'un point \n";
-    double **controlCoords = dynsys->getControlCoords();
-    unsigned long long int nbCTotal = dynsys->getTotalNbPointsC();
-    unsigned long long int nbCellsTotal = grid->getNbTotalPoints();
-    unsigned long long int cu;
-
-    list<unsigned long long int> cellsList;
-    double rho;
-
-    //cout<< " calcul de l'image pour le point ";
-    // printVector(doublePointCoords,dim);
-    //double dv[dim];
-    for (cu = 0; cu < nbCTotal; cu++)
-	{
-
-	// cout<< "  controle numero "<<cu<<endl;
-	// printVector(controlCoords[cu],dimC);
-	/*!
-	 * on calcule les coordonn�es r�elles de l'image du point par la dynamique discrete
-	 * elles sont stockes dans le tableau doubleVect
-	 * si \f$ u\in U(x)\f$  (contr�le admissible) on calcule l'image r�elle par la dynamique
-	 *  discr�tis�e  en temps  du point x avec le controle u
-	 */
-	if (dynsys->constraintsXU(doublePointCoords, controlCoords[cu]) < PLUS_INF)
-	    {
-	    //////printf("  contraintes sur U et X  ok\n");
-	    //  ////printf( " x= ");
-	    // printVector(doublePointCoords,dim);
-	    rho = dynsys->calculRho_local(doublePointCoords);
-
-	    (dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[cu], doubleVect1, rho);
-
-	    // cout<< " retrour dnamique discrete ";
-	    // printVector(doubleVect1, dim);
-	    //(dynsys->*discretDynamics)(doublePointCoords, controlCoords[cu], doubleVect);
-	    if (grid->isPointInGrid(doubleVect1))
-		{
-		//  printf( "   le point est das la grlle\n " );
-
-		//////printf(" le point est das la grlle\n");
-		/*!
-		 * Si l'image est  dans les limites de la grille on �tudie si elle v�rifie les contraintes
-		 */
-		if (dynsys->constraintsX(doubleVect1) < PLUS_INF)
-		    {
-		    //     printf( "   contraintes Xu ok\n " );
-
-		    //     ////printf("  contraintes sur   X  ok\n");
-
-		    /*!
-		     * Si l'image  est dans l'ensemble de contraintes sur l'�tat \f$ K \f$
-		     * on calcule le num�ro de maille qui contient cett image
-		     */
-		    imageCells[cu] = grid->localizePoint(doubleVect1);
-
-		    // on enregistre le numero de maille
-		    cellsList.push_back(imageCells[cu]);
-		    //////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,unsigned long long ints[cu]);
-		    //   cout<< " les coordonn�es  de cin bas de la maille  sont ";
-		    //   grid->numToIntAndDoubleCoords(unsigned long long ints[cu], intPointCoords, doubleVect1);
-		    //   printVector(doubleVect1, dim);
-		    }
-		else
-		    {
-		    /*!
-		     * Si l'image n'est pas dans  \f$ K \f$ on enregistre un num�ro de maille factice qui signifie que
-		     * cette image est rejet�e
-		     */
-		    imageCells[cu] = nbCellsTotal + 10; // sinon on enregistre un nombre convenu reconnaissanble
-		    cellsList.push_back(imageCells[cu]);
-		    //    ////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,unsigned long long ints[cu]);
+		    currentPointsImage[posX] = tempVal;
 		    }
 		}
-	    else
-		{
-		/*!
-		 * Si l'image n'est pas dans  la grille on enregistre un num�ro de maille factice qui signifie que
-		 * cette image est rejet�e
-		 */
-		if (grid->isPointInGridWithConstr(doubleVect1))
-		    {
-		    imageCells[cu] = nbCellsTotal + 1; // sinon on enregistre un nombre convenu reconnaissanble
-		    cellsList.push_back(imageCells[cu]);
-
-		    }
-		else
-		    {
-		    imageCells[cu] = nbCellsTotal + 10; // sinon on enregistre un nombre convenu reconnaissanble
-		    cellsList.push_back(imageCells[cu]);
-		    }
-		//////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,unsigned long long ints[cu]);
-		}
-
-	    //cout<< " ajour d'une paire � la liste longueur "<<cellsList.size()<<"\n";
-
 	    }
-	else
-	    {
-	    /*!
-	     * Si l'image n'est pas dans  la grille on enregistre un num�ro de maille factice qui signifie que
-	     * cette image est rejet�e
-	     */
-	    /*!
-	     * \todo pr�voir la gestion des autorisations de sortie  par axe pour les variables qui peuvent
-	     * se trouver dans des intervalles non born�s
-	     */
-	    imageCells[cu] = nbCellsTotal + 10; // sinon on enregistre un nombre convenu reconnaissanble
-	    cellsList.push_back(imageCells[cu]);
-	    //////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,unsigned long long ints[cu]);
-	    }
-
+	itCell++;
 	}
-    /*    cout<< " fini traitement parallele\n";
-     for( cu=0;cu<nbCTotal;cu++)
-     {
-     cellsList.push_back(intPair(unsigned long long ints[cu],cu));
-     cout<< " cu  = "<<cu<< " image cell = "<<unsigned long long ints[cu]<<endl;
-     }*/
-    ////////system("pause");
-    /*!
-     * Toutes les images sont calcul�es  et stock�es dans un tableau dans l'ordre
-     *  de num�rotation des controles. La tache suivante consiste � trier ce tableau, �liminer les doublons
-     *   et  compl�ter la structure  image de point
-     */
+    //cout<<endl;
+    currentCellsImage.clear();
 
-    cellsList.sort();
-    list<unsigned long long int>::iterator itCell, itDouble;
-
-    itCell = cellsList.begin();
-    itDouble = itCell;
-    unsigned long long int currentCell;
-
-    cu = 0;
-    unsigned long long int iCellsTab = 0;
-    //cout<< " juste avant while de parcours de la liste  first "<<(*itCell).first<< " nb cells total "<<(int)nbCellsTotal<<endl;
-    while ((itCell != cellsList.end()) & ((*itCell) <= nbCellsTotal + 1))
-	{
-
-	currentCell = (*itCell);
-
-	//    cout<< " current cell "<<currentCell<<endl;
-
-	pointDI.tabImageCells[iCellsTab] = currentCell;
-
-	iCellsTab++;
-	//cout<< " itCellsTab="<<iCellsTab<<endl;
-	while ((itDouble != cellsList.end()) & ((*itDouble) == currentCell))
-	    {
-	    itDouble++;
-	    }
-	/*!
-	 * la boucle s'arrete au premier different
-	 * � la fin de la boucle soit itDouble a atteint la fin de la liste
-	 *  soit  il pointe sur une cellule diff�rente
-	 */
-	itCell = itDouble;
-	}
-
-    pointDI.nbImageCells = iCellsTab;
-    //cout<< "  nb  de mailles differentes dans l'iage d'un point "<<iCellsTab<<endl;
-    /*!
-     * La derni�re valeur  du tableau des controles indique la fin  de la liste des controles associ�s
-     * � la derni�re cellule
-     */
+    gettimeofday(&tim, NULL);
+    t2 = tim.tv_sec + (tim.tv_usec / 1000000.0);
+    elapsed_time = (double) ((t2 - t1));
+    spdlog::debug("Create Current Point listfinished done {} sec; Number of points is {} ",
+	    elapsed_time, currentPointsImage.size());
 
     }
 
-void ViabiBitSet::computeDiscreteImageOfPoint_noControl(double *doublePointCoords, unsigned long long int *intPointCoords)
-    {
-
-    //double testV[dim];
-    //unsigned long long int testI[dim];
-
-    //cout<< " calcul de l'image d'un point  SANS controle\n";
-
-    double **controlCoords = dynsys->getControlCoords();
-    unsigned long long int nbCellsTotal = grid->getNbTotalPoints();
-
-    list<unsigned long long int> cellsList;
-
-    //cout<< " calcul de l'image pour le point ";
-    // printVector(doublePointCoords,dim);
-    //double dv[dim];
-
-    /*!
-     * on calcule les coordonn�es r�elles de l'image du point par la dynamique discrete
-     * elles sont stockes dans le tableau doubleVect
-     * si \f$ u\in U(x)\f$  (contr�le admissible) on calcule l'image r�elle par la dynamique
-     *  discr�tis�e  en temps  du point x avec le controle u
-     */
-
-    // printVector(doublePointCoords,dim);
-    (dynsys->*(dynsys->discretDynamics))(doublePointCoords, controlCoords[0], doubleVect1, 1.0);
-
-    // cout<< " retrour dnamique discrete ";
-    //printVector(doubleVect1, dim);
-    //(dynsys->*discretDynamics)(doublePointCoords, controlCoords[cu], doubleVect);
-    if (grid->isPointInGrid(doubleVect1))
-	{
-	//printf( "   le point est das la grlle\n " );
-
-	//////printf(" le point est das la grlle\n");
-	/*!
-	 * Si l'image est  dans les limites de la grille on �tudie si elle v�rifie les contraintes
-	 */
-	if (dynsys->constraintsX(doubleVect1) < PLUS_INF)
-	    {
-	    //     printf( "   contraintes Xu ok\n " );
-
-	    //     ////printf("  contraintes sur   X  ok\n");
-
-	    /*!
-	     * Si l'image  est dans l'ensemble de contraintes sur l'�tat \f$ K \f$
-	     * on calcule le num�ro de maille qui contient cett image
-	     */
-	    imageCells[0] = grid->localizePoint(doubleVect1);
-	    /* cout<<  " num de cell image "<<imageCells[0]<<endl;
-	     cout<< " int coords de d�part ";
-	     for(int lm=0;lm<dim;lm++)
-	     {
-	     cout<< " "<<intPointCoords[lm];
-	     }
-	     cout<< endl;
-	     cout<< "double coords de image ";
-	     for(int lm=0;lm<dim;lm++)
-	     {
-	     cout<< " "<<doubleVect1[lm];
-	     }*/
-	    /*    grid->numToIntAndDoubleCoords(unsigned long long ints[cu],testI,testV);
-	     if(testV[0]<doublePointCoords[0])
-	     {
-	     cout<< " num de d�parrt "<<num<< " num de cell image "<<unsigned long long ints[cu]<<endl;
-	     cout<< " int coords de d�part ";
-	     for(int lm=0;lm<dim;lm++)
-	     {
-	     cout<< " "<<intPointCoords[lm];
-	     }
-	     cout<< endl;
-	     cout<< "double coords de d�part ";
-	     for(int lm=0;lm<dim;lm++)
-	     {
-	     cout<< " "<<doublePointCoords[lm];
-	     }
-	     cout<< endl;
-	     cout<< " double coords de result ";
-	     for(int lm=0;lm<dim;lm++)
-	     {
-	     cout<< " "<<doubleVect1[lm];
-	     }
-	     cout<< endl;
-	     cout<< " int coords de result projet� ";
-	     for(int lm=0;lm<dim;lm++)
-	     {
-	     cout<< " "<<testI[lm];
-	     }
-	     cout<< endl;
-	     cout<< "double coords de result projet�  ";
-	     for(int lm=0;lm<dim;lm++)
-	     {
-	     cout<< " "<<testV[lm];
-	     }
-	     cout<< endl;
-
-	     }*/
-	    // on enregistre le numero de maille
-	    cellsList.push_back(imageCells[0]);
-	    //////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,unsigned long long ints[cu]);
-	    //   cout<< " les coordonn�es  de cin bas de la maille  sont ";
-	    //   grid->numToIntAndDoubleCoords(unsigned long long ints[cu], intPointCoords, doubleVect1);
-	    //   printVector(doubleVect1, dim);
-	    }
-	else
-	    {
-	    /*!
-	     * Si l'image n'est pas dans  \f$ K \f$ on enregistre un num�ro de maille factice qui signifie que
-	     * cette image est rejet�e
-	     */
-	    imageCells[0] = nbCellsTotal + 10; // sinon on enregistre un nombre convenu reconnaissanble
-	    cellsList.push_back(imageCells[0]);
-	    //    ////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,unsigned long long ints[cu]);
-	    }
-	}
-    else
-	{
-	/*!
-	 * Si l'image n'est pas dans  la grille on enregistre un num�ro de maille factice qui signifie que
-	 * cette image est rejet�e
-	 */
-	if (grid->isPointInGridWithConstr(doubleVect1))
-	    {
-	    imageCells[0] = nbCellsTotal + 1; // sinon on enregistre un nombre convenu reconnaissanble
-	    cellsList.push_back(imageCells[0]);
-
-	    }
-	else
-	    {
-	    imageCells[0] = nbCellsTotal + 10; // sinon on enregistre un nombre convenu reconnaissanble
-	    cellsList.push_back(imageCells[0]);
-	    }
-	//////printf( "  thread  numero %d  controle %d   maille visee est %d\n ",ID,cu,unsigned long long ints[cu]);
-	}
-
-    // cout<< " ajour d'une paire � la liste longueur "<<cellsList.size()<<"\n";
-
-    /*    cout<< " fini traitement parallele\n";
-     for( cu=0;cu<nbCTotal;cu++)
-     {
-     cellsList.push_back(intPair(unsigned long long ints[cu],cu));
-     cout<< " cu  = "<<cu<< " image cell = "<<unsigned long long ints[cu]<<endl;
-     }*/
-    ////////system("pause");
-    /*!
-     * Toutes les images sont calcul�es  et stock�es dans un tableau dans l'ordre
-     *  de num�rotation des controles. La tache suivante consiste � trier ce tableau, �liminer les doublons
-     *   et  compl�ter la structure  image de point
-     */
-
-    cellsList.sort();
-    list<unsigned long long int>::iterator itCell, itDouble;
-
-    itCell = cellsList.begin();
-    itDouble = itCell;
-    unsigned long long int currentCell;
-
-    unsigned long long int iCellsTab = 0;
-    //  cout<< " juste avant while de parcours de la liste taille de liste  "<<cellsList.size()<< " nb cells total "<<nbCellsTotal<<endl;
-    while ((itCell != cellsList.end()) & ((*itCell) <= nbCellsTotal + 1))
-	{
-
-	currentCell = (*itCell);
-
-	//   cout<< " current cell "<<currentCell<<endl;
-
-	pointDI.tabImageCells[iCellsTab] = currentCell;
-
-	iCellsTab++;
-	// cout<< " itCellsTab="<<iCellsTab<<endl;
-	while ((itDouble != cellsList.end()) & ((*itDouble) == currentCell))
-	    {
-	    itDouble++;
-	    }
-	/*!
-	 * la boucle s'arrete au premier different
-	 * � la fin de la boucle soit itDouble a atteint la fin de la liste
-	 *  soit  il pointe sur une cellule diff�rente
-	 */
-	itCell = itDouble;
-	// exit(1);
-	}
-
-    pointDI.nbImageCells = iCellsTab;
-    // cout<< "  nb  de mailles differentes dans l'iage d'un point "<<iCellsTab<<endl;
-    /*!
-     * La derni�re valeur  du tableau des controles indique la fin  de la liste des controles associ�s
-     * � la derni�re cellule
-     */
-
-    }
 
 void ViabiBitSet::computeTrajectories()
     {
@@ -3254,270 +2833,111 @@ void ViabiBitSet::CaptureBasin_ContinuousDynamics()
 	}
 
     }
-void ViabiBitSet::createPointsList()
-    {
-
-    currentImagePointsList.pointsList.clear();
-    currentImagePointsList.maxNum = -1;
-    currentImagePointsList.minNum = currentImageList.minNum;
-
-    int nbPointsCube = (int) pow(2.0, dim);	//pow(2.0, dim);
-    list<unsigned long long int>::iterator itCell = currentImageList.cellsList.begin(), itLast = currentImageList.cellsList.end();
-    int i;
-
-    long long int *indicesDecalCell = grid->getIndicesDecalCell();
-
-    unsigned long long int numCell;
-    unsigned long long int posX;
-
-    imagePoint tempPoint;
-    list<unsigned long long int>::iterator itStart, itNew;
-    itStart = this->currentImagePointsList.pointsList.begin();
-
-    while (itCell != itLast)
-	{
-	numCell = (*itCell);
-
-	//cout<< "  maille num�ro "<<numCell<<endl;
-	for (i = 0; i < nbPointsCube; i++)
-	    {
-	    posX = numCell + indicesDecalCell[i];
-
-	    /*!
-	     * \todo proc�der comme pour la cr�ation de la liste de cellules:
-	     * cr�er un point avec le num�ro et les donn�es de la cellule.
-	     * copier une seule fois les donn�es de la cellules sur la valeur et la r�tro-action
-	     *  d'un point � l'autre de la m�me cellule  seul le num�ro du point change.
-	     *
-	     *  Puis inserrer le point dans la liste ordonn�e de points.
-	     *   Exactement comme pour les celllules! Donc du copier coller de code.
-	     *
-	     */
-	    //cout<< " on ajoute le point numero "<<posX<<endl;
-	    this->addDataToPointsList(&itStart, posX, &itNew);
-	    itStart = itNew;
-
-	    }
-	itCell++;
-	}
-
-    }
-
-void ViabiBitSet::addDataToPointsList(list<unsigned long long int>::iterator *startIt, unsigned long long int newPoint,
-	list<unsigned long long int>::iterator *resIt)
-    {
-    /*!
-     * Dans l'image  en construction de \f$ C_{n}\setminus C_{n-1}\f$ les mailles sont stock�es dans l'ordre croissant
-     * de leur num�ros  et chaque maille garde la m�moire de la valeur minimale ainsi que de tous les ant�c�dents
-     * de cette maille c'est � dire tous les couples viables (x,u) pour lesquels f(x,u) appartient � cette maille.
-     * En plus  on distingue les couples (x,u) minimisant la valeur  et les autres, juste viables.
-     *
-     * Pour ajouter une nouvelle maille dans cette liste  on doit faire dans l'ordre les choses suivantes :
-     *
-     *    rechercher dans la liste la place nu num�ro de maille � inserrer
-     *   deux cas de figure peuvent se pr�senter :
-     *     la maille ayant le m�me num�ro  existe d�j�: on proc�de alors � la fusion des deux,  en d�terminant la valeur optimale et
-     *    en  fusionnant les r�tro-actions
-     *     la maille n'existe pas encore; alors on l'inserre simplement  dans l'ordre croissant.
-     *
-     */
-    //cout<< " l'ajout du point itStart pointe sur "<<(*(*startIt)).PointNum <<endl;
-    unsigned long long int numnewPoint = newPoint;
-
-    list<unsigned long long int>::iterator itCell;
-
-    if (currentImagePointsList.pointsList.size() == 0)
-	{
-	currentImagePointsList.pointsList.push_back(newPoint);
-	currentImagePointsList.maxNum = numnewPoint;
-	currentImagePointsList.minNum = numnewPoint;
-	(*resIt) = currentImagePointsList.pointsList.end();
-	(*resIt)--;
-	//cout<< " on ajoute le premier element nouveax min et max  de la liste sont "<<currentImagePointsList.minNum<< " "<<currentImagePointsList.maxNum<<endl;
-	}
-    else
-	{
-	if (numnewPoint > (unsigned long long int) currentImagePointsList.maxNum)
-	    {
-	    currentImagePointsList.pointsList.push_back(newPoint);
-	    currentImagePointsList.maxNum = numnewPoint;
-	    (*resIt) = currentImagePointsList.pointsList.end();
-	    (*resIt)--;
-	    //cout<< " on ajoute � la fin  nouveax min et max  de la liste sont "<<currentImagePointsList.minNum<< " "<<currentImagePointsList.maxNum<<endl;
-	    }
-	else
-	    {
-	    if (numnewPoint < (unsigned long long int) currentImagePointsList.minNum)
-		{
-		currentImagePointsList.pointsList.push_front(newPoint);
-		currentImagePointsList.minNum = numnewPoint;
-		(*resIt) = currentImagePointsList.pointsList.begin();
-		//    cout<< " on ajoute au debut nouveax min et max  de la liste sont "<<currentImagePointsList.minNum<< " "<<currentImagePointsList.maxNum<<endl;
-
-		}
-	    else
-		{
-		itCell = *startIt;
-
-		if (numnewPoint < (*itCell))
-		    {
-
-		    while ((numnewPoint < (*itCell)))
-			{
-			//cout<< " current cell num "<<(*itCell).PointNum<< " new cell num "<<numnewPoint<<endl;
-			itCell--;
-			}
-		    if (numnewPoint > (*itCell))
-			{
-			itCell++;
-			currentImagePointsList.pointsList.insert(itCell, newPoint);
-			}
-
-		    (*resIt) = itCell;
-
-		    }
-		else
-		    {
-		    while ((numnewPoint > (*itCell)))
-			{
-			//      cout<< " current point num "<<(*itCell).PointNum<< " new point  num "<<numnewPoint<<endl;
-			itCell++;
-			}
-		    if (numnewPoint < (*itCell))
-			{
-			currentImagePointsList.pointsList.insert(itCell, newPoint);
-			}
-
-		    (*resIt) = itCell;
-
-		    }
-		}
-	    }
-	}
-    //cout<< " l'ajout du point est termin�  on a ajout� juste avant "<<(*(*resIt)).PointNum<<endl;
-    ////////system("pause");
-    }
 
 void ViabiBitSet::computeCurrentImage(int iter)
     {
-
-    cout << "  Compute Current Image . Iteration num " << iter << " points dans Cn = " << currentImagePointsList.pointsList.size() << endl;
-
-    double t1, t2, elapsed_time;
-
-    timeval tim;
-    gettimeofday(&tim, NULL);
-    t1 = tim.tv_sec + (tim.tv_usec / 1000000.0);
-
+    spdlog::info("[Min Time problem] : Computing current image. number of points {}", currentPointsImage.size());
     int posX;
 
+    list<imageCell>::iterator itStart, itNew;
+
+    currentCellsImage.clear();
+    double rho;
+    map<unsigned long long int, double>::iterator itPoint = currentPointsImage.begin(), itLastPoint = currentPointsImage.end(), itTemp;
+    map<unsigned long long int, list<unsigned long long int> >::iterator itCell, itLastCell, itCellsTemp;
     unsigned long long int intPointCoords[dim];
     double doublePointCoords[dim];
-
-    list<unsigned long long int>::iterator itStart, itNew;
-
-    /*!
-     * \todo  introduire � ce niveau un pointeur sur la liste  des cellules images
-     *  ce pointeur devra suivre l'insertion des cellules
-     *  puisque elles sont dans l'ordre croissant on
-     *  recherchera la suivant � partir du pointeur sur la derbi�re  qui a �t� ajout�e
-     *
-     *
-     *  Aussi il faut faire l'insertion  de tout le bloc  des donn�es
-     *  pour la m�me cellule
-     *  donc former tout de m�me une cellule  et apr�s l'ajouter dans la liste
-     *  ok
-     */
-
-    currentImageList.cellsList.clear();
-    currentImageList.maxNum = -1;
-    currentImageList.minNum = PLUS_INF;
-
-    list<unsigned long long int>::iterator itPoint = currentImagePointsList.pointsList.begin(), itLastPoint = currentImagePointsList.pointsList.end(),
-	    itTemp;
-    itStart = this->currentImageList.cellsList.begin();
+    DiscretPointImage *tempPointImage = new DiscretPointImage((unsigned long long int) 1, dim, dynsys, grid);
+    map<unsigned long long int, list<unsigned long long int> > *cellsWithControls = tempPointImage->GetImageCellsWithControls();
 
     while (itPoint != itLastPoint)
 	{
-	posX = (*itPoint);
-	//cout<< " posX="<<posX<<endl;
+	posX = itPoint->first;
 	grid->numToIntAndDoubleCoords(posX, intPointCoords, doublePointCoords);
+	rho = dynsys->calculRho_local(doublePointCoords);
+	//spdlog::info("[Min Time problem] : Timestep =  {}", rho);
 
-	this->computeDiscreteImageOfPoint(doublePointCoords, intPointCoords);
 	/*!
-	 * L'image calcul�e est stock�e dans la structure pointDI sous forme de tableau ordonn�
-	 *  de cellules
+	 * On calcule l'image discrète  du point
 	 */
-	for (unsigned long long int i = 0; i < pointDI.nbImageCells; i++)
+	double tempVal = itPoint->second + rho;
+
+	tempPointImage->setPointNumAndRebuild(posX);
+
+	itCell = cellsWithControls->begin();
+	itLastCell = cellsWithControls->end();
+	while (itCell != itLastCell)
 	    {
-	    addDataToCurrentImage(&itStart, pointDI.tabImageCells[i], &itNew);
-	    //cout<< " ares ajout  de l'image d'un point la taille de la liste est "<<currentImageList.cellsList.size()<<endl;
-	    itStart = itNew;
+	    unsigned long long int cellNum = itCell->first;
+	    //cout<< "current im  cellnum = "<< cellNum<< " nb total de pojnts " << grid->getNbTotalPoints()<<" ";
+	    if(cellNum < grid->getNbTotalPoints())
+		{
+		if (auto result = currentCellsImage.find(cellNum); result != currentCellsImage.end())
+		    {
+		    result->second = min((double) result->second, tempVal);
+		    }
+		else
+		    {
+		    currentCellsImage[cellNum] = tempVal;
+		    }
+		}
+	    itCell++;
 	    }
-
 	itPoint++;
-
 	}
 
-    gettimeofday(&tim, NULL);
-    t2 = tim.tv_sec + (tim.tv_usec / 1000000.0);
-    elapsed_time = (double) ((t2 - t1));
-
-    cout << "Elapsed time : " << elapsed_time << " sec." << endl << endl;
+    spdlog::info("[Min Time problem] : Computing current image finished. number of cells {}", currentCellsImage.size());
+    currentPointsImage.clear();
     }
 int ViabiBitSet::addNewPoints()
     {
     /*!
-     * Cette fonction  r�alise l'ajout  dans la base de donn�es  de la nouvelle couche
-     * \f$ \Phi(C_{n}\setminus C_{n-1})\f$  dans la base de donn�es.
-     * Elle doit �galement aouter aux bases de donn�es de r�troaction optimale et viable
-     * les r�troactions des points calcul�s
+     * Cette fonction  réalise l'ajout  dans la base de données  de la nouvelle couche
+     * \f$ \Phi(C_{n}\setminus C_{n-1})\f$  dans la base de données.
+     * Elle doit également aouter aux bases de données de rétroaction optimale et viable
+     * les rétroactions des points calculés
      *
-     * Les points sont stock�s sous forme de liste de structures imagePoint ordonn�e par num�ro de point x.
-     *  Chaque structure contient le num�ro du  point, la fonction valeur et
-     *  les listes de triplets \f$ (x,u,\rho)\f$ repr�sentant les r�trocations du point, optimale et viable.
+     * Les points sont stockés sous forme de liste de structures imagePoint ordonnée par numéro de point x.
+     *  Chaque structure contient le numéro du  point, la fonction valeur et
+     *  les listes de triplets \f$ (x,u,\rho)\f$ représentant les rétrocations du point, optimale et viable.
      *
-     *  Pour chaque point  de la liste on v�rifie  d'abord s'il est d�j�  dans la base de donn�es. S'il n'y est pas,
-     *  on l'ajoute � l'ensemble en construction et en m�me temps on ajoute ses r�troactions aux deux bases de r�troaction
+     *  Pour chaque point  de la liste on vérifie  d'abord s'il est déjé  dans la base de données. S'il n'y est pas,
+     *  on l'ajoute é l'ensemble en construction et en méme temps on ajoute ses rétroactions aux deux bases de rétroaction
      *  correspondantes.
      *
-     *  Si le point existe d�j� dans l'ensemble, il poss�de d�j� une r�tro-action �gaement. Dans ce cas, on
-     *  v�rifie les fonctions valeurs. Si celle du nuveau point est inf�rieure, alors on modifie le point existant
-     *  et la r�troaction optimale. Sinon,  on modifie  selement les r�troactons viables.
+     *  Si le point existe déjé dans l'ensemble, il posséde déjé une rétro-action égaement. Dans ce cas, on
+     *  vérifie les fonctions valeurs. Si celle du nuveau point est inférieure, alors on modifie le point existant
+     *  et la rétroaction optimale. Sinon,  on modifie  selement les rétroactons viables.
      *
-     *  Important!  Il est � noter ici que c'est cette m�me liste de points qui doit �tre ajout�e  � la base
-     *  par cette fonction qui servira ensuite � la construction de la couche suivante.
-     *  Ainsi, si un point de cette liste exste d�j� dans la base et que sa fonction valeur de la base n'est pas modifi�e,
-     *  il n'est pas consid�r� comme nouveau, il n'appartient pas � \f$ C_{n+1}\setminus C_n\f$ . On doit donc le supprimer
+     *  Important!  Il est é noter ici que c'est cette méme liste de points qui doit étre ajoutée  é la base
+     *  par cette fonction qui servira ensuite é la construction de la couche suivante.
+     *  Ainsi, si un point de cette liste exste déjé dans la base et que sa fonction valeur de la base n'est pas modifiée,
+     *  il n'est pas considéré comme nouveau, il n'appartient pas é \f$ C_{n+1}\setminus C_n\f$ . On doit donc le supprimer
      *   de la liste pour ne pas  calculer son image plutard.
      *
      */
-
-    cout << " ajout de nouveaux points\n";
 
     double t1, t2, elapsed_time;
 
     timeval tim;
     gettimeofday(&tim, NULL);
     t1 = tim.tv_sec + (tim.tv_usec / 1000000.0);
-    unsigned long long int intCoords[dim];
 
     int nbNewPoints = 0;
+    unsigned long long int intCoords[dim];
+    map<unsigned long long int, double>::iterator itPoint = currentPointsImage.begin(), itLastPoint = currentPointsImage.end(), itTemp;
 
-    list<unsigned long long int>::iterator itPoint = currentImagePointsList.pointsList.begin(), itLastPoint = currentImagePointsList.pointsList.end(),
-	    itTemp;
-    list<triple>::iterator itLastR, itR;
-    unsigned long long int pointNum;
-
+    imagePoint tempPoint;
     while (itPoint != itLastPoint)
 	{
+	unsigned long long int pointNum = itPoint->first;
+	double value = itPoint->second;
 
-	pointNum = (*itPoint);
 	grid->numToIntCoords(pointNum, intCoords);
 	if (!grid->isInSet(intCoords))
 	    {
 
-	    //            cout << " le point est nouveau on l'ajout dans la base  de fonc val \n";
+	    // cout << " le point est nouveau on l'ajout dans la base  de fonc val \n";
 	    grid->addPointToSet(pointNum, 1.0);
 	    //     cout<< " on l'ajoute maintenant  dans la base  de retro \n *******************************\n";
 
@@ -3529,19 +2949,15 @@ int ViabiBitSet::addNewPoints()
 	    }
 	else
 	    {
-	    itTemp = itPoint;
-	    itPoint++;
-	    currentImagePointsList.pointsList.erase(itTemp);
-
+	    itPoint = currentPointsImage.erase(itPoint);
 	    }
-
 	}
 
     gettimeofday(&tim, NULL);
     t2 = tim.tv_sec + (tim.tv_usec / 1000000.0);
     elapsed_time = (double) ((t2 - t1));
 
-    cout << "Elapsed time : " << elapsed_time << " sec." << endl << endl;
+    cout << "Elapsed time : " << elapsed_time << " sec." << endl << std::flush;
     return nbNewPoints;
     }
 

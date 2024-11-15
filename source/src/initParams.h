@@ -27,14 +27,11 @@
 #include "../include/defs.h"
 #include "../include/ParametersManager.h"
 
-ParametersManager* initParams(gridParams &gp, algoViabiParams &avp,
-	controlParams &cp, systemParams &sp, int nbOmpThreads);
-ParametersManager* initParams(gridParams &gp, algoViabiParams &avp,
-	controlParams &cp, systemParams &sp, int nbOmpThreads)
+ParametersManager* initParams(gridParams &gp, algoViabiParams &avp, controlParams &cp, systemParams &sp, int nbOmpThreads);
+ParametersManager* initParams(gridParams &gp, algoViabiParams &avp, controlParams &cp, systemParams &sp, int nbOmpThreads)
     {
 
-    ParametersManager *pm = new ParametersManager(&gp, &avp, &cp, &sp,
-	    nbOmpThreads, paramsFile);
+    ParametersManager *pm = new ParametersManager(&gp, &avp, &cp, &sp, nbOmpThreads, paramsFile);
 
     if (dynamics)
 	{
@@ -46,13 +43,13 @@ ParametersManager* initParams(gridParams &gp, algoViabiParams &avp,
 	}
 
     if (dynamics_tych)
-    	{
-    	sp.DYNAMICS_TYCH = &dynamics_tych;
-    	}
-        else
-    	{
-    	sp.DYNAMICS_TYCH = &dynamics_tych_default;
-    	}
+	{
+	sp.DYNAMICS_TYCH = &dynamics_tych;
+	}
+    else
+	{
+	sp.DYNAMICS_TYCH = &dynamics_tych_default;
+	}
     if (sp.DYN_TYPE == 4)
 	{
 	sp.DYNAMICS = &dynamics_hybrid;
@@ -104,13 +101,13 @@ ParametersManager* initParams(gridParams &gp, algoViabiParams &avp,
 	sp.JACOBIAN = &jacobian_default;
 	}
     if (jacobian_tych)
-    	{
-    	sp.JACOBIAN_TYCH = &jacobian_tych;
-    	}
-        else
-    	{
-    	sp.JACOBIAN_TYCH = &jacobian_tych_default;
-    	}
+	{
+	sp.JACOBIAN_TYCH = &jacobian_tych;
+	}
+    else
+	{
+	sp.JACOBIAN_TYCH = &jacobian_tych_default;
+	}
     if (localDynBounds)
 	{
 	sp.LOCAL_DYN_BOUNDS = &localDynBounds;
@@ -137,21 +134,21 @@ ParametersManager* initParams(gridParams &gp, algoViabiParams &avp,
 	}
 
     if (m_tych)
-    	{
-    	sp.M_FUNC_TYCH = &m_tych;
-    	}
-        else
-    	{
-    	sp.M_FUNC_TYCH = &m_tych_default;
-    	}
-        if (l_tych)
-    	{
-    	sp.L_FUNC_TYCH = &l_tych;
-    	}
-        else
-    	{
-    	sp.L_FUNC_TYCH = &l_tych_default;
-    	}
+	{
+	sp.M_FUNC_TYCH = &m_tych;
+	}
+    else
+	{
+	sp.M_FUNC_TYCH = &m_tych_default;
+	}
+    if (l_tych)
+	{
+	sp.L_FUNC_TYCH = &l_tych;
+	}
+    else
+	{
+	sp.L_FUNC_TYCH = &l_tych_default;
+	}
 
     if (target)
 	{
@@ -197,8 +194,7 @@ ParametersManager* initParams(gridParams &gp, algoViabiParams &avp,
     if (controlEligibilityForTraj_fd)
 	sp.CONTROL_ELIGIBILITY_FOR_TRAJ_fd = &controlEligibilityForTraj_fd;
     else
-	sp.CONTROL_ELIGIBILITY_FOR_TRAJ_fd =
-		&controlEligibilityForTraj_fd_default;
+	sp.CONTROL_ELIGIBILITY_FOR_TRAJ_fd = &controlEligibilityForTraj_fd_default;
 
     if (dynamics_fd)
 	sp.DYNAMICS_FD = &dynamics_fd;

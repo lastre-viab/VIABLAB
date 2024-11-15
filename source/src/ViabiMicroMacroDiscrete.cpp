@@ -160,9 +160,9 @@ void ViabiMicroMacroDiscrete::computeDiscreteImageOfPoint(unsigned long long int
 		     */
 		    imageCells[cu] = nbPointsTotal + 1; // sinon on enregistre un nombre convenu reconnaissanble
 		    try
-		    {
+			{
 			pointsList.push_back(uintPair(imageCells[cu], cu));
-		    }
+			}
 		    catch (const std::bad_alloc &e)
 			{
 			std::cout << "Allocation failed: in discretImage points push_back 1" << e.what() << '\n';
@@ -177,9 +177,9 @@ void ViabiMicroMacroDiscrete::computeDiscreteImageOfPoint(unsigned long long int
 		 */
 		imageCells[cu] = nbPointsTotal + 1; // sinon on enregistre un nombre convenu reconnaissanble
 		try
-		{
+		    {
 		    pointsList.push_back(uintPair(imageCells[cu], cu));
-		}
+		    }
 		catch (const std::bad_alloc &e)
 		    {
 		    std::cout << "Allocation failed: in discretImage points push_back 2" << e.what() << '\n';
@@ -199,9 +199,9 @@ void ViabiMicroMacroDiscrete::computeDiscreteImageOfPoint(unsigned long long int
 	     */
 	    imageCells[cu] = nbPointsTotal + 1; // sinon on enregistre un nombre convenu reconnaissanble
 	    try
-	    {
+		{
 		pointsList.push_back(uintPair(imageCells[cu], cu));
-	    }
+		}
 	    catch (const std::bad_alloc &e)
 		{
 		std::cout << "Allocation failed: in discretImage points push_back 3" << e.what() << '\n';
@@ -269,7 +269,7 @@ void ViabiMicroMacroDiscrete::initialiseTarget()
      *
      */
 
-	initialiseTargetHJB();
+    initialiseTargetHJB();
     }
 
 void ViabiMicroMacroDiscrete::computeTrajectories()
@@ -746,138 +746,126 @@ double ViabiMicroMacroDiscrete::computeOptimalCaptTrajectory(double *initPositio
 void ViabiMicroMacroDiscrete::computeCurrIm(int iter)
     {
 
+    cout << " debut compute current image DD" << endl;
+    cout << " currentpoints list size is " << currentImagePointsList.pointsList->size() << endl;
+    double t1, t2, elapsed_time;
 
-	cout<< " debut compute current image DD"<<endl;
-	cout<< " currentpoints list size is "<<currentImagePointsList.pointsList->size()<<endl;
-	double t1,t2,elapsed_time;
+    timeval tim;
+    gettimeofday(&tim, NULL);
+    t1 = tim.tv_sec + (tim.tv_usec / 1000000.0);
 
-	timeval tim;
-	gettimeofday(&tim,NULL);
-	t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+    unsigned long long int posX;
 
+    unsigned long long int nbPointsTotal = grid->getNbTotalPoints();
 
-	unsigned long long int posX;
+    unsigned long long int **controlCoords = dynsys->getControlIntCoords();
 
-	unsigned long long int nbPointsTotal=grid->getNbTotalPoints();
+    /*!
+     * \todo  introduire à ce niveau un pointeur sur la liste  des cellules images
+     *  ce pointeur devra suivre l'insertion des cellules
+     *  puisque elles sont dans l'ordre croissant on
+     *  recherchera la suivant à partir du pointeur sur la derbière  qui a été ajoutée
+     *
+     *
+     *  Aussi il faut faire l'insertion  de tout le bloc  des données
+     *  pour la méme cellule
+     *  donc former tout de méme une cellule  et aprés l'ajouter dans la liste
+     *  ok
+     */
 
-	unsigned long long int ** controlCoords=dynsys->getControlIntCoords();
+    imagePointsList tempPointsList;
+    tempPointsList.maxNum = 0;
+    tempPointsList.minNum = 0;
+    if (this->whichPointListToUse == 1)
+	{
+	tempPointsList.pointsList = tempPointsList2;
+	tempPointsList.pointsList->clear();
+	}
+    else
+	{
+	tempPointsList.pointsList = tempPointsList1;
+	tempPointsList.pointsList->clear();
+	}
 
+    double tempL, tempMu;
+
+    list<imagePoint>::iterator itPoint = currentImagePointsList.pointsList->begin(), itTemp;
+    imagePoint tempImagePoint;
+
+    list<imagePoint>::iterator itStart, itNew;
+    itStart = tempPointsList.pointsList->begin();
+    double imageCoords[dim];
+
+    while (!currentImagePointsList.pointsList->empty())    //(itPoint!=itLastPoint)
+	{
+
+	posX = (*itPoint).PointNum;
+	//cout<< " posX="<<posX<<endl;
+	grid->numToIntAndDoubleCoords(posX, intPointCoords, doublePointCoords);
+	//  cout<< " rho= "<<rho;
 
 	/*!
-	 * \todo  introduire à ce niveau un pointeur sur la liste  des cellules images
-	 *  ce pointeur devra suivre l'insertion des cellules
-	 *  puisque elles sont dans l'ordre croissant on
-	 *  recherchera la suivant à partir du pointeur sur la derbière  qui a été ajoutée
-	 *
-	 *
-	 *  Aussi il faut faire l'insertion  de tout le bloc  des données
-	 *  pour la méme cellule
-	 *  donc former tout de méme une cellule  et aprés l'ajouter dans la liste
-	 *  ok
+	 * On calcule l'image discrète  du point
 	 */
 
+	this->computeDiscreteImageOfPoint(posX);
+	/*!
+	 * L'image calculée est stockée dans la structure pointDI sous forme de tableau ordonné
+	 *  de cellules
+	 */
+	unsigned long long int numPoint, numControl;
 
-	imagePointsList tempPointsList;
-	tempPointsList.maxNum =0;
-	tempPointsList.minNum =0;
-	if(this->whichPointListToUse ==1)
-	{
-		tempPointsList.pointsList= tempPointsList2;
-		tempPointsList.pointsList->clear();
-	}
-	else
-	{
-		tempPointsList.pointsList= tempPointsList1;
-		tempPointsList.pointsList->clear();
-	}
+	//cout<< "  nb cells dans l'image "<<pointDI_DD.nbImagePoints<<endl;
 
-
-
-	double tempL, tempMu;
-
-	list<imagePoint>::iterator itPoint=currentImagePointsList.pointsList->begin(),
-			itTemp;
-	imagePoint tempImagePoint;
-
-	list<imagePoint>::iterator itStart, itNew;
-	itStart=tempPointsList.pointsList->begin();
-	double imageCoords[dim];
-
-	while(!currentImagePointsList.pointsList->empty())//(itPoint!=itLastPoint)
-	{
-
-		posX=(*itPoint).PointNum;
-		//cout<< " posX="<<posX<<endl;
-		grid->numToIntAndDoubleCoords(posX,intPointCoords,doublePointCoords);
-		//  cout<< " rho= "<<rho;
-
-		/*!
-		 * On calcule l'image discrète  du point
-		 */
-
-		this->computeDiscreteImageOfPoint(posX);
-		/*!
-		 * L'image calculée est stockée dans la structure pointDI sous forme de tableau ordonné
-		 *  de cellules
-		 */
-		unsigned long long int numPoint,numControl;
-
-
-		//cout<< "  nb cells dans l'image "<<pointDI_DD.nbImagePoints<<endl;
-
-
-		// cout<<  " analyse d'une image de point\n";
-		for(int i=0;i<pointDI.nbImagePoints;i++)
+	// cout<<  " analyse d'une image de point\n";
+	for (int i = 0; i < pointDI.nbImagePoints; i++)
+	    {
+	    numPoint = pointDI.tabImagePoints[i];
+	    tempImagePoint.PointNum = numPoint;
+	    // cout<< " i= "<<i<<  "numPoint= "<<numPoint<<endl;
+	    //cout<< " intervalle "<<pointDI_DD.tabPointsEntrees[i]<< " "<< pointDI_DD.tabPointsEntrees[i+1]<<endl;
+	    if (numPoint < nbPointsTotal)
 		{
-			numPoint=pointDI.tabImagePoints[i];
-			tempImagePoint.PointNum = numPoint;
-			// cout<< " i= "<<i<<  "numPoint= "<<numPoint<<endl;
-			//cout<< " intervalle "<<pointDI_DD.tabPointsEntrees[i]<< " "<< pointDI_DD.tabPointsEntrees[i+1]<<endl;
-			if(numPoint< nbPointsTotal)
-			{
-				tempImagePoint.minVal=PLUS_INF;
-				for(int j=pointDI.tabPointsEntrees[i];j<pointDI.tabPointsEntrees[i+1];j++)
-				{
-					numControl=pointDI.tabImageControls[j];
-					//cout<< " numControl = "<<numControl<<endl;
-					tempL=dynsys->lFunc_fd(intPointCoords, controlCoords[numControl]);
-					tempMu=dynsys->muFunc_fd(intPointCoords, controlCoords[numControl]);
-					// cout<< " tempL = "<<tempL<< " tempmu = "<<tempMu<<endl;
-					tempImagePoint.minVal=min(tempImagePoint.minVal, max(tempMu, (*itPoint).minVal+tempL));
-				}
-				// cout<< " ajout  de cellule avec valeur "<< tempImageCell.minVal<<"\n ";
-				addDataToGivenPointsList(&tempPointsList,&itStart,tempImagePoint, &itNew);
-				itStart=itNew;
-				// cout<< " ares ajout  de l'image d'un point la taille de la liste est "<<currentImageList.cellsList.size()<<endl;
-			}
+		tempImagePoint.minVal = PLUS_INF;
+		for (int j = pointDI.tabPointsEntrees[i]; j < pointDI.tabPointsEntrees[i + 1]; j++)
+		    {
+		    numControl = pointDI.tabImageControls[j];
+		    //cout<< " numControl = "<<numControl<<endl;
+		    tempL = dynsys->lFunc_fd(intPointCoords, controlCoords[numControl]);
+		    tempMu = dynsys->muFunc_fd(intPointCoords, controlCoords[numControl]);
+		    // cout<< " tempL = "<<tempL<< " tempmu = "<<tempMu<<endl;
+		    tempImagePoint.minVal = min(tempImagePoint.minVal, max(tempMu, (*itPoint).minVal + tempL));
+		    }
+		// cout<< " ajout  de cellule avec valeur "<< tempImageCell.minVal<<"\n ";
+		addDataToGivenPointsList(&tempPointsList, &itStart, tempImagePoint, &itNew);
+		itStart = itNew;
+		// cout<< " ares ajout  de l'image d'un point la taille de la liste est "<<currentImageList.cellsList.size()<<endl;
 		}
+	    }
 
-		//        cout<< " \n";
+	//        cout<< " \n";
 
-		itPoint++;
-		currentImagePointsList.pointsList->pop_front();
+	itPoint++;
+	currentImagePointsList.pointsList->pop_front();
 	}
 
+    cout << " parcours de base terminé\n";
+    currentImagePointsList.pointsList = tempPointsList.pointsList;
 
-	cout<< " parcours de base terminé\n";
-	currentImagePointsList.pointsList = tempPointsList.pointsList;
-
-	if(this->whichPointListToUse == 1)
+    if (this->whichPointListToUse == 1)
 	{
-		whichPointListToUse = 2;
+	whichPointListToUse = 2;
 	}
-	else
+    else
 	{
-		whichPointListToUse = 1;
+	whichPointListToUse = 1;
 	}
 
-	gettimeofday(&tim,NULL);
-	t2=tim.tv_sec+(tim.tv_usec/1000000.0);
-	elapsed_time=(double)((t2-t1));
+    gettimeofday(&tim, NULL);
+    t2 = tim.tv_sec + (tim.tv_usec / 1000000.0);
+    elapsed_time = (double) ((t2 - t1));
 
-	cout << "Elapsed time : " << elapsed_time << " sec." << endl << endl;
-
-
+    cout << "Elapsed time : " << elapsed_time << " sec." << endl << endl;
 
     }
 
