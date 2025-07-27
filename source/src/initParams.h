@@ -92,6 +92,15 @@ ParametersManager* initParams(gridParams &gp, algoViabiParams &avp, controlParam
 	{
 	sp.CONSTR_XU = &constraintsXU_default;
 	}
+
+    if (constraintsXV_tych)
+    	{
+    	sp.CONSTR_XV_TYCH = &constraintsXV_tych;
+    	}
+        else
+    	{
+    	sp.CONSTR_XV_TYCH = &constraintsXV_default;
+    	}
     if (jacobian)
 	{
 	sp.JACOBIAN = &jacobian;

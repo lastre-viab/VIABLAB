@@ -49,6 +49,7 @@ SysDyn::SysDyn(systemParams SP, int ds, controlParams cp, Grid *grRef)
 	}
     fd_dyn_type = SP.FD_DYN_TYPE;
     constraintsXU = SP.CONSTR_XU;
+    constraintsXV_tych = SP.CONSTR_XV_TYCH;
     constraintsXU_fd = SP.CONSTR_XU_fd;
     constraintsX = SP.CONSTR_X;
     constraintsX_fd = SP.CONSTR_X_fd;

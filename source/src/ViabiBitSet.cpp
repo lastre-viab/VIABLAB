@@ -1496,62 +1496,66 @@ bool ViabiBitSet::findGuarantedViabImagePoint(double *xCoordsDouble, bool print)
 	 * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
 	 * au point en cours
 	 */
-	testAllTych = true;
-	int ty = 0;
-	while (ty < nbTyTotal && testAllTych)
+	if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
 	    {
-	    if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
+	    testAllTych = true;
+	    int ty = 0;
+	    while (ty < nbTyTotal && testAllTych)
 		{
-		/*
-		 * calcul du successeur  du point en cours
-		 */
-		(dynsys->*(dynsys->discretDynamics_tych))(xCoordsDouble, controlCoords[cu], tychCoords[ty], doubleVect1, rho);
-		if (grid->isPointInGrid(doubleVect1))
+		if(dynsys->constraintsXV_tych(xCoordsDouble, tychCoords[ty]) < PLUS_INF)
 		    {
 		    /*
-		     *  le sucesseur est dans la grille de calcul
+		     * calcul du successeur  du point en cours
 		     */
-		    if (dynsys->constraintsX(doubleVect1) < PLUS_INF)
+		    (dynsys->*(dynsys->discretDynamics_tych))(xCoordsDouble, controlCoords[cu], tychCoords[ty], doubleVect1, rho);
+		    if (grid->isPointInGrid(doubleVect1))
 			{
 			/*
-			 * le successeur vérifie les contraintes
-			 * On identifie la maille où il se trouve
+			 *  le sucesseur est dans la grille de calcul
 			 */
-			cellNum = grid->localizePoint(doubleVect1);
-			// cout<< " num cellule "<<cellNum<<endl;
-
-			/*
-			 * On parcours les sommets de la maille
-			 * autour du sucesseur pour voir s'il y a des
-			 * points viables
-			 */
-			int ii = 0;
-			bool imageInSet = false;
-			while (ii < nbPointsCube && !imageInSet)
+			if (dynsys->constraintsX(doubleVect1) < PLUS_INF)
 			    {
-			    posTemp = cellNum + indicesDecalCell[ii];
-			    grid->numToIntAndDoubleCoords(posTemp, testI, testV);
-			    double dist = 0.0;
-			    for (int k = 0; k < dim; k++)
+			    /*
+			     * le successeur vérifie les contraintes
+			     * On identifie la maille où il se trouve
+			     */
+			    cellNum = grid->localizePoint(doubleVect1);
+			    // cout<< " num cellule "<<cellNum<<endl;
+
+			    /*
+			     * On parcours les sommets de la maille
+			     * autour du sucesseur pour voir s'il y a des
+			     * points viables
+			     */
+			    int ii = 0;
+			    bool imageInSet = false;
+			    while (ii < nbPointsCube && !imageInSet)
 				{
-				dist = max(dist, abs(testV[k] - doubleVect1[k]));
+				posTemp = cellNum + indicesDecalCell[ii];
+				grid->numToIntAndDoubleCoords(posTemp, testI, testV);
+				double dist = 0.0;
+				for (int k = 0; k < dim; k++)
+				    {
+				    dist = max(dist, abs(testV[k] - doubleVect1[k]));
+				    }
+				imageInSet = grid->isInSet(testI) && (dist <= hMax / 2.0);
+				ii++;
 				}
-			    imageInSet = grid->isInSet(testI) && (dist <= hMax / 2.0);
-			    ii++;
+			    testAllTych &= imageInSet;
 			    }
-			testAllTych &= imageInSet;
+			}
+		    else
+			{
+			testAllTych = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1)
+										    && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
 			}
 		    }
-		else
-		    {
-		    testAllTych = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1)
-						    && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
-		    }
 
+		ty++;
 		}
-	    ty++;
+	    testNonVide = testAllTych;
 	    }
-	testNonVide = testAllTych;
+
 	cu += stepCu;
 	}			//fin de parcours de tous les contrôles
 
@@ -1564,67 +1568,70 @@ bool ViabiBitSet::findGuarantedViabImagePoint(double *xCoordsDouble, bool print)
 	    cu = first;
 	    while (cu < nbCTotal && !testNonVide)
 		{
-		/*
-		 * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
-		 * au point en cours
-		 */
-		testAllTych = true;
-		int ty = 0;
-		while (ty < nbTyTotal && testAllTych)
+		if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
 		    {
-		    if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
+		    /*
+		     * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
+		     * au point en cours
+		     */
+		    testAllTych = true;
+		    int ty = 0;
+		    while (ty < nbTyTotal && testAllTych)
 			{
-			/*
-			 * calcul du successeur  du point en cours
-			 */
-			(dynsys->*(dynsys->discretDynamics_tych))(xCoordsDouble, controlCoords[cu], tychCoords[ty], doubleVect1, rho);
-			if (grid->isPointInGrid(doubleVect1))
+			if(dynsys->constraintsXV_tych(xCoordsDouble, tychCoords[ty]) < PLUS_INF)
 			    {
 			    /*
-			     *  le sucesseur est dans la grille de calcul
+			     * calcul du successeur  du point en cours
 			     */
-			    if (dynsys->constraintsX(doubleVect1) < PLUS_INF)
+			    (dynsys->*(dynsys->discretDynamics_tych))(xCoordsDouble, controlCoords[cu], tychCoords[ty], doubleVect1, rho);
+			    if (grid->isPointInGrid(doubleVect1))
 				{
-				/* cout<< " image du point ";
+				/*
+				 *  le sucesseur est dans la grille de calcul
+				 */
+				if (dynsys->constraintsX(doubleVect1) < PLUS_INF)
+				    {
+				    /* cout<< " image du point ";
 				 for(int k=0;k<dim;k++)
 				 {
 				 cout<< " "<<doubleVect1[k];
 				 }*/
-				/*
-				 * le successeur vérifie les contraintes
-				 * On identifie la maille où il se trouve
-				 */
-				cellNum = grid->localizePoint(doubleVect1);
-				// cout<< " num cellule "<<cellNum<<endl;
+				    /*
+				     * le successeur vérifie les contraintes
+				     * On identifie la maille où il se trouve
+				     */
+				    cellNum = grid->localizePoint(doubleVect1);
+				    // cout<< " num cellule "<<cellNum<<endl;
 
-				/*
-				 * On parcours les sommets de la maille
-				 * autour du sucesseur pour voir s'il y a des
-				 * points viables
-				 */
-				int ii = 0;
-				bool imageInSet = false;
-				while (ii < nbPointsCube && !imageInSet)
-				    {
-				    posTemp = cellNum + indicesDecalCell[ii];
-				    grid->numToIntAndDoubleCoords(posTemp, testI, testV);
-				    double dist = 0.0;
-				    for (int k = 0; k < dim; k++)
+				    /*
+				     * On parcours les sommets de la maille
+				     * autour du sucesseur pour voir s'il y a des
+				     * points viables
+				     */
+				    int ii = 0;
+				    bool imageInSet = false;
+				    while (ii < nbPointsCube && !imageInSet)
 					{
-					dist = max(dist, abs(testV[k] - doubleVect1[k]));
+					posTemp = cellNum + indicesDecalCell[ii];
+					grid->numToIntAndDoubleCoords(posTemp, testI, testV);
+					double dist = 0.0;
+					for (int k = 0; k < dim; k++)
+					    {
+					    dist = max(dist, abs(testV[k] - doubleVect1[k]));
+					    }
+					imageInSet = grid->isInSet(testI) && (dist <= hMax / 2.0);
+					ii++;
 					}
-				    imageInSet = grid->isInSet(testI) && (dist <= hMax / 2.0);
-				    ii++;
+				    testAllTych &= imageInSet;
 				    }
-				testAllTych &= imageInSet;
 				}
-			    }
-			else
-			    {
-			    testAllTych = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1)
-							    && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
-			    }
+			    else
+				{
+				testAllTych = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1)
+											    && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
+				}
 
+			    }
 			}
 		    ty++;
 		    }
@@ -2436,8 +2443,8 @@ void ViabiBitSet::initialiseTargetPointList()
     int totalPointsX = grid->getNbTotalPoints();
 
     imagePoint currentPoint;
-        currentPointsImage.clear();
-        currentCellsImage.clear();
+    currentPointsImage.clear();
+    currentCellsImage.clear();
 
     unsigned long long int pos;
 
@@ -3047,7 +3054,7 @@ void ViabiBitSet::noyauViabi_sansControle(bool sortieOK, int nbArret)
 			    }	// fin de if masque[k]
 			}	// fin de for  de parcours de masque
 		    //cout<< " fini"<<endl;
-		    //cout<< " masque points enleves "<<*masquePointsEnleves<<endl;
+		    // cout<< " masque points enleves "<<*masquePointsEnleves<<endl;
 		    if (masquePointsEnleves->count() < (unsigned long long int) longTrame)
 			{
 
@@ -3060,7 +3067,7 @@ void ViabiBitSet::noyauViabi_sansControle(bool sortieOK, int nbArret)
 
 	    }				// fin de for de parcours de la trame
 
-	cout << "Itération " << nbIter << " terminée. Nombre de points  points enlevés: " << comptEnleves << "\n";
+	cout << "End of iteration " << nbIter << " Number of removed points: " << comptEnleves << "\n";
 
 	nbIter++;
 
@@ -3190,7 +3197,7 @@ void ViabiBitSet::GarantedViabilityKernel(bool sortieOK, int nbArret)
 	gettimeofday(&tim, NULL);              //mesure le temps d'execution
 	t1 = tim.tv_sec + (tim.tv_usec / 1000000.0);
 	//  Calcul du noyau de viabilité
-	cout << "=============================Debut viab kernel ==============================" << endl;
+	cout << "=============================Debut Guantaed viab kernel ==============================" << endl;
 	GuarantedViabilityKernelSimple(1, seuilArret);
 	cout << "==============================================================================" << endl;
 	gettimeofday(&tim, NULL);

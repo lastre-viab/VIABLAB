@@ -201,6 +201,7 @@ struct systemParams
     void (*DYNAMICS_TYCH_FD)(unsigned long long int*, unsigned long long int*, unsigned long long int*, unsigned long long int*);
 
     double (*CONSTR_XU)(double*, double *u);
+    double (*CONSTR_XV_TYCH)(double*, double *v);
     double (*CONSTR_XU_fd)(unsigned long long int*, unsigned long long int*);
     double (*CONTROL_ELIGIBILITY_FOR_TRAJ_fd)(unsigned long long int*, unsigned long long int*, unsigned long long int*);
 

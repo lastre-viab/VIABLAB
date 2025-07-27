@@ -57,6 +57,8 @@ double l_tych(double *x, double *u, double *v) __attribute__((weak));
 double m_tych(double *x, double *u, double *v) __attribute__((weak));
 void dynamics_hybrid(double *x, double *u, double *image) __attribute__((weak));
 void postProcess(ParametersManager *PM) __attribute__((weak));
+double constraintsXV_tych(double *x, double *v) __attribute__((weak));
+
 
 inline double l_default(double *x, double *u)
     {
@@ -95,6 +97,10 @@ inline double constraintsX_default(double *x)
     }
 
 inline double constraintsXU_default(double *x, double *u)
+    {
+    return 0.0;
+    }
+inline double constraintsXV_default(double *x, double *v)
     {
     return 0.0;
     }

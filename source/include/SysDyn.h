@@ -114,10 +114,10 @@ public:
      * @return valeur r?����elle si (x,u)  est dans le graphe de U(x), \f$ +\infty\f$ sinon
      */
     double (*constraintsXU)(double *x, double *u);
-    double (*constraintsXU_fd)(unsigned long long int *x,
-	    unsigned long long int *u);
-    double (*controlEligibilityForTraj_fd)(unsigned long long int *x,
-	    unsigned long long int *u, unsigned long long int *previousU);
+    double (*constraintsXV_tych)(double *x, double *v);
+    double (*constraintsXU_fd)(unsigned long long int *x, unsigned long long int *u);
+    double (*controlEligibilityForTraj_fd)(unsigned long long int *x, unsigned long long int *u, unsigned long long int *previousU);
+
     /*!
      * \brief  Cette fonction d?����finit les contraintes sur l'?����tat, elle correspond a la d?����finition k(x)
      *
