@@ -147,7 +147,7 @@ void DiscretPointImage::Build()
 bool DiscretPointImage::testConstraintesForCell(unsigned long long int numCell)
     {
     bool res = true;
-    long long int *indicesDecalCell = grid->getIndicesDecalCell();
+    const long long int *indicesDecalCell = grid->getIndicesDecalCell();
     double *tempDoublePointCoords = new double[dim];
 unsigned long long int tempIntCoords[dim];
     int nbPointsCube = (int) pow(2.0, dim);	//pow(2.0, dim);

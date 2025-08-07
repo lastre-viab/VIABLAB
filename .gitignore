@@ -66,3 +66,42 @@ Default/
 /cmake_install.cmake
 /CMakeCache.txt
 /Makefile
+
+# Latex
+*minted*
+*fonts*
+*.aux
+*.lof
+*.log
+*.lot
+*.loa
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+*.bbl
+*.bbl-SAVE-ERROR
+*.bcf
+*.bcf-SAVE-ERROR
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+*.fdb_latexmk
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+*.rubbercache
+
+# Mac
+**.DS_Store
+
+# Python
+
+**.ipynb_checkpoints

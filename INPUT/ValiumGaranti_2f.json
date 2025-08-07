@@ -1,0 +1,161 @@
+{
+    "ALGORITHM_PARAMETERS": {
+        "COMPUTE_MIN_TIME": false,
+        "COMPUTE_VIABLE_SET": true,
+        "GRID_REFINMENTS_NUMBER": 0,
+        "INTERMEDIATE_SAVINGS": false,
+        "ITERATION_STOP_LEVEL": 0,
+        "LEVEL": 0,
+        "PROJECTION_AXIS": [    
+            1,
+            0,
+            0,
+            0
+        ],
+        "SAVE_BOUNDARY": false,
+        "SAVE_PROJECTION": false,
+        "SAVE_SLICE": false,
+        "SAVE_SLICE_BOUND": false,
+        "SAVE_SUBLEVEL": false,
+        "SAVE_VIABSET_LIGHT": true,
+        "SET_TYPE": "VIAB",
+        "TARGET_OR_DEPARTURE": "DEPARTURE"
+    },
+    "CONTROL_PARAMETERS": {
+        "CONTROL_DIMENSION": 4,    
+        "CONTROL_GRID_POINTS": [   
+	        9,   
+	        3,  
+	        3,   
+	        7   
+        ],
+        "CONTROL_MAX_VALUES": [    
+            8,
+            2,
+            2,
+            6
+        ],
+        "CONTROL_MIN_VALUES": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "CONTROL_TYCHASTIC_DIMENSION": 12,   
+        "CONTROL_TY_GRID_POINTS": [
+            3,    
+            3,    
+	        3,    
+	        7,  
+	        7,   
+	        7,    
+	        7,   
+	        7,    
+	        7,   
+	        7,  
+	        7,   
+	        7   
+        ],
+        "CONTROL_TY_MAX_VALUES": [
+            2,
+            2,
+            2,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6,
+            6
+        ],
+        "CONTROL_TY_MIN_VALUES": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "GRID_PARAMETERS": {
+        "GRID_MAIN_DIR": 1,
+        "GRID_METHOD": "BS",
+        "LOWER_LIMIT_IS_NOT_CONSTRAINT": [  
+            false,    
+            false,
+            false,
+            true
+        ],
+        "OUTPUT_FILE_PREFIX": "VALIUM_300_0.9,5,8,1-",    
+        "SLICE_DIRECTIONS": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "SLICE_LEVELS": [   
+            0,
+            0,
+            0,
+            0
+        ],
+        "SLICE_LEVELS_DISCRETE": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "STATE_DIMENSION": 4,    
+        "STATE_GRID_POINTS": [    
+            41,   
+            9,    
+            4,     
+            41     
+        ],
+        "STATE_MAX_VALUES": [    
+            300, 
+            40,     
+            3, 
+            40     
+        ],
+        "STATE_MIN_VALUES": [
+            0,  
+            0,  
+            0,
+            0   
+        ],
+        "STATE_PERIODIC": [  
+            false,
+            false,
+            false,
+            false
+        ],
+        "UPPER_LIMIT_IS_NOT_CONSTRAINT": [ 
+            true,   
+            false,   
+            false, 
+            false    
+        ]
+    },
+    "SYSTEM_PARAMETERS": {   
+        "COST_BOUND_CONSTANT": 2,
+        "COST_LIPSCHITZ_CONSTANT": 1,  
+        "DYNAMICS_TYPE": "DC",   
+        "TIME_HORIZON": 20
+    },
+    "TRAJECTORY_PARAMETERS": [],
+    "MODEL_PARAMETERS": {
+        "GAMMA_PARAM": 0.9,
+        "COST_PARAM": 5.0,
+        "PLUIE_PARAM": 8.0,
+        "BES_PARAM": 1.0
+    }
+}

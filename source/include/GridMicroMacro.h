@@ -26,43 +26,42 @@
 
 #include "Grid.h"
 #include "SysDyn.h"
+#include "Params.h"
 
 #include <iostream>
 
 using namespace std;
-class GridMicroMacro: public Grid
+class GridMicroMacro final: public Grid
     {
 public:
     GridMicroMacro();
-    GridMicroMacro(gridParams gp);
+    GridMicroMacro(const gridParams &gp);
     virtual ~GridMicroMacro();
-    virtual void printGrid(void);
-    void addPointToSet(unsigned long long int *coords, double value);
+    virtual void printGrid(void) const;
+    void addPointToSet(const unsigned long long int *coords, double value);
     void addPointToSet(unsigned long long int pos, double value);
 
-    void loadSet(string fileName);
-    virtual bool isInSet(unsigned long long int *coords);
-    virtual unsigned long long int getNearestPointInSet(double *coords);
-    unsigned long long int getBestNearPointInSet(double *coords);
-    double getOptimalValue(double *coords);
-    virtual void savePointsList(string fileName);
-    virtual void saveValOnGrid(string fileName);
-    virtual void saveValOnGridLight(string fileName);
-    void saveValOnGrid_DD(string fileName);
+    void loadSet(const string &fileName);
+    virtual bool isInSet(const unsigned long long int *coords) const;
+    virtual unsigned long long int getNearestPointInSet(const double *coords) const;
+    unsigned long long int getBestNearPointInSet(const double *coords) const;
+    double getOptimalValue(const double *coords) const;
+    virtual void savePointsList(const string &fileName) const;
+    virtual void saveValOnGrid(const string &fileName) const;
+    virtual void saveValOnGridLight(const string &fileName) const;
+    void saveValOnGrid_DD(const string &fileName) const;
 
-    void printFoncValVox_fd(string fileName, double scaleVal, int epi);
-    void addPointToSet_withData(unsigned long long int *pos, double val,
-	    void *dataBuff, int dataLength);
-    void saveProjetion(string fileName, unsigned long long int *projection);
-    void computeMinMaxValues(double &minV, double &maxV);
+    void saveProjection(const string &fileName, const unsigned long long int *projection) const;
+    void computeMinMaxValues(double &minV, double &maxV) const;
+    const double* getGridPtr() const;
     double* getGridPtr();
-    double* getGridPtr_tmp();
-    void copyGrid(double *grIn, double *grOut);
+    const double* getGridPtr_tmp() const;
+    void copyGrid(const double *grIn, double *grOut) const;
 
-    void saveSubLevelset(double level, string fileName);
-    void saveSubLevelset_DD(double level, string fileName);
-    void saveCoupeBoundary(string nomFichier);
-    void saveCoupeBoundary_DD(string nomFichier);
+    void saveSubLevelset(double level, const string &fileName) const;
+    void saveSubLevelset_DD(double level, const string &fileName) const;
+    void saveCoupeBoundary(const string &nomFichier) const;
+    void saveCoupeBoundary_DD(const string &nomFichier) const;
     int nbOMPThreads;
 private:
 

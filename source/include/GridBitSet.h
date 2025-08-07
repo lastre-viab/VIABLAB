@@ -25,58 +25,59 @@
 #define GRIDBITSET_H_
 
 #include "Grid.h"
+#include "Params.h"
 
-class Grid_BitSet: public Grid
-    {
+class Grid_BitSet final : public Grid
+{
 public:
-    Grid_BitSet(gridParams gp);
+    Grid_BitSet(const gridParams &gp);
     virtual ~Grid_BitSet();
-    virtual void printGrid(void);
+    virtual void printGrid(void) const;
 
-    void addPointToSet(unsigned long long int *coords, double value);
+    void addPointToSet(const unsigned long long int *coords, double value);
     void addPointToSet(unsigned long long int pos, double value);
-    int getNumberOfViableNeighbors(unsigned long long int pos);
-    virtual bool isInSet(unsigned long long int *coords);
-    virtual unsigned long long int getNearestPointInSet(double *coords);
+    int getNumberOfViableNeighbors(unsigned long long int pos) const;
+    virtual bool isInSet(const unsigned long long int *coords) const;
+    virtual unsigned long long int getNearestPointInSet(const double *coords) const;
 
-    void findNearestViabPointInCell(double *startPoint, double *currentPoint,
-	    double *newPoint, double (*dynConstraints)(double*, double*));
-    virtual void savePointsList(string fileName);
-    virtual void saveValOnGrid(string fileName);
-    virtual void saveValOnGridLight(string fileName);
+    void findNearestViabPointInCell(const double *startPoint, const double *currentPoint,
+	double *newPoint, double (*dynConstraints)(const double*, double*)) const;
+    virtual void savePointsList(const string &fileName) const;
+    virtual void saveValOnGrid(const string &fileName) const;
+    virtual void saveValOnGridLight(const string &fileName) const;
 
-    boost::dynamic_bitset<> analyseTrameMasque(unsigned long long int posX);
-    unsigned long long int getDirTram();
-    unsigned long long int getLongTrame();
-    boost::dynamic_bitset<>** getGridTab();
-    boost::dynamic_bitset<>** getGridTabNew();
-    void setPoint(unsigned long long int *coords, bool val);
+    boost::dynamic_bitset<> analyseTrameMasque(unsigned long long int posX) const;
+    unsigned long long int getDirTram() const;
+    unsigned long long int getLongTrame() const;
+    boost::dynamic_bitset<>**getGridTab();
+    boost::dynamic_bitset<>**getGridTabNew();
+    const boost::dynamic_bitset<>* const *getGridTab() const;
+    const boost::dynamic_bitset<>* const *getGridTabNew() const;
+    void setPoint(const unsigned long long int *coords, bool val);
     void setPoint(unsigned long long int posX, unsigned long long int posTrame,
 	    bool val);
 
-    void saveCoupe(string nomFichier);
-    void saveBoundary(string nomFichier);
-    void saveCoupeBoundary(string nomFichier);
-    void saveProjetion(string fileName, unsigned long long int *projection);
-    void loadSet(string fileName);
+    void saveCoupe(const string &nomFichier) const;
+    void saveBoundary(const string &nomFichier) const;
+    void saveCoupeBoundary(const string &nomFichier) const;
+    void saveProjetion(const string &fileName, const unsigned long long int *projection) const;
+    void loadSet(const string &fileName);
     void refineVoidGridTab();
 
-    unsigned long long int* getNbPointsSubGrid();
-    unsigned long long int getNbPointsTotalSubGrid();
+    const unsigned long long int* getNbPointsSubGrid() const;
+    unsigned long long int getNbPointsTotalSubGrid() const;
     boost::dynamic_bitset<> analyseTrameMasqueBis(unsigned long long int posX,
-	    bool print);
+	    bool print) const;
     void refineTrameMasque(unsigned long long int posX, int parite);
 
-    void copyGrid(boost::dynamic_bitset<> **grIn,
-	    boost::dynamic_bitset<> **grOut);
+    void copyGrid(const boost::dynamic_bitset<> * const *grIn,
+	    boost::dynamic_bitset<> **grOut) const;
 
     void refine();
 
 private:
     int cp1; //pas de calcul des d�riv�es partielles: x+hx/pas1 , y+hy/p1
     int pp1;
-    void addPointToSet1(unsigned long long int *coords);
-    void deletePointFromSet(unsigned long long int *coords);
     void computeSubGridShifts();
 
     int pas1;       //pas de calcul des d�riv�es partielles: x+hhx/pas1
@@ -136,9 +137,9 @@ private:
      *  en argument � cette fonction
      */
     inline void numToIntCoords_dm1(unsigned long long int num,
-	    unsigned long long int *res);
+	    unsigned long long int *res) const;
     inline void numToSubGridCoords(unsigned long long int num,
-	    unsigned long long int *res);
+	    unsigned long long int *res) const;
 
     /*!
      * \brief Fonction g�n�rique qui permet de calculer les coordonn�es enti�res et r�elles
@@ -169,7 +170,7 @@ private:
      *  en argument � cette fonction
      */
     void numToIntAndDoubleCoords_dm1(unsigned long long int num,
-	    unsigned long long int *resI, double *resD);
+	    unsigned long long int *resI, double *resD) const;
 
     /*!
      * \brief Fonction qui calcule le num�ro d'un point � partir de ses coordonn�es enti�res
@@ -187,8 +188,7 @@ private:
      *   (i_0,i_1,...i_{d-1}) \mapsto i_0+i_1*n_0+i_2*n_1*n_0+\dots +i_{d_1}\prod_{j=0}^{d-2}n_j
      *   \f]
      */
-    void intCoordsToNum_dm1(unsigned long long int *coords,
-	    unsigned long long int *res);
+    unsigned long long int intCoordsToNum_dm1(const unsigned long long int *coords) const;
     /*!
      * \brief Fonction  qui identifie la maille  de la grille qui contient le point
      * de coordonn�es r�elles donn�es

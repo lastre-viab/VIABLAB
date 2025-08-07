@@ -1,0 +1,122 @@
+{
+    "ALGORITHM_PARAMETERS": {
+        "COMPUTE_MIN_TIME": false,
+        "COMPUTE_VIABLE_SET": true,
+        "GRID_REFINMENTS_NUMBER": 0,
+        "INTERMEDIATE_SAVINGS": false,
+        "ITERATION_STOP_LEVEL": 0,
+        "LEVEL": 0,
+        "PROJECTION_AXIS": [    
+            1,
+            0,
+            0,
+            0
+        ],
+        "SAVE_BOUNDARY": true,
+        "SAVE_PROJECTION": false,
+        "SAVE_SLICE": false,
+        "SAVE_SLICE_BOUND": false,
+        "SAVE_SUBLEVEL": false,
+        "SAVE_VIABSET_LIGHT": true,
+        "SET_TYPE": "VIAB",
+        "TARGET_OR_DEPARTURE": "DEPARTURE"
+    },
+    "CONTROL_PARAMETERS": {
+        "CONTROL_DIMENSION": 4,    
+        "CONTROL_GRID_POINTS": [   
+	        9,    
+	        3,    
+	        3,    
+	        7    
+        ],
+        "CONTROL_MAX_VALUES": [    
+            8,
+            2,
+            2,
+            6
+        ],
+        "CONTROL_MIN_VALUES": [
+            0,
+            0,
+            0,
+            0
+        ]
+    },
+    "GRID_PARAMETERS": {
+        "GRID_MAIN_DIR": 1,
+        "GRID_METHOD": 1,
+        "LOWER_LIMIT_IS_NOT_CONSTRAINT": [  
+            false,    
+            false,
+            false,
+            false
+        ],
+        "OUTPUT_FILE_PREFIX": "VALIUM_0.7-",    
+        "SLICE_DIRECTIONS": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "SLICE_LEVELS": [   
+            0,
+            0,
+            0,
+            0
+        ],
+        "SLICE_LEVELS_DISCRETE": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "STATE_DIMENSION": 4,    
+        "STATE_GRID_POINTS": [    
+            401,    
+            9,   
+            4,    
+            41    
+        ],
+        "STATE_MAX_VALUES": [    
+            400, 
+            40,     
+            3, 
+            40     
+        ],
+        "STATE_MIN_VALUES": [
+            0,  
+            0,  
+            0,
+            0   
+        ],
+        "STATE_PERIODIC": [  
+            false,
+            false,
+            false,
+            false
+        ],
+        "UPPER_LIMIT_IS_NOT_CONSTRAINT": [ 
+            false,   
+            false,   
+            false, 
+            false    
+        ]
+    },
+    "SYSTEM_PARAMETERS": {   
+        "COST_BOUND_CONSTANT": 2,
+        "COST_LIPSCHITZ_CONSTANT": 1,  
+        "DYNAMICS_TYPE": "DC",
+        "TIME_HORIZON": 20
+    },
+    "TRAJECTORY_PARAMETERS": [{
+        "INITIAL_POINT": [5, 35, 0, 29],
+        "TRAJECTORY_TYPE": "VD",
+        "TRAJECTORY_TIME_HORIZON": 20
+    }],
+    "MODEL_PARAMETERS": {
+        "GAMMA_PARAM": 1.0,
+        "COST_PARAM": 5.0,
+        "PLUIE_PARAM": 3.0,
+        "BES_PARAM": 1.0
+    }
+}

@@ -28,7 +28,7 @@ GridMicroMacro::GridMicroMacro()
     // TODO Auto-generated constructor stub
 
     }
-GridMicroMacro::GridMicroMacro(gridParams gp)
+GridMicroMacro::GridMicroMacro(const gridParams &gp)
     {
 
     string dataFileName;
@@ -74,7 +74,7 @@ GridMicroMacro::GridMicroMacro(gridParams gp)
 	unboundedDomain |= (sortieOKinf[d] == 1) | (sortieOKsup[d] == 1);
 	d++;
 	}
-    spdlog::debug("[GridMicorMacro] : check unbounded domain : {}", unboundedDomain);
+    spdlog::debug("[GridMicroMacro] : check unbounded domain : {}", unboundedDomain);
 
     gridDataFile << dim << endl;
     for (int k = 0; k < dim; k++)
@@ -102,10 +102,10 @@ GridMicroMacro::GridMicroMacro(gridParams gp)
     gridDataFile.close();
 
     /*
-     * gridType=0 <=> les points  sont les noeuds
-     * gridType=1 <=> les points sont les centres des mailles
+     * arePointsGridCenters=0 <=> les points  sont les noeuds
+     * arePointsGridCenters=1 <=> les points sont les centres des mailles
      */
-    gridType = gp.GRID_TYPE;
+    arePointsGridCenters = gp.GRID_TYPE;
 
     step = new double[dim];
 
@@ -116,7 +116,7 @@ GridMicroMacro::GridMicroMacro(gridParams gp)
     nbCells = new unsigned long long int[dim];
     for (d = 0; d < dim; d++)
 	{
-	step[d] = (limSup[d] - limInf[d]) / (nbPoints[d] - (1 - gridType) * 1);
+	step[d] = (limSup[d] - limInf[d]) / (nbPoints[d] - (1 - arePointsGridCenters) * 1);
 
 	maxStep = max(maxStep, step[d]);
 	nbTotalPoints *= nbPoints[d];
@@ -190,40 +190,42 @@ GridMicroMacro::~GridMicroMacro()
 	{
 	delete[] gridPtr_tmp;
 	}
-    spdlog::debug("[GridMicorMacro] : grid destructor finished");
+    spdlog::debug("[GridMicroMacro] : grid destructor finished");
 
     }
 
-void GridMicroMacro::loadSet(string fileName)
+void GridMicroMacro::loadSet(const string &fileName)
     {
     string line;
-    ifstream *userDataFile = new ifstream();
+    ifstream userDataFile(fileName);
     double val;
     istringstream sstr;
     double *xCoords = new double[dim];
 
-    userDataFile->open(fileName);
-    if (userDataFile->good())
+    if (userDataFile.good())
 	{
-	for (unsigned long long int pos = 0; pos < nbTotalPoints; pos++)
-	    {
-	    getline((*userDataFile), line);
-	    line.append(" ");
-	    sstr.str(line);
+        while (getline(userDataFile, line)) {
+            sstr.str(line);
 
-	    for (int i = 0; i < dim; i++)
-		{
-		sstr >> xCoords[i];
-		}
-	    sstr >> val;
-	    gridPtr[pos] = val;
+            unsigned long long int pos = 0;
+            for (int d = 0; d < dim; ++d) {
+                sstr >> xCoords[d];
 
-	    }
+                // Transformation double vers int...
+                const double invDoubleCoord =
+                    (xCoords[d] - limInf[d])/step[d] - 0.5*arePointsGridCenters;                
+                const unsigned long long int coordInt = llround(invDoubleCoord);
+                // ...puis int vers num
+                pos = pos * nbPoints[d] + coordInt;
+            }            
+            sstr >> val;
+            gridPtr[pos] = val;
+        }
 	}
     delete[] xCoords;
     }
 
-void GridMicroMacro::printGrid(void)
+void GridMicroMacro::printGrid(void) const
     {
     spdlog::debug("[GridMicorMacro] : Grid type : Micro-Macro");
     spdlog::debug("[GridMicorMacro] : Dimension = {}", dim);
@@ -232,17 +234,22 @@ void GridMicroMacro::printGrid(void)
     logVector("[GridMicorMacro] : sup limits : ", limSup, dim);
     }
 
+const double* GridMicroMacro::getGridPtr() const
+    {
+    return gridPtr;
+    }
+
 double* GridMicroMacro::getGridPtr()
     {
     return gridPtr;
     }
 
-double* GridMicroMacro::getGridPtr_tmp()
+const double* GridMicroMacro::getGridPtr_tmp() const
     {
     return gridPtr_tmp;
     }
 
-void GridMicroMacro::copyGrid(double *grIn, double *grOut)
+void GridMicroMacro::copyGrid(const double *grIn, double *grOut) const
     {
     unsigned long long int posX = 0;
 #pragma omp parallel for num_threads(nbOMPThreads) private (posX) shared( grIn, grOut) default(none)
@@ -251,14 +258,14 @@ void GridMicroMacro::copyGrid(double *grIn, double *grOut)
 	grOut[posX] = grIn[posX];
 	}
     }
-bool GridMicroMacro::isInSet(unsigned long long int *coords)
+bool GridMicroMacro::isInSet(const unsigned long long int *coords) const
     {
     unsigned long long int posX;
-    this->intCoordsToNum(coords, &posX);
+    posX = this->intCoordsToNum(coords);
     return ((gridPtr[posX]) < (double) PLUS_INF);
     }
 
-unsigned long long int GridMicroMacro::getNearestPointInSet(double *coords)
+unsigned long long int GridMicroMacro::getNearestPointInSet(const double *coords) const
     {
     unsigned long long int nearest = this->nbTotalPoints + 1; // means that teh is no near points that are viable
     double minDist = PLUS_INF;
@@ -288,7 +295,7 @@ unsigned long long int GridMicroMacro::getNearestPointInSet(double *coords)
     return nearest;
     }
 
-unsigned long long int GridMicroMacro::getBestNearPointInSet(double *coords)
+unsigned long long int GridMicroMacro::getBestNearPointInSet(const double *coords) const
     {
     unsigned long long int nearest = this->nbTotalPoints + 1; // means that teh is no near points that are viable
     double minVal = PLUS_INF;
@@ -306,7 +313,7 @@ unsigned long long int GridMicroMacro::getBestNearPointInSet(double *coords)
     return nearest;
     }
 
-double GridMicroMacro::getOptimalValue(double *coords)
+double GridMicroMacro::getOptimalValue(const double *coords) const
     {
     double minCellVal = PLUS_INF;
     unsigned long long int cellNum = localizePoint(coords);
@@ -317,7 +324,7 @@ double GridMicroMacro::getOptimalValue(double *coords)
     return minCellVal;
     }
 
-void GridMicroMacro::savePointsList(string fileName)
+void GridMicroMacro::savePointsList(const string &fileName) const
     {
     //cout<<"ecriture  de l'ensemble dans un fichier \n";
     unsigned long long int *x = new unsigned long long int[dim];
@@ -353,7 +360,7 @@ void GridMicroMacro::savePointsList(string fileName)
     delete[] xReel;
     }
 
-void GridMicroMacro::saveValOnGrid(string fileName)
+void GridMicroMacro::saveValOnGrid(const string &fileName) const
     {
     //cout<<"ecriture  de l'ensemble dans un fichier \n";
     unsigned long long int *x = new unsigned long long int[dim];
@@ -387,7 +394,7 @@ void GridMicroMacro::saveValOnGrid(string fileName)
     delete[] xReel;
     }
 
-void GridMicroMacro::saveValOnGridLight(string fileName)
+void GridMicroMacro::saveValOnGridLight(const string &fileName) const
     {
     cout << "ecriture  de l'ensemble light  dans un fichier \n";
     unsigned long long int *x = new unsigned long long int[dim];
@@ -424,7 +431,7 @@ void GridMicroMacro::saveValOnGridLight(string fileName)
     delete[] xReel;
     }
 
-void GridMicroMacro::saveCoupeBoundary(string fileName)
+void GridMicroMacro::saveCoupeBoundary(const string &fileName) const
     {
     bool test;
 
@@ -467,7 +474,7 @@ void GridMicroMacro::saveCoupeBoundary(string fileName)
     delete[] xReel;
     }
 
-void GridMicroMacro::saveCoupeBoundary_DD(string fileName)
+void GridMicroMacro::saveCoupeBoundary_DD(const string &fileName) const
     {
     bool test;
 
@@ -508,7 +515,7 @@ void GridMicroMacro::saveCoupeBoundary_DD(string fileName)
 	}
     }
 
-void GridMicroMacro::saveValOnGrid_DD(string fileName)
+void GridMicroMacro::saveValOnGrid_DD(const string &fileName) const
     {
     unsigned long long int *xInt = new unsigned long long int[dim];
     double *xReel = new double[dim];
@@ -539,7 +546,7 @@ void GridMicroMacro::saveValOnGrid_DD(string fileName)
 	}
     }
 
-void GridMicroMacro::saveSubLevelset(double level, string fileName)
+void GridMicroMacro::saveSubLevelset(double level, const string &fileName) const
     {
     unsigned long long int *x = new unsigned long long int[dim];
     double *xReel = new double[dim];
@@ -572,7 +579,7 @@ void GridMicroMacro::saveSubLevelset(double level, string fileName)
 	spdlog::error("[GridMicorMacro] : Error while open file {}", fileName);
 	}
     }
-void GridMicroMacro::saveSubLevelset_DD(double level, string fileName)
+void GridMicroMacro::saveSubLevelset_DD(double level, const string &fileName) const
     {
     unsigned long long int *xInt = new unsigned long long int[dim];
     double *xReel = new double[dim];
@@ -606,7 +613,7 @@ void GridMicroMacro::saveSubLevelset_DD(double level, string fileName)
 	}
     }
 
-void GridMicroMacro::computeMinMaxValues(double &minV, double &maxV)
+void GridMicroMacro::computeMinMaxValues(double &minV, double &maxV) const
     {
     minV = PLUS_INF;
     maxV = -PLUS_INF;
@@ -618,7 +625,7 @@ void GridMicroMacro::computeMinMaxValues(double &minV, double &maxV)
 	}
     }
 
-void GridMicroMacro::saveProjetion(string fileName, unsigned long long int *projection)
+void GridMicroMacro::saveProjection(const string &fileName, const unsigned long long int *projection) const
     {
     unsigned long long int *reducedNbPoints = new unsigned long long int[dim - 1];
     double *reducedLimInf = new double[dim - 1];
@@ -675,7 +682,7 @@ void GridMicroMacro::saveProjetion(string fileName, unsigned long long int *proj
 	    for (unsigned long long int k = 0; k < nbPoints[projAxe]; k++)
 		{
 		x[projAxe] = k;
-		this->intCoordsToNum(x, &pointNum);
+		pointNum = this->intCoordsToNum(x);
 		val = min(val, gridPtr[pointNum]);
 		if (val < PLUS_INF - 1)
 		    {
@@ -698,12 +705,12 @@ void GridMicroMacro::saveProjetion(string fileName, unsigned long long int *proj
 	}
     }
 
-void GridMicroMacro::addPointToSet(unsigned long long int *coords, double val)
+void GridMicroMacro::addPointToSet(const unsigned long long int *coords, double val)
     {
 
     unsigned long long int pos;
 
-    Grid::intCoordsToNum(coords, &pos);
+    pos = Grid::intCoordsToNum(coords);
     gridPtr[pos] = val;
     }
 

@@ -9,162 +9,41 @@
 #define DATA_WEAKDECLARATIONS_H_
 
 #include "defs.h"
-extern double level;
-extern int sortieOKinf[];
-extern int sortieOKsup[];
-extern double l_Lip;
-extern double l_max;
-extern int saveSubLevel;
-unsigned long long int *initPoints_fd;
-double *initValues_fd;
-double *initValues;
 
-void loadModelData(ParametersManager *PM) __attribute__((weak));
+class ParametersManager;
 
-__attribute__((weak)) double constraintsXU_fd(unsigned long long int *x,
-	unsigned long long int *u);
-void dynamics_tych_fd(unsigned long long int *x, unsigned long long int *u,
-	unsigned long long int *v, unsigned long long int *image)
-		__attribute__((weak));
-double __attribute__((weak)) constraintsX_fd(unsigned long long int *x);
-void dynamics_fd(unsigned long long int *x, unsigned long long int *u,
-	unsigned long long int *image) __attribute__((weak));
-double dynConstraintsForTraj(double *x, double *image) __attribute__((weak));
-double constraintsXUY_fd(unsigned long long int *x, unsigned long long int *u)
-	__attribute__((weak));
-double controlEligibilityForTraj_fd(unsigned long long int *x,
-	unsigned long long int *u, unsigned long long int *previousU)
-		__attribute__((weak));
-double target_fd(unsigned long long int *x) __attribute__((weak));
-double l_fd(unsigned long long int *x, unsigned long long int *u)
-	__attribute__((weak));
-double l_tych_fd(unsigned long long int *x, unsigned long long int *u,
-	unsigned long long int *v) __attribute__((weak));
+void loadModelData(const ParametersManager *PM);
 
-double dynConstraintsForTraj_default(double *x, double *image);
+double constraintsXU_fd(const unsigned long long int *x,
+                        const unsigned long long int *u);
+void dynamics_tych_fd(const unsigned long long int *x, const unsigned long long int *u,
+                      const unsigned long long int *v, unsigned long long int *image);
+double constraintsX_fd(const unsigned long long int *x);
+void dynamics_fd(const unsigned long long int *x, const unsigned long long int *u,
+                 unsigned long long int *image);
+double dynConstraintsForTraj(const double *x, double *image);
+double constraintsXUY_fd(const unsigned long long int *x, const unsigned long long int *u);
+double controlEligibilityForTraj_fd(const unsigned long long int *x,
+                                    const unsigned long long int *u, const unsigned long long int *previousU);
+double target_fd(const unsigned long long int *x);
+double l_fd(const unsigned long long int *x, const unsigned long long int *u);
+double l_tych_fd(const unsigned long long int *x, const unsigned long long int *u,
+                 const unsigned long long int *v);
 
-void dynamics(double *x, double *u, double *image) __attribute__((weak));
-void dynamics_tych(double *x, double *u, double *v, double *image) __attribute__((weak));
-void jacobian(double *x, double *u, double **jacob) __attribute__((weak));
-void jacobian_tych(double *x, double *u, double *v, double **jacob) __attribute__((weak));
-void localDynBounds(double *x, double *res) __attribute__((weak));
-double constraintsXU(double *x, double *u) __attribute__((weak));
-double constraintsX(double *x) __attribute__((weak));
-double target(double *x) __attribute__((weak));
-double l(double *x, double *u) __attribute__((weak));
-double m(double *x, double *u) __attribute__((weak));
-double l_tych(double *x, double *u, double *v) __attribute__((weak));
-double m_tych(double *x, double *u, double *v) __attribute__((weak));
-void dynamics_hybrid(double *x, double *u, double *image) __attribute__((weak));
-void postProcess(ParametersManager *PM) __attribute__((weak));
-double constraintsXV_tych(double *x, double *v) __attribute__((weak));
-
-
-inline double l_default(double *x, double *u)
-    {
-    return 1.0;
-    }
-inline double m_default(double *x, double *u)
-    {
-    return 0.0;
-    }
-inline double l_tych_default(double *x, double *u, double *v)
-    {
-    return 1.0;
-    }
-inline double m_tych_default(double *x, double *u, double *v)
-    {
-    return 0.0;
-    }
-
-void dynamics_hybrid_default(double *x, double *u, double *image)
-    {
-
-    }
-void postProcess_default(ParametersManager *PM)
-    {
-
-    }
-
-inline double target_default(double *x)
-    {
-    return PLUS_INF;
-    }
-
-inline double constraintsX_default(double *x)
-    {
-    return 0.0;
-    }
-
-inline double constraintsXU_default(double *x, double *u)
-    {
-    return 0.0;
-    }
-inline double constraintsXV_default(double *x, double *v)
-    {
-    return 0.0;
-    }
-inline void localDynBounds_default(double *x, double *res)
-    {
-
-    }
-
-inline double constraintsXU_fd_default(unsigned long long int *x,
-	unsigned long long int *u)
-    {
-    return 0.0;
-    }
-inline void jacobian_default(double *x, double *u, double **jacob)
-    {
-
-    }
-inline void jacobian_tych_default(double *x, double *u, double *v, double **jacob)
-    {
-
-    }
-inline void dynamics_default(double *x, double *u, double *image)
-    {
-
-    }
-inline void dynamics_tych_default(double *x, double *u, double *v, double *image)
-    {
-
-    }
-
-double dynConstraintsForTraj_default(double *x, double *image)
-    {
-    return 1.0;
-    }
-
-void loadModelData_void()
-    {
-
-    }
-inline double target_fd_default(unsigned long long int *x)
-    {
-    return 0.0;
-    }
-
-inline double l_fd_default(unsigned long long int *x, unsigned long long int *u)
-    {
-    return 0.0;
-    }
-
-inline double l_fd_tych_default(unsigned long long int *x,
-	unsigned long long int *u, unsigned long long int *v)
-    {
-    return 0.0;
-    }
-
-inline double controlEligibilityForTraj_fd_default(unsigned long long int *x,
-	unsigned long long int *u, unsigned long long int *previousU)
-    {
-    return 1.0;
-    }
-inline double constraintsXUY_fd_default(unsigned long long int *x,
-	unsigned long long int *u)
-    {
-    return -PLUS_INF;
-    }
+void dynamics(const double *x, const double *u, double *image);
+void dynamics_tych(const double *x, const double *u, const double *v, double *image);
+void jacobian(const double *x, const double *u, double **jacob);
+void jacobian_tych(const double *x, const double *u, const double *v, double **jacob);
+void localDynBounds(const double *x, double *res);
+double constraintsXU(const double *x, const double *u);
+double constraintsX(const double *x);
+double target(const double *x);
+double l(const double *x, const double *u);
+double m(const double *x, const double *u);
+double l_tych(const double *x, const double *u, const double *v);
+double m_tych(const double *x, const double *u, const double *v);
+void dynamics_hybrid(const double *x, const double *u, double *image);
+void postProcess(const ParametersManager *PM);
+double constraintsXV_tych(const double *x, const double *v);
 
 #endif /* DATA_WEAKDECLARATIONS_H_ */

@@ -27,20 +27,19 @@ ViabiMicroMacro::ViabiMicroMacro(ParametersManager *pm)
     {
     modelParams = pm;
 
-    systemParams sp = *(pm->getSystemParameters());
+    const systemParams *sp = pm->getSystemParameters();
 
-    algoViabiParams avp = *(pm->getAlgoParameters());
+    const algoViabiParams *avp = pm->getAlgoParameters();
 
-    controlParams cp = *(pm->getControlParameters());
-    gridParams gp = *(pm->getGridParameters());
+    const controlParams *cp = pm->getControlParameters();
+    const gridParams *gp = pm->getGridParameters();
 
-    dim = gp.DIM;
-    grid = new GridMicroMacro(gp);
+    dim = gp->DIM;
+    grid = new GridMicroMacro(*gp);
     grid->printGrid();
 
-    dynsys = new SysDyn(sp, dim, cp, grid);
-    InitViabiMicroMacro(avp);
-    trajectoryHelper = new ViabiMicroMacroTrajectoryHelper(grid, dynsys, avp.TYPE_TRAJ);
+    dynsys = new SysDyn(*sp, dim, *cp, grid);
+    InitViabiMicroMacro(*avp);
     }
 
 SysDyn*
@@ -55,7 +54,7 @@ ViabiMicroMacro::GetGridForViabProblem()
     return grid;
     }
 
-void ViabiMicroMacro::InitViabiMicroMacro(algoViabiParams avp)
+void ViabiMicroMacro::InitViabiMicroMacro(const algoViabiParams &avp)
     {
 
     ostringstream os;
@@ -139,89 +138,89 @@ void ViabiMicroMacro::initialiseTarget()
     }
 
 void ViabiMicroMacro::computeTrajectories()
-    {
-
+{
     dynsys->setDynamicsForward();
+    
+    const int nbTrajs = modelParams->getNbTrajectories();
+    for (int i = 0; i < nbTrajs; ++i) {
 
-    algoViabiParams *avp = modelParams->getAlgoParameters();
-    if (avp->TYPE_TRAJ == OP)
-	computeOptimalTrajectories();
-    else
-	computeViableTrajectories();
+        TrajectoryParametersManager tpm(modelParams, i);
+        ViabiMicroMacroTrajectoryHelper trajectoryHelper(grid, dynsys, &tpm);
+        
+        if (tpm.getTrajectoryParameters()->TRAJECTORY_TYPE == OP) {
+            computeOptimalTrajectory(&trajectoryHelper, &tpm);
+        }
+        else {
+            computeViableTrajectory(&trajectoryHelper, &tpm);
+        }
+    }    
 
-    }
+}
 
-void ViabiMicroMacro::computeOptimalTrajectories()
-    {
-    algoViabiParams *avp = modelParams->getAlgoParameters();
-    int nbTrajs = avp->NB_TRAJS;
+void ViabiMicroMacro::computeOptimalTrajectory(ViabiMicroMacroTrajectoryHelper *trajectoryHelper, TrajectoryParametersManager *tpm)
+{
+    const trajectoryParams *tp = tpm->getTrajectoryParameters();
     ostringstream os;
     string fileName;
-    if (nbTrajs > 0)
-	{
-	bool success[nbTrajs];
-	for (int tr = 0; tr < nbTrajs; tr++)
-	    {
-	    os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1 << ".dat";
-	    fileName = os.str();
-	    os.str("");
+    int tr = tpm->getTrajectoryIndex();
+    double timeHorizon = tp->maxTime;
+	
+    bool success;
+    os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1 << ".dat";
+    fileName = os.str();
+    os.str("");
+    
+    computeOptimalCaptTrajectory(trajectoryHelper, tp->INIT_POINT, timeHorizon, fileName, success);
+}
 
-	    computeOptimalCaptTrajectory(avp->INIT_POINTS + tr * dim, fileName, success[tr]);
-	    }
-	}
-    }
-
-void ViabiMicroMacro::computeViableTrajectories()
-    {
-    algoViabiParams *avp = modelParams->getAlgoParameters();
-    int nbTrajs = avp->NB_TRAJS;
-    int typeTraj = avp->TYPE_TRAJ;
+void ViabiMicroMacro::computeViableTrajectory(ViabiMicroMacroTrajectoryHelper *trajectoryHelper, TrajectoryParametersManager *tpm)
+{
+    const trajectoryParams *tp = tpm->getTrajectoryParameters();
+    int nbTrajs = tpm->getNbTrajectories();
+    TypeTraj typeTraj = tp->TRAJECTORY_TYPE;
     ostringstream os;
     string endOfFileName = ".dat";
     switch (typeTraj)
 	{
     case VD:
 	{
-	endOfFileName = "-viabDefault.dat";
-	break;
+        endOfFileName = "-viabDefault.dat";
+        break;
 	}
     case VDI:
 	{
-	endOfFileName = "-viabDiffControls.dat";
-	break;
+        endOfFileName = "-viabDiffControls.dat";
+        break;
 	}
     case VMM:
 	{
-	endOfFileName = "-viabMinValue.dat";
-	break;
+        endOfFileName = "-viabMinValue.dat";
+        break;
 	}
     case VG:
 	{
-	endOfFileName = "-viabGaranti.dat";
-	break;
+        endOfFileName = "-viabGaranti.dat";
+        break;
 	}
     default:
 	{
-	endOfFileName = "-viabDefault.dat";
-	break;
+        endOfFileName = "-viabDefault.dat";
+        break;
 	}
 	}
 
     string fileName;
-    if (nbTrajs > 0)
-	{
-	spdlog::debug(" Number of trajectories {}", nbTrajs);
-	bool success[nbTrajs];
-	for (int tr = 0; tr < nbTrajs; tr++)
-	    {
-	    os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1 << endOfFileName;
-	    fileName = os.str();
-	    os.str("");
 
-	    trajectoryHelper->computeViableTrajectory(avp->INIT_POINTS + tr * dim, avp->INIT_VALUES[tr], fileName, success[tr]);
-	    }
-	}
-    }
+    int tr = tpm->getTrajectoryIndex();
+	bool success;
+	    
+    os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1 << endOfFileName;
+    fileName = os.str();
+    os.str("");
+
+    trajectoryHelper->computeViableTrajectory(tp->INIT_POINT, tp->INIT_VALUE, fileName, success);
+	    	
+}
 
 void ViabiMicroMacro::initialiseTargetHJB_new()
     {
@@ -289,7 +288,7 @@ void ViabiMicroMacro::loadViableSets()
     {
 
     spdlog::info("Loading viable sets for the problem with prefix {}", filePrefix);
-    algoViabiParams *avp = modelParams->getAlgoParameters();
+    const algoViabiParams *avp = modelParams->getAlgoParameters();
 
     ostringstream os;
     string fileName;
@@ -309,7 +308,7 @@ void ViabiMicroMacro::loadViableSets()
 	/*
 	 *  calcul et sauvegarde  de la projection du  noyau
 	 */
-	grid->saveProjetion(fileName, avp->PROJECTION);
+	grid->saveProjection(fileName, avp->PROJECTION);
 	}
     }
 
@@ -318,8 +317,8 @@ void ViabiMicroMacro::saveViableSets()
     saveValFunctions();
     }
 void ViabiMicroMacro::saveValFunctions()
-    {
-    algoViabiParams *avp = modelParams->getAlgoParameters();
+{
+    const algoViabiParams *avp = modelParams->getAlgoParameters();
 
     ostringstream os;
     string fileName;
@@ -355,7 +354,7 @@ void ViabiMicroMacro::saveValFunctions()
 	/*
 	 *  calcul et sauvegarde  de la projection du  noyau
 	 */
-	grid->saveProjetion(fileName, avp->PROJECTION);
+	grid->saveProjection(fileName, avp->PROJECTION);
 	}
 
     if (avp->SAVE_SLICE_BOUND)
@@ -387,7 +386,7 @@ void ViabiMicroMacro::viabKerValFunc_new(unsigned long long int nbArret)
 
     int totalPointsX = grid->getNbTotalPoints();
 
-    long long int *indicesDecalCell = grid->getIndicesDecalCell();
+    const long long int *indicesDecalCell = grid->getIndicesDecalCell();
     int nbPointsCube = (int) pow(2.0, dim);
 
     double **controlCoords = dynsys->getControlCoords();
@@ -644,16 +643,16 @@ void ViabiMicroMacro::CaptureBasin()
     saveValFunctions();
     }
 
-double ViabiMicroMacro::computeOptimalCaptTrajectory(double *initPosition, string fileName, bool &succes)
-    {
-    return trajectoryHelper->computeOptimalTrajectory(initPosition, fileName, succes);
+double ViabiMicroMacro::computeOptimalCaptTrajectory(ViabiMicroMacroTrajectoryHelper *trajectoryHelper, double *initPosition, double timeHorizon, string fileName, bool &succes)
+{
+    return trajectoryHelper->computeOptimalTrajectory(initPosition, timeHorizon, fileName, succes);
     /* if (computeTmin)
      return trajectoryHelper->computeOptimalTrajectory(initPosition,
      fileName, succes);
      else
      return trajectoryHelper->computeOptimalTrajectory_Lmin(initPosition,
      fileName, succes);*/
-    }
+}
 
 
 void ViabiMicroMacro::computeCurrIm_tmin_new(int iter)
@@ -1026,7 +1025,7 @@ void ViabiMicroMacro::createPointsList_new()
     int nbPointsCube = (int) pow(2.0, dim);	//pow(2.0, dim);
     map<unsigned long long int, double>::iterator itCell = currentCellsImage.begin(), itLast = currentCellsImage.end();
 
-    long long int *indicesDecalCell = grid->getIndicesDecalCell();
+    const long long int *indicesDecalCell = grid->getIndicesDecalCell();
 
     while (itCell != itLast)
 	{
@@ -1159,7 +1158,7 @@ int ViabiMicroMacro::addNewPoints_new()
 bool ViabiMicroMacro::testConstraintesForCell(unsigned long long int numCell)
     {
     bool res = true;
-    long long int *indicesDecalCell = grid->getIndicesDecalCell();
+    const long long int *indicesDecalCell = grid->getIndicesDecalCell();
     double *doublePointCoords = new double[dim];
 
     int nbPointsCube = (int) pow(2.0, dim);	//pow(2.0, dim);
@@ -1204,7 +1203,7 @@ void ViabiMicroMacro::initialiseConstraints_CC()
 	}
     }
 
-void ViabiMicroMacro::ViabilityKernel(bool sortieOK, int nbArret)
+void ViabiMicroMacro::ViabilityKernel(int nbArret)
     {
     dynsys->setDynamicsForward();
     viabKerValFunc_new(nbArret);
@@ -1220,7 +1219,7 @@ void ViabiMicroMacro::ViabilityKernel(bool sortieOK, int nbArret)
      */
     }
 
-void ViabiMicroMacro::GarantedViabilityKernel(bool sortieOK, int nbArret)
+void ViabiMicroMacro::GarantedViabilityKernel(int nbArret)
     {
     dynsys->setDynamicsForward();
 

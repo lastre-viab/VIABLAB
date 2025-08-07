@@ -8,12 +8,13 @@
 #ifndef DATA_DEFAULTVALUES_H_
 #define DATA_DEFAULTVALUES_H_
 
+#include "Params.h"
 #include "WeakDeclarations.h"
 
-double *initControls;
-gridParams gp;
-algoViabiParams avp;
-controlParams cp;
-systemParams sp;
+// Définies dans ParametersManager.cpp
+extern gridParams gp;
+extern algoViabiParams avp;
+extern controlParams cp;
+extern systemParams sp;
 
 #endif /* DATA_DEFAULTVALUES_H_ */

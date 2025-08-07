@@ -21,49 +21,63 @@
  *      Author: Anna DESILLES
  */
 
-#include "ViabiMicroMacroTrajectoryHelper.h"
+#include <numeric> // Pour std::iota
+
+#include "../include/ViabiMicroMacroTrajectoryHelper.h"
+#include "../include/Params.h"
 
 ViabiMicroMacroTrajectoryHelper::ViabiMicroMacroTrajectoryHelper()
-    {
+{
     // TODO Auto-generated constructor stub
 
-    }
+}
 
-ViabiMicroMacroTrajectoryHelper::ViabiMicroMacroTrajectoryHelper(GridMicroMacro *gr, SysDyn *ds, int type)
-    {
+ViabiMicroMacroTrajectoryHelper::ViabiMicroMacroTrajectoryHelper(GridMicroMacro *gr, SysDyn *ds, TrajectoryParametersManager *tpm)
+{
+
+    const trajectoryParams *tp = tpm->getTrajectoryParameters();
+    TypeTraj typeTraj = tp->TRAJECTORY_TYPE;
+        
     grid = gr;
     dynsys = ds;
     dim = grid->dim;
     dimC = dynsys->getDimC();
     filePrefix = grid->filePrefix;
-    typeTraj = type;
+    this->typeTraj = typeTraj;
     vTab = grid->getGridPtr();
+
+    unsigned long long int nbTotalC = dynsys->getTotalNbPointsC();    
+    preferedControlIndexes = new int[nbTotalC];
+    std::iota(preferedControlIndexes, preferedControlIndexes+nbTotalC, 0);
+    controlWeight = tp->CONTROL_WEIGHT;
+    sortIndexes = tp->SORT_INDEXES;
+    
     switch (typeTraj)
 	{
     case VD:
 	{
-	ViabiMicroMacroTrajectoryHelper::findfViableControl_DD = &ViabiMicroMacroTrajectoryHelper::findViabControlDefault_DD;
-	break;
+        ViabiMicroMacroTrajectoryHelper::findfViableControl_DD = &ViabiMicroMacroTrajectoryHelper::findViabControlDefault_DD;
+        break;
 	}
     case VDI:
 	{
-	ViabiMicroMacroTrajectoryHelper::findfViableControl_DD = &ViabiMicroMacroTrajectoryHelper::findViabControlDiffControl_DD;
-	break;
+        ViabiMicroMacroTrajectoryHelper::findfViableControl_DD = &ViabiMicroMacroTrajectoryHelper::findViabControlDiffControl_DD;
+        break;
 	}
     case VMM:
 	{
-	ViabiMicroMacroTrajectoryHelper::findfViableControl_DD = &ViabiMicroMacroTrajectoryHelper::findViabControlMinValue_DD;
-	break;
+        ViabiMicroMacroTrajectoryHelper::findfViableControl_DD = &ViabiMicroMacroTrajectoryHelper::findViabControlMinValue_DD;
+        break;
 	}
     default:
 	{
-	ViabiMicroMacroTrajectoryHelper::findfViableControl_DD = &ViabiMicroMacroTrajectoryHelper::findViabControlDefault_DD;
-	break;
+        ViabiMicroMacroTrajectoryHelper::findfViableControl_DD = &ViabiMicroMacroTrajectoryHelper::findViabControlDefault_DD;
+        break;
 	}
 	}
-    }
+}
 
-double ViabiMicroMacroTrajectoryHelper::computeOptimalTrajectory(double *initPosition, string fileName, bool &succes)
+double ViabiMicroMacroTrajectoryHelper::computeOptimalTrajectory(double *initPosition, double T, string fileName, bool &succes)
     {
     /*
      * tableau de coordonnées  définissant
@@ -85,7 +99,6 @@ double ViabiMicroMacroTrajectoryHelper::computeOptimalTrajectory(double *initPos
      */
     list<valarray<double> > traj, trajC, trajDiscrete;
     list<double> realTrajBudget, valueAlongDiscreteTrajectory;
-    double T = dynsys->getTimeHorizon();
     /*
      * structures accumulables dansune liste
      */
@@ -150,7 +163,7 @@ double ViabiMicroMacroTrajectoryHelper::computeOptimalTrajectory(double *initPos
 		    }
 
 
-		while ((time < T) && (c >= PLUS_INF) && (nbIter <= NB_MAX_TRAJ_ITER))
+		while ((time < T) && (c >= PLUS_INF) && (nbIter < NB_MAX_TRAJ_ITER))
 		    {
 
 		    os << "Time : " << time << ". Current point = ";
@@ -182,7 +195,7 @@ double ViabiMicroMacroTrajectoryHelper::computeOptimalTrajectory(double *initPos
 		    rho = min(rho, T - time);
 		    realTimeStep = rho;
 
-		    optimSuccessor = this->findOptimalDiscreteSuccessor(currentDiscreteTrajPos, rho);
+		    optimSuccessor = this->findOptimalDiscreteSuccessor(currentDiscreteTrajPos, time, rho);
 		    if (optimSuccessor > grid->nbTotalPoints)
 			{
 			spdlog::error("Optimal successor not found");
@@ -247,12 +260,12 @@ double ViabiMicroMacroTrajectoryHelper::computeOptimalTrajectory(double *initPos
     if(succes)
 	{
 	spdlog::info("Trajectory reconstruction finished with success");
-	spdlog::info("The real trajectory will be saved in the file {}, the discrete trajectory saved in the file ", fileName, fileNameD);
+	spdlog::info("The real trajectory will be saved in the file {}, the discrete trajectory saved in the file {}", fileName, fileNameD);
 	}
     else
 	{
 	spdlog::warn("Trajectory reconstruction failed before attempting the target set");
-	spdlog::warn("The real partial trajectory will be saved in the file {}, the partial discrete trajectory saved in the file ", fileName, fileNameD);
+	spdlog::warn("The real partial trajectory will be saved in the file {}, the partial discrete trajectory saved in the file {}", fileName, fileNameD);
 	}
 
 
@@ -331,7 +344,6 @@ int ViabiMicroMacroTrajectoryHelper::findOptiControl(double *currentPos, double 
     double realCoordsOnDiscreteTraj[dim];
     unsigned long long int intCoordsOnDiscreteTraj[dim];
     double rho0 = dt;
-    dynsys->setRho(rho0);
     int bestCu;
 
     grid->numToIntAndDoubleCoords(optimDiscreteSuccessor, intCoordsOnDiscreteTraj, realCoordsOnDiscreteTraj);
@@ -427,7 +439,6 @@ int ViabiMicroMacroTrajectoryHelper::findOptiControl(double *currentPos, double 
 
 	iter++;
 	rho += step;
-	dynsys->setRho(rho);
 
 	}
 
@@ -437,7 +448,6 @@ int ViabiMicroMacroTrajectoryHelper::findOptiControl(double *currentPos, double 
 	spdlog::info("Discrete successor val {}, realSuccessor val {}, Distance {}, optimal time step {}",successorVal, optimBudget, minDist, rhoOptim );
 	}
     succes = testNonVide;
-    dynsys->setRho(rhoOptim);
 
     (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[bestCu], imageVect, rhoOptim);
     for (int i = 0; i < (int) dim; i++)
@@ -449,8 +459,8 @@ int ViabiMicroMacroTrajectoryHelper::findOptiControl(double *currentPos, double 
     return bestCu;
     }
 
-unsigned long long int ViabiMicroMacroTrajectoryHelper::findOptimalDiscreteSuccessor(unsigned long long int pos, double dt)
-    {
+unsigned long long int ViabiMicroMacroTrajectoryHelper::findOptimalDiscreteSuccessor(unsigned long long int pos, double time, double dt)
+{
     int nbPointsCube = (int) pow(2.0, dim);
     unsigned long long int optimSuccessor = grid->nbTotalPoints + 1;
     unsigned long long int intCoordsOnDiscreteTraj[dim];
@@ -468,6 +478,7 @@ unsigned long long int ViabiMicroMacroTrajectoryHelper::findOptimalDiscreteSucce
      * la grille de contrôles
      */
     double **controlCoords = dynsys->getControlCoords();
+    int *preferedControlIndexes = sortPreferedControlIndexes(xCoordsDouble, time);
     /*
      * nombre total de points de contrôle
      */
@@ -477,7 +488,7 @@ unsigned long long int ViabiMicroMacroTrajectoryHelper::findOptimalDiscreteSucce
      * indices de déplacement pour parcourir les sommets d'une malle à partir
      * du sommet inf
      */
-    long long int *indicesDecalCell = grid->getIndicesDecalCell();
+    const long long int *indicesDecalCell = grid->getIndicesDecalCell();
 
     /*
      * le pas de temps déterminé localement pour chaque point de la trajectoire
@@ -496,68 +507,69 @@ unsigned long long int ViabiMicroMacroTrajectoryHelper::findOptimalDiscreteSucce
 
     double currentVal = vTab[pos];
     rho = dt;
-    dynsys->setRho(rho);
     /*
      * on parcours tous les contrôles
      */
 
     double minVal = PLUS_INF;
-    unsigned long long int cu = 0;
+    unsigned long long int cPrefu = 0;
 
     minVal = PLUS_INF;
-    while (cu < nbCTotal)
+    while (cPrefu < nbCTotal)
 	{
-	/*
-	 * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
-	 * au point en cours
-	 */
-	if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
+        /*
+         * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
+         * au point en cours
+         */
+        double *preferedControl = controlCoords[preferedControlIndexes[cPrefu]];
+        
+        if (dynsys->constraintsXU(xCoordsDouble, preferedControl) < PLUS_INF)
 	    {
-	    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[cu], imageVect, rho);
-	    if (grid->isPointInGrid(imageVect))
-		{
-		/*
-		 *  le sucesseur est dans la grille de calcul
-		 */
-		if (dynsys->constraintsX(imageVect) < PLUS_INF)
-		    {
-		    /*
-		     * le successeur vérifie les contraintes
-		     * On identifie la maille où il se trouve
-		     */
-		    cellNum = grid->localizePoint(imageVect);
-		    //cout<< " num cellule "<<cellNum<<endl;
+            (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, preferedControl, imageVect, rho);
+            if (grid->isPointInGrid(imageVect))
+            {
+                /*
+                 *  le sucesseur est dans la grille de calcul
+                 */
+                if (dynsys->constraintsX(imageVect) < PLUS_INF)
+                {
+                    /*
+                     * le successeur vérifie les contraintes
+                     * On identifie la maille où il se trouve
+                     */
+                    cellNum = grid->localizePoint(imageVect);
+                    //cout<< " num cellule "<<cellNum<<endl;
 
-		    /*
-		     * On parcours les sommets de la maille
-		     * autour du sucesseur pour voir s'il y a des
-		     * points viables
-		     */
-		    double tempL = dynsys->lFunc(xCoordsDouble, controlCoords[cu]);
+                    /*
+                     * On parcours les sommets de la maille
+                     * autour du sucesseur pour voir s'il y a des
+                     * points viables
+                     */
+                    double tempL = dynsys->lFunc(xCoordsDouble, preferedControl);
 
-		    double tempL1 = dynsys->lFunc(imageVect, controlCoords[cu]);
+                    double tempL1 = dynsys->lFunc(imageVect, preferedControl);
 
-		    double newVal = currentVal - rho * 0.5 * (tempL + tempL1);
-		    for (int ii = 0; ii < nbPointsCube; ii++)
-			{
-			posTemp = cellNum + indicesDecalCell[ii];
-			if (newVal <= vTab[posTemp] + rho && vTab[posTemp] < minVal)
-			    {
-			    optimSuccessor = posTemp;
-			    minVal = vTab[posTemp];
-			    }
-			}
-		    }
-		}
+                    double newVal = currentVal - rho * 0.5 * (tempL + tempL1);
+                    for (int ii = 0; ii < nbPointsCube; ii++)
+                    {
+                        posTemp = cellNum + indicesDecalCell[ii];
+                        if (newVal <= vTab[posTemp] + rho && vTab[posTemp] < minVal)
+                        {
+                            optimSuccessor = posTemp;
+                            minVal = vTab[posTemp];
+                        }
+                    }
+                }
+            }
 	    }
-	cu++;
+        cPrefu++;
 	}
     if(optimSuccessor < grid->nbTotalPoints + 1)
 	{
-	spdlog::info("Optimal discrete sucessot found. Sucessorr value : {}, currentpoint value : {}", minVal, currentVal);
+        spdlog::info("Optimal discrete sucessot found. Sucessorr value : {}, currentpoint value : {}", minVal, currentVal);
 	}
     return optimSuccessor;
-    }
+}
 
 unsigned long long int ViabiMicroMacroTrajectoryHelper::findViabControlDefault_DD(double budget, unsigned long long int *currentPos,
 	unsigned long long int currentControl, unsigned long long int *resPos, double &newBudget, bool &succes)
@@ -594,7 +606,7 @@ unsigned long long int ViabiMicroMacroTrajectoryHelper::findViabControlDefault_D
     bestCu = 0;
     testNonVide = false;
 
-    grid->intCoordsToNum(xCoords, &posTemp);
+    posTemp = grid->intCoordsToNum(xCoords);
 
     testNonVide = false;
     succes = false;
@@ -640,7 +652,7 @@ unsigned long long int ViabiMicroMacroTrajectoryHelper::findViabControlDefault_D
 
 			    double newVal = budget + tempL;
 
-			    grid->intCoordsToNum(intVect1, &imagePos);
+			    imagePos = grid->intCoordsToNum(intVect1);
 			    testNonVide = (newVal >= vTab[imagePos]);
 			    /*
 			     * On parcours les sommets de la maille
@@ -722,7 +734,7 @@ unsigned long long int ViabiMicroMacroTrajectoryHelper::findViabControlDefault_t
     bestCu = 0;
     testNonVide = false;
 
-    grid->intCoordsToNum(xCoords, &posTemp);
+    posTemp = grid->intCoordsToNum(xCoords);
 
     testNonVide = false;
     succes = false;
@@ -770,7 +782,7 @@ unsigned long long int ViabiMicroMacroTrajectoryHelper::findViabControlDefault_t
 
 			    double newVal = budget + tempL;
 
-			    grid->intCoordsToNum(intVect1, &imagePos);
+			    imagePos = grid->intCoordsToNum(intVect1);
 			    testNonVide = (newVal >= vTab[imagePos]);
 			    /*
 			     * On parcours les sommets de la maille
@@ -841,7 +853,7 @@ unsigned long long int ViabiMicroMacroTrajectoryHelper::findViabControlMinValue_
     bestCu = 0;
     testNonVide = false;
     double minVal = PLUS_INF;
-    grid->intCoordsToNum(xCoords, &posTemp);
+    posTemp = grid->intCoordsToNum(xCoords);
 
     testNonVide = false;
     succes = false;
@@ -876,7 +888,7 @@ unsigned long long int ViabiMicroMacroTrajectoryHelper::findViabControlMinValue_
 
 			    double newVal = budget + tempL;
 
-			    grid->intCoordsToNum(intVect1, &imagePos);
+			    imagePos = grid->intCoordsToNum(intVect1);
 			    testNonVide = (newVal >= vTab[imagePos]);
 			    /*
 			     * On parcours les sommets de la maille
@@ -951,7 +963,7 @@ unsigned long long int ViabiMicroMacroTrajectoryHelper::findViabControlDiffContr
     bestCu = 0;
     testNonVide = false;
 
-    grid->intCoordsToNum(xCoords, &posTemp);
+    posTemp = grid->intCoordsToNum(xCoords);
 
     testNonVide = false;
     succes = false;
@@ -988,7 +1000,7 @@ unsigned long long int ViabiMicroMacroTrajectoryHelper::findViabControlDiffContr
 
 			    double newVal = budget + tempL;
 
-			    grid->intCoordsToNum(intVect1, &imagePos);
+			    imagePos = grid->intCoordsToNum(intVect1);
 			    if (!testNonVide && newVal >= vTab[imagePos])
 				{
 				cout << " Controle viable trouve " << cu << endl;
@@ -1093,7 +1105,7 @@ double ViabiMicroMacroTrajectoryHelper::computeViableTrajectory_DD(unsigned long
 	{
 	if (dynsys->constraintsX_fd(initPosition) < PLUS_INF)
 	    {
-	    grid->intCoordsToNum(initPosition, &posTemp);
+            posTemp = grid->intCoordsToNum(initPosition);
 
 	    cout << " pos temp num = " << posTemp << endl;
 	    testNonVide = (vTab[posTemp] < PLUS_INF);
@@ -1133,7 +1145,7 @@ double ViabiMicroMacroTrajectoryHelper::computeViableTrajectory_DD(unsigned long
 		double c;
 		c = dynsys->target_fd(xCoordsInt);
 		cout << " cible donne au point init " << c << endl;
-		while ((c >= PLUS_INF) && (testNonVide) && (nbIter <= NB_MAX_TRAJ_ITER))
+		while ((c >= PLUS_INF) && (testNonVide) && (nbIter < NB_MAX_TRAJ_ITER))
 		    {
 		    cout << " point en cours ";
 		    for (int i = 0; i < (int) dim; i++)
@@ -1141,7 +1153,7 @@ double ViabiMicroMacroTrajectoryHelper::computeViableTrajectory_DD(unsigned long
 			newTrajPoint[i] = xCoordsInt[i];
 			cout << " " << newTrajPoint[i];
 			}
-		    grid->intCoordsToNum(xCoordsInt, &posTemp);
+		    posTemp = grid->intCoordsToNum(xCoordsInt);
 		    cout << " pos temp num = " << posTemp << endl;
 		    cout << " value of   point  " << vTab[posTemp] << endl;
 		    cout << " budget initial  " << budget << endl;
@@ -1195,7 +1207,7 @@ double ViabiMicroMacroTrajectoryHelper::computeViableTrajectory_DD(unsigned long
 			newTrajPoint[i] = xCoordsInt[i];
 			cout << " " << newTrajPoint[i];
 			}
-		    grid->intCoordsToNum(xCoordsInt, &posTemp);
+		    posTemp = grid->intCoordsToNum(xCoordsInt);
 		    traj.push_back(newTrajPoint);
 		    valsOptiTraj.push_back(vTab[posTemp]);
 		    valsRealTraj.push_back(budget);
@@ -1322,7 +1334,7 @@ double ViabiMicroMacroTrajectoryHelper::computeViableTrajectory_tych_DD(unsigned
 	{
 	if (dynsys->constraintsX_fd(initPosition) < PLUS_INF)
 	    {
-	    grid->intCoordsToNum(initPosition, &posTemp);
+            posTemp = grid->intCoordsToNum(initPosition);
 
 	    cout << " pos temp num = " << posTemp << endl;
 	    testNonVide = (vTab[posTemp] < PLUS_INF);
@@ -1362,7 +1374,7 @@ double ViabiMicroMacroTrajectoryHelper::computeViableTrajectory_tych_DD(unsigned
 		double c;
 		c = dynsys->target_fd(xCoordsInt);
 		cout << " cible donne au point init " << c << endl;
-		while ((c >= PLUS_INF) && (testNonVide) && (nbIter <= NB_MAX_TRAJ_ITER))
+		while ((c >= PLUS_INF) && (testNonVide) && (nbIter < NB_MAX_TRAJ_ITER))
 		    {
 		    cout << " point en cours ";
 		    for (int i = 0; i < (int) dim; i++)
@@ -1370,7 +1382,7 @@ double ViabiMicroMacroTrajectoryHelper::computeViableTrajectory_tych_DD(unsigned
 			newTrajPoint[i] = xCoordsInt[i];
 			cout << " " << newTrajPoint[i];
 			}
-		    grid->intCoordsToNum(xCoordsInt, &posTemp);
+		    posTemp = grid->intCoordsToNum(xCoordsInt);
 		    cout << " pos temp num = " << posTemp << endl;
 		    cout << " value of   point  " << vTab[posTemp] << endl;
 		    cout << " budget initial  " << budget << endl;
@@ -1435,7 +1447,7 @@ double ViabiMicroMacroTrajectoryHelper::computeViableTrajectory_tych_DD(unsigned
 			newTrajPoint[i] = xCoordsInt[i];
 			cout << " " << newTrajPoint[i];
 			}
-		    grid->intCoordsToNum(xCoordsInt, &posTemp);
+		    posTemp = grid->intCoordsToNum(xCoordsInt);
 		    traj.push_back(newTrajPoint);
 		    valsOptiTraj.push_back(vTab[posTemp]);
 		    valsRealTraj.push_back(budget);
@@ -1516,8 +1528,20 @@ double ViabiMicroMacroTrajectoryHelper::computeViableTrajectory(double *initPosi
     return 0.0;
     }
 
+int *ViabiMicroMacroTrajectoryHelper::getPreferedControlIndexes() {
+    return preferedControlIndexes;
+}
+
+int *ViabiMicroMacroTrajectoryHelper::sortPreferedControlIndexes(const double *x, double time, int strategyIndex) {
+    unsigned long long int nbCTotal = dynsys->getTotalNbPointsC();
+    double **controlCoords = dynsys->getControlCoords();
+    sortIndexes(preferedControlIndexes, x, controlCoords, nbCTotal, time, controlWeight, trajIndex, strategyIndex);
+    return preferedControlIndexes;
+}
+
 ViabiMicroMacroTrajectoryHelper::~ViabiMicroMacroTrajectoryHelper()
     {
     // TODO Auto-generated destructor stub
+        delete [] preferedControlIndexes;
     }
 

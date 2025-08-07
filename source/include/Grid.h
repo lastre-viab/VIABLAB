@@ -37,7 +37,7 @@
  *
  */
 class Grid
-    {
+{
 
 protected:
     Grid();
@@ -53,12 +53,12 @@ public:
 
     double maxStep; /*!< \brief Valeur maximale de pas , scalaire	 */
 
-    int *periodic; /*!< \brief Indicateur booléen de périodicité, tableau*/
+    bool *periodic; /*!< \brief Indicateur booléen de périodicité, tableau*/
     /*!<
      *  1= variable périodique
      *  0=variable non périodique
      */
-    int gridType;
+    bool arePointsGridCenters;
     int pow3;
     int nbPointsCube;
     unsigned long long int *nbPoints; /*!< \brief Nombre de points de grille par axe ,tableau	 */
@@ -67,10 +67,12 @@ public:
 
     unsigned long long int *vectUnsigIntTemp; /*!< \brief Une mémoire tampon pour les calculs ,tableau	 */
     unsigned long long int *vectInt; /*!< \brief Une mémoire tempon pour les calculs ,tableau	 */
-    unsigned long long int getDim();
+    unsigned long long int getDim() const;
 
-    long long int* getIndicesDecalCell(); /*!<\brief accès  aux indices de déclage pour les sommets d'une maille*/
+    const long long int* getIndicesDecalCell() const; /*!<\brief accès  aux indices de déclage pour les sommets d'une maille*/
 
+    const long long int *getIndicesDecal() const;
+        
     /*!
      * \fn virtual void Grid::printGrid(void) const=0
      *
@@ -78,7 +80,7 @@ public:
      * informations de la grille
      * Doit être impéematée par chaque classe qui hérite
      */
-    virtual void printGrid(void);
+    virtual void printGrid(void) const;
     /*!
      *  \brief Destructeur
      *
@@ -87,7 +89,7 @@ public:
      */
     virtual ~Grid();
 
-    virtual bool isInSet(unsigned long long int *coords);
+    virtual bool isInSet(const unsigned long long int *coords) const;
 
     /*!
      * \fn virtual void savePointsList(string fileName) const=0
@@ -101,7 +103,7 @@ public:
      * pour l'enregistrement
      * Doit être impéematée par chaque classe qui hérite
      */
-    virtual void savePointsList(string fileName);
+    virtual void savePointsList(const string &fileName) const;
 
     /*!
      * \fn virtual void saveValOnGrid(string fileName) const=0
@@ -115,7 +117,7 @@ public:
      * pour l'enregistrement
      * Doit être impéematée par chaque classe qui hérite
      */
-    virtual void saveValOnGrid(string fileName);
+    virtual void saveValOnGrid(const string &fileName) const;
     /*!
      * \fn virtual void saveValOnGridLight(string fileName) const=0
      *
@@ -132,7 +134,7 @@ public:
      * pour l'enregistrement
      * Doit être impéematée par chaque classe qui hérite
      */
-    virtual void saveValOnGridLight(string fileName);
+    virtual void saveValOnGridLight(const string &fileName) const;
     /*!
      * \brief Fonction générique qui permet de calculer les coordonnées entiéres d'un point de la grille é
      * partir de son numéro
@@ -153,7 +155,7 @@ public:
      *  en argument é cette fonction
      */
     void numToIntCoords(unsigned long long int num,
-	    unsigned long long int *res);
+                        unsigned long long int *res) const;
 
     /*!
      * \brief Fonction générique qui permet de calculer les coordonnées entiéres et réelles
@@ -184,7 +186,7 @@ public:
      *  en argument é cette fonction
      */
     void numToIntAndDoubleCoords(unsigned long long int num,
-	    unsigned long long int *resI, double *resD);
+                                 unsigned long long int *resI, double *resD) const;
 
     /*!
      * \brief Fonction qui calcule le numéro d'un point é partir de ses coordonnées entiéres
@@ -202,9 +204,11 @@ public:
      *   (i_0,i_1,...i_{d-1}) \mapsto i_0+i_1*n_0+i_2*n_1*n_0+\dots +i_{d_1}\prod_{j=0}^{d-2}n_j
      *   \f]
      */
-    void intCoordsToNum(unsigned long long int *coords,
-	    unsigned long long int *res);
+    unsigned long long int intCoordsToNum(const unsigned long long int *coords) const;
 
+
+    void intCoordsToDoubleCoords(const unsigned long long int *coords, double *coordsDouble) const;
+    
     /*!
      * \brief Fonction  qui identifie la maille  de la grille qui contient le point
      * de coordonnées réelles données
@@ -212,7 +216,7 @@ public:
      * @param coords  pointeur sur l'adresse mémoire oé sont les coordonnées  réelles du point é localiser
      * @return le numéro du coin inférieur de la maille qui contient le point
      */
-    unsigned long long int localizePoint(double *coords);
+    unsigned long long int localizePoint(const double *coords) const;
 
     /*!
      * Fonction  technqiue qui précalcule certaines données utiles aux reprérages classiques dans
@@ -228,10 +232,10 @@ public:
      *
      */
 
-    virtual unsigned long long int getNearestPointInSet(double *coords);
+    virtual unsigned long long int getNearestPointInSet(const double *coords) const;
 
     void computeGridShifts();
-    bool ArePointsInTheSameCell(double *coords1, double *coords2);
+    bool ArePointsInTheSameCell(const double *coords1, const double *coords2) const;
 
     /*!
      * \brief Fonction qui permet de corriger les dépassements éventuels de coordonnées qui
@@ -241,7 +245,7 @@ public:
      *
      * La fonction vérifie quelles sont les variables périodiques , en utilisant l'attribut periodic
      */
-    void periodizePoint(double *vect);
+    void periodizePoint(double *vect) const;
 
     /*!
      * Fonction qui vérifie si un vecteur de coordonénes données appartient au pavé délimitant la grille
@@ -249,8 +253,8 @@ public:
      * @param coords coordonnées réelles du vecteur
      * @return booléen selon l'appartenance ou non de vecteur au pavé de la grille
      */
-    bool isPointInGrid(double *coords);
-    bool isPointInGrid_fd(unsigned long long int *coords);
+    bool isPointInGrid(const double *coords) const;
+    bool isPointInGrid_fd(const unsigned long long int *coords) const;
 
 
 
@@ -258,19 +262,19 @@ public:
      * Méthode d'accès
      * @return Le nombre total de mailles de la grille
      */
-    unsigned long long int getNbTotalCells();
+    unsigned long long int getNbTotalCells() const;
 
     /*!
      * Méthode d'accès
      * @return Le nombre total de points de la grille
      */
-    unsigned long long int getNbTotalPoints();
+    unsigned long long int getNbTotalPoints() const;
 
     /*!
      * Méthode d'accès
      * @return Le pas de discrétisation maximal de la grille
      */
-    double getMaxStep();
+    double getMaxStep() const;
 
     /*!
      * Nombre total de mailles de la grille
@@ -288,7 +292,7 @@ public:
     long long int *indicesDecal;
 
     string filePrefix;
-    unsigned long long int* getNbPoints();
+    const unsigned long long int* getNbPoints() const;
 
     vector<int> dirs;
     vector<double> values;
@@ -301,12 +305,12 @@ public:
     unsigned long long int **lesDecalagesCell;
     unsigned long long int **lesDecalagesAxes;
 
-    int *sortieOKinf;
-    int *sortieOKsup;
-    bool isPointInGridWithConstr(double *coords);
+    bool *sortieOKinf;
+    bool *sortieOKsup;
+    bool isPointInGridWithConstr(const double *coords) const;
 
     bool unboundedDomain;
 
-    };
+};
 
 #endif /* GRID_H_ */

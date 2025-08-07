@@ -1,0 +1,117 @@
+{
+    "ALGORITHM_PARAMETERS": {
+        "COMPUTE_MIN_TIME": false,
+        "COMPUTE_VIABLE_SET": false,
+        "GRID_REFINMENTS_NUMBER": 0,        
+        "INTERMEDIATE_SAVINGS": false,
+        "ITERATION_STOP_LEVEL": 0,
+        "LEVEL": 1,
+        "PROJECTION_AXIS": [
+            0,
+            0
+        ],
+        "SAVE_BOUNDARY": true,
+        "SAVE_PROJECTION": false,
+        "SAVE_SLICE": false,
+        "SAVE_SLICE_BOUND": false,
+        "SAVE_SUBLEVEL": false,
+        "SAVE_VIABSET_LIGHT": false,
+        "SET_TYPE": "VIABG",
+        "TARGET_OR_DEPARTURE": "DEPARTURE"
+    },
+    "CONTROL_PARAMETERS": {
+        "CONTROL_DIMENSION": 1,
+        "CONTROL_GRID_POINTS": [
+            21
+        ],
+        "CONTROL_MAX_VALUES": [
+            3.15
+        ],
+        "CONTROL_MIN_VALUES": [
+            -1.575
+        ],
+        "CONTROL_TYCHASTIC_DIMENSION" : 4,
+        "CONTROL_TY_GRID_POINTS": [
+            5, 11, 5, 5
+        ],
+        "CONTROL_TY_MIN_VALUES": [
+            2.2, 0, 2.2, 0.052631579
+        ],
+        "CONTROL_TY_MAX_VALUES": [
+            2.3, 1, 2.3, 0.0625
+        ]
+    },
+    "GRID_PARAMETERS": {
+        "GRID_MAIN_DIR": 1,
+        "GRID_METHOD": "BS",
+        "LOWER_LIMIT_IS_NOT_CONSTRAINT": [
+            false,
+            false
+        ],
+        "OUTPUT_FILE_PREFIX": "Lake_collective",
+        "SLICE_DIRECTIONS": [
+            0,
+            0
+        ],
+        "SLICE_LEVELS": [
+            1,
+            1
+        ],
+        "SLICE_LEVELS_DISCRETE": [
+            0,
+            0
+        ],
+        "STATE_DIMENSION": 2,
+        "STATE_GRID_POINTS": [
+            1001,
+            1001
+        ],
+        "STATE_MAX_VALUES": [
+            27.8,
+            24.76
+        ],
+        "STATE_MIN_VALUES": [
+            6.94,
+            0
+        ],
+        "STATE_PERIODIC": [
+            false,
+            false
+        ],
+        "UPPER_LIMIT_IS_NOT_CONSTRAINT": [
+            false,
+            false
+        ]
+    },
+    "SYSTEM_PARAMETERS": {
+        "DYNAMICS_TYPE": "CC",
+        "DYN_BOUND": 1,
+        "DYN_BOUND_COMPUTE_METHOD": "ANALYTICAL_CALC",
+        "IS_TIMESTEP_GLOBAL": false,
+        "LIPSCHITZ_CONSTANT": 1,
+        "LIPSCHITZ_CONSTANT_COMPUTE_METHOD": "ANALYTICAL_CALC",
+        "TIME_DISCRETIZATION_SCHEME": "RK2",
+        "TIME_HORIZON": 10
+    },
+    "TRAJECTORY_PARAMETERS": [{
+        "INITIAL_POINT": [10, 10],
+        "TRAJECTORY_TYPE": ["FIRST"],
+        "TRAJECTORY_TIME_HORIZON": 10,
+        "TYCHE_PARAMETERS": [{
+            "TYCHE_DISTRIBUTION": "CONSTANT",
+            "CONSTANT_TYCHE_VALUE": 2.2676
+        }, {
+            "TYCHE_DISTRIBUTION": "CONSTANT",
+            "CONSTANT_TYCHE_VALUE": 0
+        }, {
+            "TYCHE_DISTRIBUTION": "UNIFORM"
+        }, {
+            "TYCHE_DISTRIBUTION": "CONSTANT",
+            "CONSTANT_TYCHE_VALUE": 0.052631579
+        }]
+    }],
+    "MODEL_PARAMETERS": {
+        "M": 26.9,
+        "R": 101.96
+    }
+}

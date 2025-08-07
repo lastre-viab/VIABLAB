@@ -1,0 +1,94 @@
+{
+    "ALGORITHM_PARAMETERS": {
+        "COMPUTE_MIN_TIME": 0,
+        "COMPUTE_VIABLE_SET": 1,
+        "GRID_REFINMENTS_NUMBER": 0,
+        "INITIAL_POINTS": [
+            [
+                1,
+                1
+            ]
+        ],
+        "INTERMEDIATE_SAVINGS": 0,
+        "ITERATION_STOP_LEVEL": 0,
+        "LEVEL": 1,
+        "NUMBER_OF_TRAJECTORIES": 1,
+        "PROJECTION_AXIS": [
+            1,
+            0
+        ],
+        "SAVE_BOUNDARY": 1,
+        "SAVE_PROJECTION": 0,
+        "SAVE_SLICE": 0,
+        "SAVE_SLICE_BOUND": 0,
+        "SAVE_SUBLEVEL": 0,
+        "SAVE_VIABSET_LIGHT": 0,
+        "SET_TYPE": "VIAB",
+        "TARGET_OR_DEPARTURE": 1,
+        "TRAJECTORY_TYPE": "STOCHASTIC_VD"
+    },
+    "CONTROL_PARAMETERS": {
+        "CONTROL_DIMENSION": 1,
+        "CONTROL_GRID_POINTS": [
+            100
+        ],
+        "CONTROL_MAX_VALUES": [
+            5
+        ],
+        "CONTROL_MIN_VALUES": [
+            -5
+        ]
+    },
+    "GRID_PARAMETERS": {
+        "GRID_MAIN_DIR": 0,
+        "GRID_METHOD": "BS",
+        "LOWER_LIMIT_IS_NOT_CONSTRAINT": [
+            0,
+            0
+        ],
+        "OUTPUT_FILE_PREFIX": "ExempleTrajectoire",
+        "SLICE_DIRECTIONS": [
+            0,
+            0
+        ],
+        "SLICE_LEVELS": [
+            1,
+            1
+        ],
+        "SLICE_LEVELS_DISCRETE": [
+            0,
+            0
+        ],
+        "STATE_DIMENSION": 2,
+        "STATE_GRID_POINTS": [
+            100,
+            100
+        ],
+        "STATE_MAX_VALUES": [
+            3,
+            2
+        ],
+        "STATE_MIN_VALUES": [
+            0.2,
+            -2
+        ],
+        "STATE_PERIODIC": [
+            0,
+            0
+        ],
+        "UPPER_LIMIT_IS_NOT_CONSTRAINT": [
+            0,
+            0
+        ]
+    },
+    "SYSTEM_PARAMETERS": {
+        "DYNAMICS_TYPE": "CC",
+        "DYN_BOUND": 1,
+        "DYN_BOUND_COMPUTE_METHOD": "ANALYTICAL",
+        "IS_TIMESTEP_GLOBAL": 0,
+        "LIPSCHITZ_CONSTANT": 1,
+        "LIPSCHITZ_CONSTANT_COMPUTE_METHOD": "ANALYTICAL",
+        "TIME_DISCRETIZATION_SCHEME": "EL",
+        "TIME_HORIZON": 50
+    }
+}

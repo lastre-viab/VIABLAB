@@ -39,7 +39,7 @@ ViabProblemFactory::~ViabProblemFactory()
     // TODO Auto-generated destructor stub
     }
 
-Viabi* ViabProblemFactory::constructViabilityProblem(int gridMethod)
+Viabi* ViabProblemFactory::constructViabilityProblem(GridMethod gridMethod)
     {
     Viabi *vp;
     auto dynSysType = problemParameters->getSystemParameters()->DYN_TYPE;

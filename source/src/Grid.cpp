@@ -63,83 +63,84 @@ Grid::~Grid()
     // cout<< "  fini  destructeur de grid generique \n";
     }
 
-void Grid::printGrid()
+void Grid::printGrid() const
     {
 
     }
-bool Grid::isInSet(unsigned long long int *coords)
+bool Grid::isInSet(const unsigned long long int *coords) const
     {
     return false;
     }
 
-unsigned long long int Grid::getNearestPointInSet(double *coords)
+unsigned long long int Grid::getNearestPointInSet(const double *coords) const 
     {
     return 0;
     }
 
-void Grid::savePointsList(string fileName)
+void Grid::savePointsList(const string &fileName) const
     {
 
     }
-void Grid::saveValOnGrid(string fileName)
+void Grid::saveValOnGrid(const string &fileName) const
     {
 
     }
-void Grid::saveValOnGridLight(string fileName)
+void Grid::saveValOnGridLight(const string &fileName) const
     {
 
     }
-unsigned long long int Grid::getDim()
+unsigned long long int Grid::getDim() const
     {
     return dim;
     }
-void Grid::numToIntCoords(unsigned long long int num, unsigned long long int *res)
-    {
 
+void Grid::numToIntAndDoubleCoords(unsigned long long int num, unsigned long long int *resI, double *resD) const
+{
+    unsigned long long int temp = num;
+    for (int d = dim - 1; d >= 0; d--)
+    {
+        const unsigned long long resId = temp % nbPoints[d];  // coordonn�es enti�res du point
+        
+        const double resDd = limInf[d] + step[d] * (resId + 0.5*arePointsGridCenters);
+        temp /= nbPoints[d];
+        resI[d] = resId;
+        resD[d] = resDd;
+    }
+}
+
+void Grid::numToIntCoords(unsigned long long int num, unsigned long long int *res) const
+{
     unsigned long long int temp = num;
 
     for (int d = dim - 1; d >= 0; d--)
 	{
-	res[d] = temp % nbPoints[d];
-	temp = (temp - res[d]) / nbPoints[d];
-
+        const unsigned long long resD = temp % nbPoints[d];
+        temp /= nbPoints[d];
+        res[d] = resD;
 	}
-
-    }
-void Grid::numToIntAndDoubleCoords(unsigned long long int num, unsigned long long int *resI, double *resD)
-    {
-    bool print = false;  //(num == 5100);
-    unsigned long long int temp = num;
-    for (int d = (int) dim - 1; d >= 0; d--)
-	{
-	if (print)
-	    cout << "  temp = " << temp << " nbPoints[d] = " << nbPoints[d];
-	resI[d] = temp % nbPoints[d];  // coordonn�es enti�res du point
-	if (print)
-	    cout << " resI = " << resI[d];
-	resD[d] = limInf[d] + step[d] * resI[d] + 0.5 * gridType * step[d];
-	if (print)
-	    cout << "  gridType = " << gridType << " resD = " << resD[d];
-	temp = (temp - resI[d]) / nbPoints[d];
-	if (print)
-	    cout << "  temp = " << temp << endl;
-	}
-
-    }
+}
 /*
  * Transformation  de num�rotation alpha-num�rique :
  *  � partir du num�ro des coordonn�es enti�res du points dans la grille
  *  sont num�ro
  */
-void Grid::intCoordsToNum(unsigned long long int *coords, unsigned long long int *res)
+unsigned long long int Grid::intCoordsToNum(const unsigned long long int *coords) const
+{
+    unsigned long long int res = coords[0];
+    for (int i = 1; i < dim; i++)
     {
-    (*res) = coords[0];
-    for (int i = 0; i < dim - 1; i++)
-	{
-	(*res) = (*res) * nbPoints[i + 1] + coords[i + 1];
-
-	}
+        res = res * nbPoints[i] + coords[i];
     }
+    return res;
+}
+
+void Grid::intCoordsToDoubleCoords(const unsigned long long int *coords, double *coordsDouble) const {
+    for (int d = dim - 1; d >= 0; d--)
+    {        
+        const double resDd = limInf[d] + step[d] * (coords[d] + 0.5*arePointsGridCenters);
+        coordsDouble[d] = resDd;
+    }
+}
 
 /*!
  *  Cette  fonction d�termine la maille qui contient le point de coordonn�es r�elles donn�es
@@ -148,37 +149,23 @@ void Grid::intCoordsToNum(unsigned long long int *coords, unsigned long long int
  * @param coords
  * @return num�ro de la cellule  qui contient le point r�el
  */
-unsigned long long int Grid::localizePoint(double *coords)
-    {
-    unsigned long long int *indiceCell = new unsigned long long int[dim];
-
-    //int *indiceCell =vectInt;
-    // cout<< " indice Cell dans localize ";
-    for (int k = 0; k < dim; k++)
+unsigned long long int Grid::localizePoint(const double *coords) const
+{
+    unsigned long long int numCell = (unsigned long long int) (((coords)[0] - limInf[0]) / step[0]);
+	if (numCell == (nbPoints[0] - 1)) numCell--;
+    
+    for (int i = 1; i < dim; i++)
 	{
-	indiceCell[k] = (unsigned long long int) (floor((((coords)[k] - limInf[k]) / step[k])));
-
-	if (indiceCell[k] == (nbPoints[k] - 1))
-	    {
-	    // cout<<  " coucouc"<<endl;
-	    indiceCell[k]--;
-
-	    }
-	// cout<< " "<<indiceCell[k];
+        unsigned long long int indiceCell = (unsigned long long int) (((coords)[i] - limInf[i]) / step[i]);
+        if (indiceCell == (nbPoints[i] - 1)) {
+            indiceCell--;
+        }
+        numCell = numCell * (nbPoints[i]) + indiceCell;
 	}
-    // cout<< endl;
-    unsigned long long int numCell = indiceCell[0];
-
-    for (int i = 0; i < dim - 1; i++)
-	{
-	numCell = numCell * (nbPoints[i + 1]) + indiceCell[i + 1];
-
-	}
-    delete[] indiceCell;
     return numCell;
-    }
+}
 
-bool Grid::ArePointsInTheSameCell(double *coords1, double *coords2)
+bool Grid::ArePointsInTheSameCell(const double *coords1, const double *coords2) const
     {
     bool res = true;
     for (int k = 0; k < dim; k++)
@@ -325,8 +312,8 @@ void Grid::computeGridShifts()
  * cette fonction corrige les coordonn�es r�elles d'un vecteur
  * qui sont p�riodiques en les ramenant le cas �ch�ant  dans l'intervalle de la p�riode
  */
-void Grid::periodizePoint(double *vect)
-    {
+void Grid::periodizePoint(double *vect) const
+{
     int i;
     double dist;
     bool testDepass;
@@ -335,50 +322,48 @@ void Grid::periodizePoint(double *vect)
 
     for (i = 0; i < dim; i++)
 	{
-	/*
-	 * On teste  si la variable est d�crar�e p�riodique
-	 */
-	////cout<< " i= "<< i<< " periodic["<<i<<"]= "<<periodic[i]<<endl;
-	if (periodic[i])
-	    {
-
-	    testDepass = true;
-	    /*
-	     * La periode
-	     */
-	    dist = limSup[i] - limInf[i];
-	    ////cout<< " dist= "<<dist<<endl;
-	    /*
-	     * Correction par p�riode enti�re
-	     */
-	    while (testDepass)
-		{
-		//	//cout<< " test depass="<<testDepass<<endl;
-		if (vect[i] > limSup[i])
-		    {
-		    vect[i] -= dist;
-		    }
-		else
-		    {
-		    if (vect[i] < limInf[i])
-			{
-			vect[i] += dist;
-			}
-		    else
-			{
-			testDepass = false;
-			}
-		    }
-		//		//cout<< " vect= ";
-		//		printVector(vect,dim);
-		}
-
-	    }
+        /*
+         * On teste  si la variable est d�crar�e p�riodique
+         */
+        ////cout<< " i= "<< i<< " periodic["<<i<<"]= "<<periodic[i]<<endl;
+        if (periodic[i])
+        {
+            testDepass = true;
+            /*
+             * La periode
+             */
+            dist = limSup[i] - limInf[i];
+            ////cout<< " dist= "<<dist<<endl;
+            /*
+             * Correction par p�riode enti�re
+             */
+            while (testDepass)
+            {
+                //	//cout<< " test depass="<<testDepass<<endl;
+                if (vect[i] > limSup[i])
+                {
+                    vect[i] -= dist;
+                }
+                else
+                {
+                    if (vect[i] < limInf[i])
+                    {
+                        vect[i] += dist;
+                    }
+                    else
+                    {
+                        testDepass = false;
+                    }
+                }
+                //		//cout<< " vect= ";
+                //		printVector(vect,dim);
+            }
+        }
 	}
     //	//cout<< "Periodise a fini  vect= ";
     //				printVector(vect,dim);
     ////system("pause");
-    }
+}
 
 /*!
  *  Cette  fonction v�rifie l'apartenance  d'un point  dont les coordonnees sont donn�es
@@ -386,74 +371,77 @@ void Grid::periodizePoint(double *vect)
  * @param coords coordonnees reelles d'un point
  * @return isInGrid : l'indicateur booleen
  */
-bool Grid::isPointInGrid(double *coords)
-    {
+bool Grid::isPointInGrid(const double *coords) const
+{
 
     bool isInGrid = true;
     int i = 0;
 
     while (isInGrid & (i < dim))
 	{
-	isInGrid &= ((coords[i] <= limSup[i]) & (coords[i] >= limInf[i]));
-	i++;
+        isInGrid &= ((coords[i] <= limSup[i]) & (coords[i] >= limInf[i]));
+        i++;
 	}
     return isInGrid;
 
-    }
+}
 
-bool Grid::isPointInGrid_fd(unsigned long long int *coords)
-    {
-
+bool Grid::isPointInGrid_fd(const unsigned long long int *coords) const
+{
     bool isInGrid = true;
     int i = 0;
 
     while (isInGrid & (i < dim))
 	{
-	isInGrid &= ((coords[i] < nbPoints[i]) & (coords[i] >= 0));
-	i++;
+        isInGrid &= (coords[i] < nbPoints[i]);
+        i++;
 	}
     return isInGrid;
+}
 
-    }
-
-unsigned long long int Grid::getNbTotalCells()
+unsigned long long int Grid::getNbTotalCells() const
     {
     return nbTotalCells;
     }
 
-unsigned long long int Grid::getNbTotalPoints()
+unsigned long long int Grid::getNbTotalPoints() const
     {
     // cout<< " ici grid nb total points est "<<nbTotalPoints<<endl;
     return nbTotalPoints;
     }
 
-double Grid::getMaxStep()
+double Grid::getMaxStep() const
     {
     return maxStep;
     }
 
-long long int* Grid::getIndicesDecalCell()
+const long long int* Grid::getIndicesDecalCell() const
     {
     return indicesDecalCell;
     }
 
-unsigned long long int* Grid::getNbPoints()
+const long long int *Grid::getIndicesDecal() const
+{
+    return indicesDecal;
+}
+
+const unsigned long long int* Grid::getNbPoints() const
     {
     return nbPoints;
     }
 
-bool Grid::isPointInGridWithConstr(double *coords)
-    {
+bool Grid::isPointInGridWithConstr(const double *coords) const
+{
 
     bool isInGrid = true;
     int i = 0;
 
     while (isInGrid & (i < dim))
 	{
-	isInGrid &= (((coords[i] <= limSup[i]) | (sortieOKsup[i])) & ((coords[i] >= limInf[i]) | (sortieOKinf[i])));
-	i++;
+        isInGrid &= (((coords[i] <= limSup[i]) | (sortieOKsup[i])) & ((coords[i] >= limInf[i]) | (sortieOKinf[i])));
+        i++;
 	}
     return isInGrid;
 
-    }
+}
 
