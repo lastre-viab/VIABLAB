@@ -29,16 +29,18 @@
 #include "ParametersManager.h"
 #include "DiscretPointImage.h"
 
-class ViabiBitSet: public Viabi
-    {
+class ControlPickerBitSet;
+
+class ViabiBitSet final : public Viabi
+{
 public:
     ViabiBitSet(ParametersManager *pm);
     virtual ~ViabiBitSet();
     virtual void printViabiInfo();
 
-    virtual void ViabilityKernel(bool sortieOK, int nbArret);
+    virtual void ViabilityKernel(int nbArret);
     virtual void CaptureBasin();
-    virtual void GarantedViabilityKernel(bool sortieOK, int nbArret);
+    virtual void GarantedViabilityKernel(int nbArret);
 
     virtual void initialiseTarget();
     virtual void initialiseConstraints();
@@ -46,6 +48,7 @@ public:
 
     virtual void loadViableSets();
     virtual void saveViableSets();
+    void saveViableSets(const string &baseFilenameSuffix);
     virtual SysDyn* GetSysDynForViabProblem();
 
     void saveIntermediateViableSets(int refine);
@@ -60,33 +63,29 @@ public:
     bool findGuarantedViabImagePoint(double *xCoordsDouble, bool print);
     bool findViabImagePoint_noControl(double *xCoordsDouble, bool print);
     void initialiseTargetPointList();
-    int computeViableTrajectorySetVal(double *initPosition, double finalTime, string fileName);
-    int computeViableTrajectoryHeavy(double *initPosition, double *initControl, double finalTime, string fileName);
 
-    int computeViableTrajectory(double *initPosition, double finalTime, string fileName);
-    int findViabControl(double *currentPos, double &dt, int nbStepIter, double stepCoeff, double *resPos, int &nbViabVoisins, bool &succes);
 private:
     Grid_BitSet *grid;
-    void InitViabiBitSet(algoViabiParams avbp);
-    void ViabilityKernelSimple(bool sortieOK, int nbArret);
-    void GuarantedViabilityKernelSimple(bool sortieOK, int nbArret);
+
+    string getSetName(SetType type);
+    void InitViabiBitSet(const algoViabiParams &avbp);
+    void ViabilityKernelSimple(int nbArret);
+    void GuarantedViabilityKernelSimple(int nbArret);
     void computeDiscreteImageOfPoint(double *doublePointCoords, unsigned long long int *intPointCoords);
     void computeDiscreteImageOfPoint_noControl(double *doublePointCoords, unsigned long long int *intPointCoords);
 
-    void noyauViabi_FD(bool sortieOK, int nbArret);
-    void noyauViabi(bool sortieOK, int nbArret);
-    void noyauViabiGuaranti(bool sortieOK, int nbArret);
-    void noyauViabi_sansControle(bool sortieOK, int nbArret);
-    void noyauViabi_omp(bool sortieOK, int nbArret);
-    void noyauViabi_sansControle_omp(bool sortieOK, int nbArret);
-    void noyauViabiGaranti_FD(bool sortieOK, int nbArret);
+    void noyauViabi_FD(int nbArret);
+    void noyauViabi(int nbArret);
+    void noyauViabiGuaranti(int nbArret);
+    void noyauViabi_sansControle(int nbArret);
+    void noyauViabi_omp(int nbArret);
+    void noyauViabi_sansControle_omp(int nbArret);
+    void noyauViabiGaranti_FD(int nbArret);
     void CaptureBasin_ContinuousDynamics();
     void CaptureBasin_DiscreteDynamics();
-    unsigned long long int findViableDiscreteSuccessor(unsigned long long int pos, double dt);
-    int findViabControl_bis(double *currentPos, unsigned long long int optimDiscreteSuccessor, double &dt, int nbStepIter, double stepCoeff,
-	    double *resPos, bool &succes);
     void computeViableTrajectories();
-    int computeViableTrajectorySetVal_bis(double *initPosition, double finalTime, string fileName);
+    void computeTychasticViableTrajectories();
+        
     /*!
      *  \brief  Copie pour raisons de rapidt�  de la valeur de dimension d'�tat
      */
@@ -146,6 +145,7 @@ private:
     void createPointsList();
     void addDataToPointsList(list<unsigned long long int>::iterator *startIt, unsigned long long int newPoint,
 	    list<unsigned long long int>::iterator *resIt);
+    
 
     };
 

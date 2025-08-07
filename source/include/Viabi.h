@@ -38,9 +38,9 @@ public:
     virtual void printViabiInfo() =0;
     virtual void initialiseTarget() =0;
     virtual void initialiseConstraints() =0;
-    virtual void ViabilityKernel(bool sortieOK, int nbArret) =0;
+    virtual void ViabilityKernel(int nbArret) =0;
     virtual void CaptureBasin() =0;
-    virtual void GarantedViabilityKernel(bool sortieOK, int nbArret) =0;
+    virtual void GarantedViabilityKernel(int nbArret) =0;
     virtual void computeTrajectories() =0;
     virtual void loadViableSets() =0;
     virtual void saveViableSets() =0;

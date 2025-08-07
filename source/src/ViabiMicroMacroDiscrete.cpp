@@ -27,20 +27,19 @@ ViabiMicroMacroDiscrete::ViabiMicroMacroDiscrete(ParametersManager *pm)
     {
     modelParams = pm;
 
-    systemParams sp = *(pm->getSystemParameters());
+    const systemParams *sp = pm->getSystemParameters();
 
-    algoViabiParams avp = *(pm->getAlgoParameters());
+    const algoViabiParams *avp = pm->getAlgoParameters();
 
-    controlParams cp = *(pm->getControlParameters());
-    gridParams gp = *(pm->getGridParameters());
+    const controlParams *cp = pm->getControlParameters();
+    const gridParams *gp = pm->getGridParameters();
 
-    dim = gp.DIM;
-    grid = new GridMicroMacro(gp);
+    dim = gp->DIM;
+    grid = new GridMicroMacro(*gp);
     grid->printGrid();
 
-    dynsys = new SysDyn(sp, dim, cp, grid);
-    InitViabiMicroMacroDiscrete(avp);
-    trajectoryHelper = new ViabiMicroMacroTrajectoryHelper(grid, dynsys, avp.TYPE_TRAJ);
+    dynsys = new SysDyn(*sp, dim, *cp, grid);
+    InitViabiMicroMacroDiscrete(*avp);
     }
 
 SysDyn* ViabiMicroMacroDiscrete::GetSysDynForViabProblem()
@@ -53,7 +52,7 @@ GridMicroMacro* ViabiMicroMacroDiscrete::GetGridForViabProblem()
     return grid;
     }
 
-void ViabiMicroMacroDiscrete::InitViabiMicroMacroDiscrete(algoViabiParams avp)
+void ViabiMicroMacroDiscrete::InitViabiMicroMacroDiscrete(const algoViabiParams &avp)
     {
 
     ostringstream os;
@@ -138,7 +137,7 @@ void ViabiMicroMacroDiscrete::computeDiscreteImageOfPoint(unsigned long long int
 	    dynsys->dynamics_fd(intPointCoords, controlCoords[cu], intVect1);
 	    if (grid->isPointInGrid_fd(intVect1))
 		{
-		grid->intCoordsToNum(intVect1, &imagePos);
+            imagePos = grid->intCoordsToNum(intVect1);
 		/*!
 		 * Si l'image est  dans les limites de la grille on étudie si elle vérifie les contraintes
 		 */
@@ -273,98 +272,94 @@ void ViabiMicroMacroDiscrete::initialiseTarget()
     }
 
 void ViabiMicroMacroDiscrete::computeTrajectories()
-    {
-
+{
     dynsys->setDynamicsForward();
+    
+    const int nbTrajs = modelParams->getNbTrajectories();
+    for (int i = 0; i < nbTrajs; ++i) {
 
-    algoViabiParams *avp = modelParams->getAlgoParameters();
-    if (avp->TYPE_TRAJ == OP)
-	computeOptimalTrajectories();
-    else
-	computeViableTrajectories();
+        TrajectoryParametersManager tpm(modelParams, i);
+        ViabiMicroMacroTrajectoryHelper trajectoryHelper(grid, dynsys, &tpm);
+        
+        if (tpm.getTrajectoryParameters()->TRAJECTORY_TYPE == OP) {
+            computeOptimalTrajectory(&trajectoryHelper, &tpm);
+        }
+        else {
+            computeViableTrajectory(&trajectoryHelper, &tpm);
+        }
+    }    
+}
 
-    }
-
-void ViabiMicroMacroDiscrete::computeOptimalTrajectories()
-    {
-    algoViabiParams *avp = modelParams->getAlgoParameters();
-    int nbTrajs = avp->NB_TRAJS;
+void ViabiMicroMacroDiscrete::computeOptimalTrajectory(ViabiMicroMacroTrajectoryHelper *trajectoryHelper, TrajectoryParametersManager *tpm)
+{
+    const trajectoryParams *tp = tpm->getTrajectoryParameters();
     ostringstream os;
     string fileName;
-    if (nbTrajs > 0)
-	{
-	bool success[nbTrajs];
-	for (int tr = 0; tr < nbTrajs; tr++)
-	    {
-	    os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1 << ".dat";
-	    fileName = os.str();
-	    os.str("");
+    int tr = tpm->getTrajectoryIndex();
+    double timeHorizon = tp->maxTime;
+	
+    bool success;
+    os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1 << ".dat";
+    fileName = os.str();
+    os.str("");
+    
+    computeOptimalCaptTrajectory(trajectoryHelper, tp->INIT_POINT, timeHorizon, fileName, success);
+}
 
-	    computeOptimalCaptTrajectory(avp->INIT_POINTS + tr * dim, fileName, success[tr]);
-	    }
-	}
-    }
-
-void ViabiMicroMacroDiscrete::computeViableTrajectories()
-    {
-    algoViabiParams *avp = modelParams->getAlgoParameters();
-    int nbTrajs = avp->NB_TRAJS;
-    int typeTraj = avp->TYPE_TRAJ;
+void ViabiMicroMacroDiscrete::computeViableTrajectory(ViabiMicroMacroTrajectoryHelper *trajectoryHelper, TrajectoryParametersManager *tpm)
+{
+    const trajectoryParams *tp = tpm->getTrajectoryParameters();
+    int nbTrajs = tpm->getNbTrajectories();
+    TypeTraj typeTraj = tp->TRAJECTORY_TYPE;
     ostringstream os;
     string endOfFileName = ".dat";
     switch (typeTraj)
 	{
     case VD:
 	{
-	endOfFileName = "-viabDefault.dat";
-	break;
+        endOfFileName = "-viabDefault.dat";
+        break;
 	}
     case VDI:
 	{
-	endOfFileName = "-viabDiffControls.dat";
-	break;
+        endOfFileName = "-viabDiffControls.dat";
+        break;
 	}
     case VMM:
 	{
-	endOfFileName = "-viabMinValue.dat";
-	break;
+        endOfFileName = "-viabMinValue.dat";
+        break;
 	}
     case VG:
 	{
-	endOfFileName = "-viabGaranti.dat";
-	break;
+        endOfFileName = "-viabGaranti.dat";
+        break;
 	}
     default:
 	{
-	endOfFileName = "-viabDefault.dat";
-	break;
+        endOfFileName = "-viabDefault.dat";
+        break;
 	}
 	}
 
     string fileName;
-    if (nbTrajs > 0)
-	{
-	spdlog::debug(" Number of trajectories {}", nbTrajs);
-	bool success[nbTrajs];
-	for (int tr = 0; tr < nbTrajs; tr++)
-	    {
-	    os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1 << endOfFileName;
-	    fileName = os.str();
-	    os.str("");
 
-	    logVector("Initial point ", avp->INIT_POINTS_FD + tr * dim, dim);
-	    if (typeTraj == VG)
-		{
-		trajectoryHelper->computeViableTrajectory_tych_DD(avp->INIT_POINTS_FD + tr * dim, avp->INIT_VALUES_FD[tr], fileName, success[tr]);
-		}
-	    else
-		{
-		trajectoryHelper->computeViableTrajectory_DD(avp->INIT_POINTS_FD + tr * dim, avp->INIT_VALUES_FD[tr], fileName, success[tr]);
-		}
-	    }
+    int tr = tpm->getTrajectoryIndex();
+    bool success;
+    os << "../OUTPUT/" << filePrefix << "-traj-" << tr + 1 << endOfFileName;
+    fileName = os.str();
+    os.str("");
 
-	}
+    logVector("Initial point ", tp->INIT_POINT_FD, dim);
+    if (typeTraj == VG)
+    {
+        trajectoryHelper->computeViableTrajectory_tych_DD(tp->INIT_POINT_FD, tp->INIT_VALUE_FD, fileName, success);
     }
+    else
+    {
+        trajectoryHelper->computeViableTrajectory_DD(tp->INIT_POINT_FD, tp->INIT_VALUE_FD, fileName, success);
+    }    
+}
 
 void ViabiMicroMacroDiscrete::initialiseTargetHJB()
     {
@@ -439,10 +434,10 @@ void ViabiMicroMacroDiscrete::initialiseTargetHJB()
     }
 
 void ViabiMicroMacroDiscrete::loadViableSets()
-    {
+{
 
     spdlog::info("Loading viable sets for the problem with prefix {}", filePrefix);
-    algoViabiParams *avp = modelParams->getAlgoParameters();
+    const algoViabiParams *avp = modelParams->getAlgoParameters();
 
     ostringstream os;
     string fileName;
@@ -456,73 +451,74 @@ void ViabiMicroMacroDiscrete::loadViableSets()
 
     if (avp->SAVE_PROJECTION)
 	{
-	os << "../OUTPUT/" << filePrefix << "-proj" << ".dat";
-	fileName = os.str();
-	os.str("");
-	/*
-	 *  calcul et sauvegarde  de la projection du  noyau
-	 */
-	grid->saveProjetion(fileName, avp->PROJECTION);
+        os << "../OUTPUT/" << filePrefix << "-proj" << ".dat";
+        fileName = os.str();
+        os.str("");
+        /*
+         *  calcul et sauvegarde  de la projection du  noyau
+         */
+        grid->saveProjection(fileName, avp->PROJECTION);
 	}
-    }
+}
 
 void ViabiMicroMacroDiscrete::saveViableSets()
-    {
+{
     saveValFunctions();
-    }
+}
+
 void ViabiMicroMacroDiscrete::saveValFunctions()
-    {
-    algoViabiParams *avp = modelParams->getAlgoParameters();
+{
+    const algoViabiParams *avp = modelParams->getAlgoParameters();
 
     ostringstream os;
     string fileName;
 
     if (avp->SAVE_SUBLEVEL)
 	{
-	os << "../OUTPUT/" << filePrefix << "-subLevel.dat";
-	fileName = os.str();
-	os.str("");
-	grid->saveSubLevelset(avp->LEVEL, fileName);
+        os << "../OUTPUT/" << filePrefix << "-subLevel.dat";
+        fileName = os.str();
+        os.str("");
+        grid->saveSubLevelset(avp->LEVEL, fileName);
 	}
 
     if (avp->SAVE_BOUNDARY)
 	{
-	os << "../OUTPUT/" << filePrefix << "-valFunc.dat";
-	fileName = os.str();
-	os.str("");
-	if (avp->SAVE_VIAB_LIGHT)
+        os << "../OUTPUT/" << filePrefix << "-valFunc.dat";
+        fileName = os.str();
+        os.str("");
+        if (avp->SAVE_VIAB_LIGHT)
 	    {
-	    grid->saveValOnGridLight(fileName);
+            grid->saveValOnGridLight(fileName);
 	    }
-	else
+        else
 	    {
-	    grid->saveValOnGrid(fileName);
+            grid->saveValOnGrid(fileName);
 	    }
 	}
 
     if (avp->SAVE_PROJECTION)
 	{
-	os << "../OUTPUT/" << filePrefix << "-proj" << ".dat";
-	fileName = os.str();
-	os.str("");
-	/*
-	 *  calcul et sauvegarde  de la projection du  noyau
-	 */
-	grid->saveProjetion(fileName, avp->PROJECTION);
+        os << "../OUTPUT/" << filePrefix << "-proj" << ".dat";
+        fileName = os.str();
+        os.str("");
+        /*
+         *  calcul et sauvegarde  de la projection du  noyau
+         */
+        grid->saveProjection(fileName, avp->PROJECTION);
 	}
 
     if (avp->SAVE_SLICE_BOUND)
 	{
-	os << "../OUTPUT/" << filePrefix << "-slice" << ".dat";
-	fileName = os.str();
-	os.str("");
-	/*
-	 *  calcul et sauvegarde  de la projection du  noyau
-	 */
-	grid->saveCoupeBoundary(fileName);
+        os << "../OUTPUT/" << filePrefix << "-slice" << ".dat";
+        fileName = os.str();
+        os.str("");
+        /*
+         *  calcul et sauvegarde  de la projection du  noyau
+         */
+        grid->saveCoupeBoundary(fileName);
 	}
 
-    }
+}
 
 void ViabiMicroMacroDiscrete::viabKerValFunc(unsigned long long int nbArret)
     {
@@ -536,7 +532,7 @@ void ViabiMicroMacroDiscrete::viabKerValFunc(unsigned long long int nbArret)
 
     unsigned long long int nbCTotal = dynsys->getTotalNbPointsC();
     unsigned long long int imagePos;
-    double minValCell;
+    double minValCell = PLUS_INF;
 
     while ((cptChanged > nbArret) & (nbIter < 15000))
 	{
@@ -562,7 +558,7 @@ void ViabiMicroMacroDiscrete::viabKerValFunc(unsigned long long int nbArret)
 			dynsys->dynamics_fd(intPointCoords, controlCoords[cu], intVect1);
 			if (grid->isPointInGrid_fd(intVect1))
 			    {
-			    grid->intCoordsToNum(intVect1, &imagePos);
+                    imagePos = grid->intCoordsToNum(intVect1);
 			    /*!
 			     * Si l'image est  dans les limites de la grille on étudie si elle vérifie les contraintes
 			     */
@@ -612,7 +608,7 @@ void ViabiMicroMacroDiscrete::viabKerGarantiValFunc(unsigned long long int nbArr
     unsigned long long int nbCTotal = dynsys->getTotalNbPointsC();
     unsigned long long int imagePos;
 
-    double minValCell;
+    double minValCell = PLUS_INF;
 
     while ((cptChanged > nbArret) & (nbIter < 15000))
 	{
@@ -638,7 +634,7 @@ void ViabiMicroMacroDiscrete::viabKerGarantiValFunc(unsigned long long int nbArr
 			dynsys->dynamics_tych_fd(intPointCoords, controlCoords[cu], tychIntCoords[0], intVect1);
 			if (grid->isPointInGrid_fd(intVect1))
 			    {
-			    grid->intCoordsToNum(intVect1, &imagePos);
+                    imagePos = grid->intCoordsToNum(intVect1);
 			    /*!
 			     * Si l'image est  dans les limites de la grille on étudie si elle vérifie les contraintes
 			     */
@@ -738,10 +734,10 @@ void ViabiMicroMacroDiscrete::CaptureBasin()
     saveValFunctions();
     }
 
-double ViabiMicroMacroDiscrete::computeOptimalCaptTrajectory(double *initPosition, string fileName, bool &succes)
-    {
-    return trajectoryHelper->computeOptimalTrajectory(initPosition, fileName, succes);
-    }
+double ViabiMicroMacroDiscrete::computeOptimalCaptTrajectory(ViabiMicroMacroTrajectoryHelper *trajectoryHelper, double *initPosition, double timeHorizon, string fileName, bool &succes)
+{
+    return trajectoryHelper->computeOptimalTrajectory(initPosition, timeHorizon, fileName, succes);
+}
 
 void ViabiMicroMacroDiscrete::computeCurrIm(int iter)
     {
@@ -818,7 +814,7 @@ void ViabiMicroMacroDiscrete::computeCurrIm(int iter)
 	//cout<< "  nb cells dans l'image "<<pointDI_DD.nbImagePoints<<endl;
 
 	// cout<<  " analyse d'une image de point\n";
-	for (int i = 0; i < pointDI.nbImagePoints; i++)
+	for (long long unsigned int i = 0; i < pointDI.nbImagePoints; i++)
 	    {
 	    numPoint = pointDI.tabImagePoints[i];
 	    tempImagePoint.PointNum = numPoint;
@@ -827,7 +823,7 @@ void ViabiMicroMacroDiscrete::computeCurrIm(int iter)
 	    if (numPoint < nbPointsTotal)
 		{
 		tempImagePoint.minVal = PLUS_INF;
-		for (int j = pointDI.tabPointsEntrees[i]; j < pointDI.tabPointsEntrees[i + 1]; j++)
+		for (long long unsigned int j = pointDI.tabPointsEntrees[i]; j < pointDI.tabPointsEntrees[i + 1]; j++)
 		    {
 		    numControl = pointDI.tabImageControls[j];
 		    //cout<< " numControl = "<<numControl<<endl;
@@ -1293,7 +1289,7 @@ int ViabiMicroMacroDiscrete::addNewPoints()
 bool ViabiMicroMacroDiscrete::testConstraintesForCell(unsigned long long int numCell)
     {
     bool res = true;
-    long long int *indicesDecalCell = grid->getIndicesDecalCell();
+    const long long int *indicesDecalCell = grid->getIndicesDecalCell();
     double *doublePointCoords = new double[dim];
 
     int nbPointsCube = (int) pow(2.0, dim);	//pow(2.0, dim);
@@ -1329,14 +1325,14 @@ void ViabiMicroMacroDiscrete::initialiseConstraints()
 	}
     }
 
-void ViabiMicroMacroDiscrete::ViabilityKernel(bool sortieOK, int nbArret)
+void ViabiMicroMacroDiscrete::ViabilityKernel(int nbArret)
     {
     dynsys->setDynamicsForward();
 
     viabKerValFunc(nbArret);
     }
 
-void ViabiMicroMacroDiscrete::GarantedViabilityKernel(bool sortieOK, int nbArret)
+void ViabiMicroMacroDiscrete::GarantedViabilityKernel(int nbArret)
     {
     dynsys->setDynamicsForward();
 

@@ -20,23 +20,67 @@
  *  Created on: 7 juil. 2021
  *      Author: Anna DESILLES
  */
+#include "../include/Params.h"
 #include "../include/ParametersManager.h"
+#include "../include/WeakDeclarations.h"
 
-ParametersManager::ParametersManager()
-    {
-    // TODO Auto-generated constructor stub
+gridParams gp = {};      
+algoViabiParams avp = {};
+controlParams cp = {};   
+systemParams sp = {};    
 
+template<typename T>
+void ParametersManager::readTabData(ptree *dataRoot, T *target, const string &label, int nbElements, const T& defaultValue)
+{
+    ptree::assoc_iterator labelPos = dataRoot->find(label);
+    if (labelPos != dataRoot->not_found())
+	{
+        ptree tabTree = labelPos->second;
+        if (tabTree.empty()) {
+            throw boost::property_tree::ptree_bad_data("The data read from the JSON file is not an array", tabTree);
+        }
+        ptree::const_iterator it = tabTree.begin();
+        for (auto tabIndice = 0; tabIndice < nbElements; tabIndice++)
+	    {
+            target[tabIndice] = (*it).second.get_value<T>(defaultValue);
+            it++;
+	    }
+        logVector("[ParametrManager] : Read from table " + label, target, nbElements);
+	}
+    else {
+        std::fill(target, target+nbElements, defaultValue);
     }
+}
 
-ParametersManager::ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp, systemParams *sp)
-    {
-    gridParameters = gp;
-    algoParameters = avp;
-    controlParameters = cp;
-    systemParameters = sp;
-    }
+template<typename T>
+void ParametersManager::readTabDataSkipInvalid(ptree *dataRoot, T *target, const string &label, int &nbElements)
+{
+    if (dataRoot->find(label) != dataRoot->not_found())
+	{
+        ptree tabTree = dataRoot->find(label)->second;
+        if (tabTree.empty()) {
+            throw boost::property_tree::ptree_bad_data("Not an array", tabTree);
+        }
 
-ParametersManager::ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp, systemParams *sp, int nbThreads, string paramsFile)
+        int tabIndice = 0;
+        int ptreeValuesRead = 0;
+        for (ptree::const_iterator it = tabTree.begin(); it != tabTree.end(); ++it) {
+            try {
+                target[tabIndice] = (*it).second.get_value<T>();
+                tabIndice++;
+            }
+            catch (const std::exception &e) {
+                spdlog::warn("Invalid value read in array named \"{}\" at index {}, skipping to next value",
+                             label, ptreeValuesRead);
+                nbElements--;
+            }
+            ptreeValuesRead++;
+        }
+        logVector("[ParametrManager] : Read from table " + label, target, nbElements);
+	}
+}
+
+ParametersManager::ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp, systemParams *sp, int nbThreads, const string &paramsFile, void *mh)
     {
     gridParameters = gp;
     algoParameters = avp;
@@ -44,53 +88,73 @@ ParametersManager::ParametersManager(gridParams *gp, algoViabiParams *avp, contr
     systemParameters = sp;
     nbOmpThreads = nbThreads;
     parametersFileName = paramsFile;
-    ptree allParamsRoot, dataRoot;
-
-
-    this->readControlParametersFromJson();
-    this->readGridParametersFromJson();
-    this->readAlgoParametersFromJson();
-    this->readSystemParametersFromJson();
+    modelHandle = mh;
+    
+    ptree allParamsRoot;
+    string input_tempfile = "../INPUT/" + parametersFileName;
+    spdlog::info("[ParametrManager] : Reading input json file {}", input_tempfile.c_str());
+    read_json(input_tempfile, allParamsRoot);
+    
+    this->readControlParametersFromJson(allParamsRoot);
+    this->readGridParametersFromJson(allParamsRoot);
+    this->readAlgoParametersFromJson(allParamsRoot);
+    this->readSystemParametersFromJson(allParamsRoot);
+    this->readTrajectoryParametersListFromJson(allParamsRoot);
+    this->readModelParametersFromJson(allParamsRoot);
     }
 
-gridParams* ParametersManager::getGridParameters()
-    {
+const gridParams* ParametersManager::getGridParameters() const
+{
     return gridParameters;
-    }
-algoViabiParams* ParametersManager::getAlgoParameters()
-    {
+}
+const algoViabiParams* ParametersManager::getAlgoParameters() const
+{
     return algoParameters;
-    }
-controlParams* ParametersManager::getControlParameters()
-    {
+}
+const controlParams* ParametersManager::getControlParameters() const
+{
     return controlParameters;
-    }
-systemParams* ParametersManager::getSystemParameters()
-    {
+}
+const systemParams* ParametersManager::getSystemParameters() const
+{
     return systemParameters;
-    }
+}
+const std::vector<trajectoryParams> &ParametersManager::getTrajectoryParametersList() const
+{
+    return trajectoryParametersList;
+}
+std::vector<trajectoryParams> &ParametersManager::getTrajectoryParametersList()
+{
+    return trajectoryParametersList;
+}
+int ParametersManager::getNbTrajectories() const
+{
+    return trajectoryParametersList.size();
+}
+const modelParams *ParametersManager::getModelParameters() const
+{
+    return &modelParameters;
+}
+void *ParametersManager::getModelHandle(void) {
+    return modelHandle;
+}
 
-void ParametersManager::readGridParametersFromJson()
+void ParametersManager::readGridParametersFromJson(ptree &allParamsRoot)
     {
     string line;
     ostringstream os;
 
     string tempStr, tmpStr;
-    ptree allParamsRoot, dataRoot;
+    ptree dataRoot;
     string sedCommand;
 
-    string input_tempfile = "../INPUT/" + parametersFileName;
     spdlog::info("[ParametrManager] : Reading of Grid parameters");
-    spdlog::info("[ParametrManager] : Input json file {}", input_tempfile.c_str());
-
-    //- loading data from input file
-    read_json(input_tempfile, allParamsRoot);
     dataRoot = allParamsRoot.find("GRID_PARAMETERS")->second;
 
     gridParameters->FILE_PREFIX = dataRoot.get<string>("OUTPUT_FILE_PREFIX", "Model-");
 
     int dim = dataRoot.get<int>("STATE_DIMENSION", 1);
-    gridParameters->GRID_METHOD = dataRoot.get<int>("GRID_METHOD", 1);
+    gridParameters->GRID_METHOD = dataRoot.get<GridMethod>("GRID_METHOD", BS);
 
     gridParameters->DIM = (unsigned long long int) dim;
 
@@ -100,221 +164,119 @@ void ParametersManager::readGridParametersFromJson()
     gridParameters->LIMINF = new double[dim];
     gridParameters->LIMSUP = new double[dim];
 
-    for (int tabIndice = 0; tabIndice < dim; tabIndice++)
-	{
-	gridParameters->LIMINF[tabIndice] = 0.0;	//default values
-	gridParameters->LIMSUP[tabIndice] = 1.0;	//default values
-	}
-    readTabData(&dataRoot, gridParameters->LIMSUP, "STATE_MAX_VALUES", dim);
-    readTabData(&dataRoot, gridParameters->LIMINF, "STATE_MIN_VALUES", dim);
+    readTabData(&dataRoot, gridParameters->LIMSUP, "STATE_MAX_VALUES", dim, 1.0);
+    readTabData(&dataRoot, gridParameters->LIMINF, "STATE_MIN_VALUES", dim, 0.0);
 
     gridParameters->NBPOINTS = new unsigned long long int[dim];
-    for (int tabIndice = 0; tabIndice < dim; tabIndice++)
-	{
-	gridParameters->NBPOINTS[tabIndice] = 2;	//default values
-	}
+    readTabData(&dataRoot, gridParameters->NBPOINTS, "STATE_GRID_POINTS", dim, 2ULL);
 
-    this->readTabData(&dataRoot, gridParameters->NBPOINTS, "STATE_GRID_POINTS", dim);
+    gridParameters->PERIODIC = new bool[dim];
+    readTabData(&dataRoot, gridParameters->PERIODIC, "STATE_PERIODIC", dim, false);
 
-    gridParameters->PERIODIC = new int[dim];
-
-    if (dataRoot.find("STATE_PERIODIC") != dataRoot.not_found())
-	{
-	this->readTabData(&dataRoot, gridParameters->PERIODIC, "STATE_PERIODIC", dim);
-	}
-    else
-	{
-	for (auto tabIndice = 0; tabIndice < dim; tabIndice++)
-	    {
-	    gridParameters->PERIODIC[tabIndice] = 0;	//default values
-	    }
-	}
-
-    if (dataRoot.find("GRID_MAIN_DIR") != dataRoot.not_found())
-	{
 	gridParameters->GRID_MAIN_DIR = dataRoot.get<int>("GRID_MAIN_DIR", 0);
-	}
-    else
-	{
-	gridParameters->GRID_MAIN_DIR = 0;
-	}
 
-    gridParameters->SLICE_DIRS = new int[dim];
-    if (dataRoot.find("SLICE_DIRECTIONS") != dataRoot.not_found())
-	{
-	readTabData(&dataRoot, gridParameters->SLICE_DIRS, "SLICE_DIRECTIONS", dim);
-	}
-    else
-	{
-	for (auto tabIndice = 0; tabIndice < dim; tabIndice++)
-	    {
-	    gridParameters->SLICE_DIRS[tabIndice] = 0;	//Default Values
-	    }
-	}
+    gridParameters->SLICE_DIRS = new bool[dim];
+    readTabData(&dataRoot, gridParameters->SLICE_DIRS, "SLICE_DIRECTIONS", dim, false);
 
     gridParameters->SLICE_VALUES = new double[dim];
-    if (dataRoot.find("SLICE_LEVELS") != dataRoot.not_found())
-	{
-	readTabData(&dataRoot, gridParameters->SLICE_VALUES, "SLICE_LEVELS", dim);
-	}
-    else
-	{
-	for (auto tabIndice = 0; tabIndice < dim; tabIndice++)
-	    {
-	    gridParameters->SLICE_VALUES[tabIndice] = 0.0;	//Default Values
-	    }
-	}
-
+    readTabData(&dataRoot, gridParameters->SLICE_VALUES, "SLICE_LEVELS", dim, 0.0);
+	
     gridParameters->SLICE_VALUES_FD = new unsigned long long int[dim];
-    if (dataRoot.find("SLICE_LEVELS_DISCRETE") != dataRoot.not_found())
-	{
-	readTabData(&dataRoot, gridParameters->SLICE_VALUES_FD, "SLICE_LEVELS_DISCRETE", dim);
-	}
-    else
-	{
-	for (auto tabIndice = 0; tabIndice < dim; tabIndice++)
-	    {
-	    gridParameters->SLICE_VALUES_FD[tabIndice] = 0;	//Default Values
-	    }
-	}
+    readTabData(&dataRoot, gridParameters->SLICE_VALUES_FD, "SLICE_LEVELS_DISCRETE", dim, 0ULL);
+	
+    gridParameters->SORTIE_OK_INF = new bool[dim];
+    readTabData(&dataRoot, gridParameters->SORTIE_OK_INF, "LOWER_LIMIT_IS_NOT_CONSTRAINT", dim, false);
 
-    gridParameters->SORTIE_OK_INF = new int[dim];
-    if (dataRoot.find("LOWER_LIMIT_IS_NOT_CONSTRAINT") != dataRoot.not_found())
-	{
-	readTabData(&dataRoot, gridParameters->SORTIE_OK_INF, "LOWER_LIMIT_IS_NOT_CONSTRAINT", dim);
-	}
-    else
-	{
-	for (auto tabIndice = 0; tabIndice < dim; tabIndice++)
-	    {
-	    gridParameters->SORTIE_OK_INF[tabIndice] = 0;	//Default Values
-	    }
-	}
-
-    gridParameters->SORTIE_OK_SUP = new int[dim];
-    if (dataRoot.find("UPPER_LIMIT_IS_NOT_CONSTRAINT") != dataRoot.not_found())
-	{
-	readTabData(&dataRoot, gridParameters->SORTIE_OK_SUP, "UPPER_LIMIT_IS_NOT_CONSTRAINT", dim);
-	}
-    else
-	{
-	for (auto tabIndice = 0; tabIndice < dim; tabIndice++)
-	    {
-	    gridParameters->SORTIE_OK_SUP[tabIndice] = 0;	//Default Values
-	    }
-	}
-    logVector("[ParametrManager] : Sortie sup: ", gridParameters->SORTIE_OK_SUP, dim);
+    gridParameters->SORTIE_OK_SUP = new bool[dim];
+    readTabData(&dataRoot, gridParameters->SORTIE_OK_SUP, "UPPER_LIMIT_IS_NOT_CONSTRAINT", dim, false);
+    
+	logVector("[ParametrManager] : Sortie sup: ", gridParameters->SORTIE_OK_SUP, dim);
     logVector("[ParametrManager] : Sortie inf: ", gridParameters->SORTIE_OK_INF, dim);
 
     spdlog::info("[ParametrManager] : Read grid params : FINISHED");
     }
 
-void ParametersManager::readSystemParametersFromJson()
+void ParametersManager::readSystemParametersFromJson(ptree &allParamsRoot)
     {
     string line;
     ostringstream os;
 
     string tempStr, tmpStr;
-    ptree allParamsRoot, dataRoot;
+    ptree dataRoot;
     string sedCommand;
 
-    string input_tempfile = "../INPUT/" + parametersFileName;
-
     spdlog::info("[ParametrManager] : Reading of System parameters");
-    spdlog::info("[ParametrManager] : Input json file {}", input_tempfile.c_str());
 
-    //- loading data from input file
-    read_json(input_tempfile, allParamsRoot);
     dataRoot = allParamsRoot.find("SYSTEM_PARAMETERS")->second;
 
-    systemParameters->COMPUTE_LC = dataRoot.get<int>("LIPSCHITZ_CONSTANT_COMPUTE_METHOD", 1);
-    systemParameters->COMPUTE_MF = dataRoot.get<int>("DYN_BOUND_COMPUTE_METHOD", 1);
+    systemParameters->COMPUTE_LC = dataRoot.get<ComputeMethod>("LIPSCHITZ_CONSTANT_COMPUTE_METHOD", ANALYTICAL_CALC);
+    systemParameters->COMPUTE_MF = dataRoot.get<ComputeMethod>("DYN_BOUND_COMPUTE_METHOD", ANALYTICAL_CALC);
 
-    if (dataRoot.find("LIPSCHITZ_CONSTANT") != dataRoot.not_found())
-	{
 	systemParameters->LIP = dataRoot.get<double>("LIPSCHITZ_CONSTANT", 1.0);
-	}
-    else
-	{
-	systemParameters->LIP = 1.0;
-	}
-
-    if (dataRoot.find("DYN_BOUND") != dataRoot.not_found())
-	{
 	systemParameters->MF = dataRoot.get<double>("DYN_BOUND", 1.0);
-	}
-    else
-	{
-	systemParameters->MF = 1.0;
-	}
 
-    spdlog::debug("[ParametrManager] : Dyn bounds estimation method {}, Dyn bounds default value  {}", systemParameters->COMPUTE_MF,
-	    systemParameters->MF);
-    spdlog::debug("[ParametrManager] : Lipschitz constant estimation method {}, Lipschitz constant value {}", systemParameters->COMPUTE_LC,
-	    systemParameters->LIP);
+    spdlog::debug("[ParametrManager] : Dyn bounds estimation method {}, Dyn bounds default value  {}",
+                  toString(systemParameters->COMPUTE_MF),
+                  systemParameters->MF);
+    spdlog::debug("[ParametrManager] : Lipschitz constant estimation method {}, Lipschitz constant value {}",
+                  toString(systemParameters->COMPUTE_LC),
+                  systemParameters->LIP);
 
-    systemParameters->DYN_TYPE = dataRoot.get<int>("DYNAMICS_TYPE", 1);
+    systemParameters->DYN_TYPE = dataRoot.get<DynType>("DYNAMICS_TYPE", CC);
 
     systemParameters->globDeltat = dataRoot.get<bool>("IS_TIMESTEP_GLOBAL", false);
-    systemParameters->maxTime = dataRoot.get<double>("TIME_HORIZON", 10.0);
 
-    systemParameters->SCHEME = dataRoot.get<int>("TIME_DISCRETIZATION_SCHEME", 1);
+    systemParameters->SCHEME = dataRoot.get<TimeDiscretizationScheme>("TIME_DISCRETIZATION_SCHEME", EL);
     systemParameters->SCALE_PARAM = dataRoot.get<bool>("SCALING", false);
 
-    if (dataRoot.find("COST_LIPSCHITZ_CONSTANT") != dataRoot.not_found())
-	{
-	systemParameters->L_LIP = dataRoot.get<double>("COST_LIPSCHITZ_CONSTANT", 1.0);
-	}
-    else
-	{
-	if (algoParameters->COMPUTE_TMIN)
-	    {
-	    systemParameters->L_LIP = systemParameters->maxTime;
-	    }
-	else
-	    {
-	    systemParameters->L_LIP = 1.0;
-	    }
-	}
+    systemParameters->L_LIP = 1.0;
+    systemParameters->L_MF = 1.0;
+    
+    if (gridParameters->GRID_METHOD != BS) {
+        if (dataRoot.find("COST_LIPSCHITZ_CONSTANT") != dataRoot.not_found())
+        {
+            systemParameters->L_LIP = dataRoot.get<double>("COST_LIPSCHITZ_CONSTANT", 1.0);
+        }
+        else if (algoParameters->COMPUTE_TMIN)
+        {
+            systemParameters->L_LIP = dataRoot.get<double>("TIME_HORIZON", 10.0);
+        }
+        systemParameters->L_MF = dataRoot.get<double>("COST_BOUND_CONSTANT", 1.0);
+    }	    
 
-    systemParameters->L_MF = dataRoot.get<double>("COST_BOUND_CONSTANT", 1.0);
-
-    spdlog::debug("[ParametrManager] : Cost function bound{}, Cost function Lipschitz contant {}", systemParameters->L_MF, systemParameters->L_LIP);
+    spdlog::debug("[ParametrManager] : Cost function bound {}, Cost function Lipschitz contant {}",
+                  systemParameters->L_MF, systemParameters->L_LIP);
     spdlog::info("[ParametrManager] : Read system params : FINISHED");
     }
 
-void ParametersManager::readAlgoParametersFromJson()
+void ParametersManager::readAlgoParametersFromJson(ptree &allParamsRoot)
     {
 
     string line;
     ostringstream os;
 
     string tempStr, tmpStr;
-    ptree allParamsRoot, dataRoot;
+    ptree dataRoot;
     string sedCommand;
 
-    string input_tempfile = "../INPUT/" + parametersFileName;
     spdlog::info("[ParametrManager] : Reading of Algorithm parameters");
-    spdlog::info("[ParametrManager] : Input json file {}", input_tempfile.c_str());
 
-    //- loading data from input file
-    read_json(input_tempfile, allParamsRoot);
     dataRoot = allParamsRoot.find("ALGORITHM_PARAMETERS")->second;
 
     algoParameters->NB_OMP_THREADS = nbOmpThreads;
 
     algoParameters->FILE_PREFIX = gridParameters->FILE_PREFIX;
-    algoParameters->TARGET_OR_DEPARTURE = dataRoot.get<int>("TARGET_OR_DEPARTURE", 1);
-    algoParameters->COMPUTE_TMIN = dataRoot.get<int>("COMPUTE_MIN_TIME", 0);
-    algoParameters->GRID_REFINMENTS_NUMBER = dataRoot.get<int>("GRID_REFINMENTS_NUMBER", 0);
-    algoParameters->COMPUTE_SET = dataRoot.get<int>("COMPUTE_VIABLE_SET", 1);
-    algoParameters->SET_TYPE = dataRoot.get<int>("SET_TYPE", 1);
-    algoParameters->INTERATION_STOP_LEVEL = dataRoot.get<int>("ITERATION_STOP_LEVEL", 0);
-    algoParameters->SAVE_SUBLEVEL = dataRoot.get<int>("SAVE_SUBLEVEL", 0);
-    algoParameters->LEVEL = dataRoot.get<double>("LEVEL", 0.0);
-    algoParameters->SAVE_VIAB_LIGHT = dataRoot.get<int>("SAVE_VIABSET_LIGHT", 0);
 
-    if ((algoParameters->COMPUTE_SET == 0) & (algoParameters->GRID_REFINMENTS_NUMBER > 0))
+    algoParameters->COMPUTE_TMIN = dataRoot.get<bool>("COMPUTE_MIN_TIME", 0);
+    algoParameters->GRID_REFINMENTS_NUMBER = dataRoot.get<int>("GRID_REFINMENTS_NUMBER", 0);
+    algoParameters->COMPUTE_SET = dataRoot.get<bool>("COMPUTE_VIABLE_SET", true);
+    algoParameters->SET_TYPE = dataRoot.get<SetType>("SET_TYPE", VIAB);
+    algoParameters->ITERATION_STOP_LEVEL = dataRoot.get<int>("ITERATION_STOP_LEVEL", 0);
+    algoParameters->SAVE_SUBLEVEL = dataRoot.get<bool>("SAVE_SUBLEVEL", false);
+    algoParameters->LEVEL = dataRoot.get<double>("LEVEL", 0.0);
+    algoParameters->SAVE_VIAB_LIGHT = dataRoot.get<bool>("SAVE_VIABSET_LIGHT", false);
+
+    if ((algoParameters->COMPUTE_SET == false) & (algoParameters->GRID_REFINMENTS_NUMBER > 0))
 	{
 	for (unsigned int k = 0; k < gridParameters->DIM; k++)
 	    {
@@ -323,93 +285,32 @@ void ParametersManager::readAlgoParametersFromJson()
 		gridParameters->NBPOINTS[k] = 2 * gridParameters->NBPOINTS[k] - 1;
 		}
 	    }
-	}
-
-    algoParameters->NB_TRAJS = dataRoot.get<int>("NUMBER_OF_TRAJECTORIES", 0);
-
-    algoParameters->TYPE_TRAJ = dataRoot.get<int>("TRAJECTORY_TYPE", 1);
-    double *initPoints = new double[gridParameters->DIM * algoParameters->NB_TRAJS];
-    if (algoParameters->NB_TRAJS > 0)
-	{
-	if (dataRoot.find("INITIAL_POINTS") != dataRoot.not_found())
-	    {
-	    readDoubleTabData(&dataRoot, initPoints, "INITIAL_POINTS", algoParameters->NB_TRAJS, gridParameters->DIM);
-	    }
-	}
-    algoParameters->INIT_POINTS = initPoints;
-
-    unsigned long long int *initPoints_fd = new unsigned long long int[gridParameters->DIM * algoParameters->NB_TRAJS];
-    if (dataRoot.find("INITIAL_POINTS_DISCRETE") != dataRoot.not_found())
-	{
-	readDoubleTabData(&dataRoot, initPoints_fd, "INITIAL_POINTS_DISCRETE", algoParameters->NB_TRAJS, gridParameters->DIM);
-	}
-
-    algoParameters->INIT_POINTS_FD = initPoints_fd;
-
-    double *initValues = new double[algoParameters->NB_TRAJS];
-    if (dataRoot.find("INITIAL_VALUES") != dataRoot.not_found())
-	{
-	ptree pointsTree = dataRoot.find("INITIAL_VALUES")->second;
-	int pointCounter = 0;
-	for (ptree::value_type &point : pointsTree.get_child(""))
-	    {
-	    initValues[pointCounter] = point.second.get_value<double>();
-	    pointCounter++;
-	    }
-	}
-    algoParameters->INIT_VALUES = initValues;
-
-    double *initValues_fd = new double[algoParameters->NB_TRAJS];
-    if (dataRoot.find("INITIAL_VALUES_DISCRETE") != dataRoot.not_found())
-	{
-	ptree pointsTree = dataRoot.find("INITIAL_VALUES_DISCRETE")->second;
-	int pointCounter = 0;
-	for (ptree::value_type &point : pointsTree.get_child(""))
-	    {
-	    initValues_fd[pointCounter] = point.second.get_value<double>();
-	    pointCounter++;
-	    }
-	}
-    algoParameters->INIT_VALUES_FD = initValues_fd;
-
-    double *initControls = new double[controlParameters->DIMC * algoParameters->NB_TRAJS];
-    if (dataRoot.find("INITIAL_CONTROLS") != dataRoot.not_found())
-	{
-	readDoubleTabData(&dataRoot, initControls, "INITIAL_CONTROLS", algoParameters->NB_TRAJS, controlParameters->DIMC);
-	}
-
-    algoParameters->INIT_CONTROLS = initControls;
-
-    algoParameters->INTERMEDIATE_SAVINGS = dataRoot.get<int>("INTERMEDIATE_SAVINGS", 0);
-    algoParameters->SAVE_BOUNDARY = dataRoot.get<int>("SAVE_BOUNDARY", 0);
-    algoParameters->SAVE_PROJECTION = dataRoot.get<int>("SAVE_PROJECTION", 0);
-    algoParameters->SAVE_SLICE = dataRoot.get<int>("SAVE_SLICE", 0);
-    algoParameters->SAVE_SLICE_BOUND = dataRoot.get<int>("SAVE_SLICE_BOUND", 0);
+	}    
+    
+    algoParameters->INTERMEDIATE_SAVINGS = dataRoot.get<bool>("INTERMEDIATE_SAVINGS", 0);
+    algoParameters->SAVE_BOUNDARY = dataRoot.get<bool>("SAVE_BOUNDARY", 0);
+    algoParameters->SAVE_PROJECTION = dataRoot.get<bool>("SAVE_PROJECTION", 0);
+    algoParameters->SAVE_SLICE = dataRoot.get<bool>("SAVE_SLICE", 0);
+    algoParameters->SAVE_SLICE_BOUND = dataRoot.get<bool>("SAVE_SLICE_BOUND", 0);
     algoParameters->PROJECTION = new unsigned long long int[gridParameters->DIM];
-    for (unsigned long long int tabIndice = 0; tabIndice < gridParameters->DIM; tabIndice++)
-	{
-	algoParameters->PROJECTION[tabIndice] = 0;	//Default Values
-	}
-    this->readTabData(&dataRoot, algoParameters->PROJECTION, "PROJECTION_AXIS", gridParameters->DIM);
-
+    this->readTabData(&dataRoot, algoParameters->PROJECTION, "PROJECTION_AXIS", gridParameters->DIM, 0ULL);
+    algoParameters->TARGET_OR_DEPARTURE = dataRoot.get<TargetOrDeparture>("TARGET_OR_DEPARTURE", DEPARTURE);
+    
     spdlog::info("[ParametrManager] : Read algorithm params : FINISHED");
     }
-void ParametersManager::readControlParametersFromJson()
+
+void ParametersManager::readControlParametersFromJson(ptree &allParamsRoot)
     {
 
     string line;
     ostringstream os;
 
     string tempStr, tmpStr;
-    ptree allParamsRoot, dataRoot;
+    ptree dataRoot;
     string sedCommand;
 
-    string input_tempfile = "../INPUT/" + parametersFileName;
     spdlog::info("[ParametrManager] : Reading of controls parameters");
-    spdlog::info("[ParametrManager] : Input json file {}", input_tempfile.c_str());
 
-    //- loading data from input file
-    read_json(input_tempfile, allParamsRoot);
     dataRoot = allParamsRoot.find("CONTROL_PARAMETERS")->second;
 
     /*
@@ -426,20 +327,11 @@ void ParametersManager::readControlParametersFromJson()
 	 */
 	controlParameters->LIMINFC = new double[dimc];
 	controlParameters->LIMSUPC = new double[dimc];
-	for (auto tabIndice = 0; tabIndice < dimc; tabIndice++)
-	    {
-	    controlParameters->LIMINFC[tabIndice] = 0.0;	//Default Values
-	    controlParameters->LIMSUPC[tabIndice] = 1.0;	//Default Values
-	    }
-	this->readTabData(&dataRoot, controlParameters->LIMSUPC, "CONTROL_MAX_VALUES", dimc);
-	this->readTabData(&dataRoot, controlParameters->LIMINFC, "CONTROL_MIN_VALUES", dimc);
+	this->readTabData(&dataRoot, controlParameters->LIMSUPC, "CONTROL_MAX_VALUES", dimc, 1.0);
+	this->readTabData(&dataRoot, controlParameters->LIMINFC, "CONTROL_MIN_VALUES", dimc, 0.0);
 
 	controlParameters->NBPOINTSC = new unsigned long long int[dimc];
-	for (auto tabIndice = 0; tabIndice < dimc; tabIndice++)
-	    {
-	    controlParameters->NBPOINTSC[tabIndice] = 1;	//Default Values
-	    }
-	this->readTabData(&dataRoot, controlParameters->NBPOINTSC, "CONTROL_GRID_POINTS", dimc);
+	this->readTabData(&dataRoot, controlParameters->NBPOINTSC, "CONTROL_GRID_POINTS", dimc, 1ULL);
 	}
     else
 	{
@@ -459,20 +351,11 @@ void ParametersManager::readControlParametersFromJson()
 	 */
 	controlParameters->LIMINF_TY = new double[dimc_ty];
 	controlParameters->LIMSUP_TY = new double[dimc_ty];
-	for (auto tabIndice = 0; tabIndice < dimc_ty; tabIndice++)
-	    {
-	    controlParameters->LIMINF_TY[tabIndice] = 0.0;	//Default Values
-	    controlParameters->LIMSUP_TY[tabIndice] = 1.0;	//Default Values
-	    }
-	this->readTabData(&dataRoot, controlParameters->LIMSUP_TY, "CONTROL_TY_MAX_VALUES", dimc_ty);
-	this->readTabData(&dataRoot, controlParameters->LIMINF_TY, "CONTROL_TY_MIN_VALUES", dimc_ty);
+	this->readTabData(&dataRoot, controlParameters->LIMSUP_TY, "CONTROL_TY_MAX_VALUES", dimc_ty, 0.0);
+	this->readTabData(&dataRoot, controlParameters->LIMINF_TY, "CONTROL_TY_MIN_VALUES", dimc_ty, 1.0);
 
 	controlParameters->NBPOINTS_TY = new unsigned long long int[dimc_ty];
-	for (auto tabIndice = 0; tabIndice < dimc_ty; tabIndice++)
-	    {
-	    controlParameters->NBPOINTS_TY[tabIndice] = 1;	//Default Values
-	    }
-	this->readTabData(&dataRoot, controlParameters->NBPOINTS_TY, "CONTROL_TY_GRID_POINTS", dimc_ty);
+	this->readTabData(&dataRoot, controlParameters->NBPOINTS_TY, "CONTROL_TY_GRID_POINTS", dimc_ty, 1ULL);
 	}
     else
 	{
@@ -485,136 +368,371 @@ void ParametersManager::readControlParametersFromJson()
 	controlParameters->LIMSUP_TY = new double[dimc_ty];
 	controlParameters->NBPOINTS_TY = new unsigned long long int[dimc_ty];
 	}
+    
     spdlog::info("[ParametrManager] : Read control : FINISHED");
     }
 
-void ParametersManager::readTabData(ptree *dataRoot, unsigned long long int *target, string label, int nbElements)
-    {
-    if (dataRoot->find(label) != dataRoot->not_found())
-	{
-	ptree tabTree = dataRoot->find(label)->second;
-	ptree::const_iterator it = tabTree.begin();
-	for (auto tabIndice = 0; tabIndice < nbElements; tabIndice++)
-	    {
-	    target[tabIndice] = (unsigned long long int) (*it).second.get_value<int>();
-	    it++;
-	    }
-	logVector("[ParametrManager] : Read from table " + label, target, nbElements);
-	}
+void ParametersManager::readTrajectoryParametersListFromJson(ptree &allParamsRoot) {
+    ptree dataRoot;
+
+    spdlog::info("[ParametrManager] : Reading of Trajectory parameters");
+
+    ptree::assoc_iterator trajParamsPos = allParamsRoot.find("TRAJECTORY_PARAMETERS");
+    if (trajParamsPos == allParamsRoot.not_found()) {
+        spdlog::info("[ParametrManager] : No trajectory parameters found");
+        // Pour s'assurer que le vecteur est vide
+        trajectoryParametersList.clear();
+        return;
     }
 
-void ParametersManager::readDoubleTabData(ptree *dataRoot, unsigned long long int *target, string label, int nbElements, int dim)
-    {
-    if (dataRoot->find(label) != dataRoot->not_found())
-	{
-	int cptPoints = 0;
-	BOOST_FOREACH(ptree::value_type & rowPair, dataRoot->find(label)->second)
-	    {
-	    if (cptPoints >= nbElements)
-		{
-		break;
-		}
-	    int cptCoords = 0;
-	    BOOST_FOREACH(ptree::value_type & itemPair, rowPair.second)
-		{
-		if(cptCoords >= dim)
-		    {
-		    break;
-		    }
-		target[cptPoints * dim + cptCoords] = (unsigned long long int) itemPair.second.get_value<int>();
-		cptCoords++;
-		}
-	    cptPoints++;
-	    }
-	}
-    logVector("[ParametrManager] : Read from table " + label, target, nbElements * dim);
+    ptree defaultValues;
+    ptree::assoc_iterator defaultValuesPos;
+    dataRoot = trajParamsPos->second;    
+    if (dataRoot.empty()) {
+        spdlog::warn("[ParametrManager] : Trajectory parameters should be an array or an objet with fields DEFAULT_VALUES and TRAJECTORY_SPECIFIC_VALUES. No trajectory calculations");
+    }
+    else if ((defaultValuesPos = dataRoot.find("DEFAULT_VALUES")) != dataRoot.not_found()) {
+        // On suppose avoir des paramètres de trajectoire avec valeur par défaut
+        defaultValues = defaultValuesPos->second;
+        ptree::assoc_iterator newDataRootPos = dataRoot.find("TRAJECTORY_SPECIFIC_VALUES");
+        if (newDataRootPos == dataRoot.not_found()) {
+            spdlog::error("[ParametrManager] : Default values given without trajectory specific values. Ill formed trajectory parameters");
+            spdlog::error("[ParametrManager] : No trajectory calculation");
+            trajectoryParametersList.clear();
+            return;
+        }
+        else {
+            dataRoot = newDataRootPos->second;
+        }
     }
 
-void ParametersManager::readTabData(ptree *dataRoot, int *target, string label, int nbElements)
-    {
-    if (dataRoot->find(label) != dataRoot->not_found())
-	{
-	ptree tabTree = dataRoot->find(label)->second;
-	ptree::const_iterator it = tabTree.begin();
-	for (auto tabIndice = 0; tabIndice < nbElements; tabIndice++)
-	    {
-	    target[tabIndice] = (*it).second.get_value<int>();
-	    it++;
-	    }
-	logVector("[ParametrManager] : Read from table " + label, target, nbElements);
-	}
+    for (ptree::iterator pos = dataRoot.begin(); pos != dataRoot.end(); ++pos) {
+        trajectoryParams trajParams;
+        mergeJSONPtreeInto(defaultValues, pos->second);
+        readTrajectoryParameters(pos->second, trajParams);
+        trajectoryParametersList.push_back(std::move(trajParams));
+    }
+    spdlog::info("[ParametrManager] : Read trajectory parameters : FINISHED");
+}
+
+void ParametersManager::readTrajectoryParameters(ptree &trajectoryParamsRoot, trajectoryParams &trajParams) {
+
+    ptree &dataRoot = trajectoryParamsRoot;
+    
+    trajParams.maxTime = dataRoot.get<double>("TRAJECTORY_TIME_HORIZON", 10.0);   
+
+    if (dataRoot.find("TRAJECTORY_TYPE") != dataRoot.not_found()) {
+        trajParams.NB_STRATEGIES = dataRoot.find("TRAJECTORY_TYPE")->second.size();
+    }
+    else {
+        trajParams.NB_STRATEGIES = 0;
+    }
+    
+    if (trajParams.NB_STRATEGIES > 0) {
+        trajParams.TRAJECTORY_TYPE = STRATEGY_LIST;
+        trajParams.STRATEGIES = new ControlPickStrategyName[trajParams.NB_STRATEGIES];
+        readTabDataSkipInvalid(&dataRoot, trajParams.STRATEGIES, "TRAJECTORY_TYPE", trajParams.NB_STRATEGIES);
+        initBubble(dataRoot, trajParams);
+    }
+    else {
+        trajParams.TRAJECTORY_TYPE = dataRoot.get<TypeTraj>("TRAJECTORY_TYPE", VD);
+        if (isCautious(trajParams.TRAJECTORY_TYPE)) {
+            initBubble(dataRoot, trajParams);
+        }
+    }
+    
+    double *initPoint = new double[gridParameters->DIM];
+    readTabData(&dataRoot, initPoint, "INITIAL_POINT", gridParameters->DIM, 0.0);
+    trajParams.INIT_POINT = initPoint;
+
+    unsigned long long int *initPoint_fd = new unsigned long long int[gridParameters->DIM];
+    readTabData(&dataRoot, initPoint_fd, "INITIAL_POINT_DISCRETE", gridParameters->DIM, 0ULL);
+
+    trajParams.INIT_POINT_FD = initPoint_fd;
+    
+    trajParams.INIT_VALUE = dataRoot.get<double>("INITIAL_VALUE", 0.0);
+    trajParams.INIT_VALUE_FD = dataRoot.get<double>("INITIAL_VALUE_DISCRETE", 0.0);
+
+    double *initControl = new double[controlParameters->DIMC];    
+    readTabData(&dataRoot, initControl, "INITIAL_CONTROL", controlParameters->DIMC, 0.0);
+	
+    for (unsigned long long int d = 0; d < controlParameters->DIMC; ++d) {
+        if (initControl[d] < controlParameters->LIMINFC[d]) {
+            spdlog::error("Initial control n°{} outside of control domain.", d+1);
+            spdlog::warn("Clamping coordinate of value {} (index n°{}) into [{} ,{}]",
+                         trajectoryParametersList.size()+1, initControl[d], d+1, controlParameters->LIMINFC[d], controlParameters->LIMSUPC[d]);
+            initControl[d] = controlParameters->LIMINFC[d];
+        }
+        else if (initControl[d] > controlParameters->LIMSUPC[d]) {
+            spdlog::error("Initial control n°{} outside of control domain.");
+            spdlog::warn("Clamping coordinate of value {} (index n°{}) into [{} ,{}]",
+                         trajectoryParametersList.size()+1, initControl[d], d+1, controlParameters->LIMINFC[d], controlParameters->LIMSUPC[d]);
+            initControl[d] = controlParameters->LIMSUPC[d];
+        }
+    }        
+    trajParams.INIT_CONTROL = initControl;
+
+    trajParams.REAL_TIME_STEPS_PER_DISCRETE_STEP = dataRoot.get<int>("REAL_TIME_STEPS_PER_DISCRETE_STEP", 1);
+
+    boost::optional<double> optAngle = dataRoot.get_optional<double>("MAX_ANGLE_RADIANS");
+    if (optAngle) {
+        trajParams.MAX_ANGLE_RADIANS = (*optAngle);
+    }
+    else if ((optAngle = dataRoot.get_optional<double>("MAX_ANGLE_DEGREES"))) {
+        trajParams.MAX_ANGLE_RADIANS = (*optAngle) * pi/180;
+    }
+    else {
+        trajParams.MAX_ANGLE_RADIANS = pi/2;
     }
 
-void ParametersManager::readDoubleTabData(ptree *dataRoot, int *target, string label, int nbElements, int dim)
-    {
-    if (dataRoot->find(label) != dataRoot->not_found())
-	{
-	int cptPoints = 0;
-	BOOST_FOREACH(ptree::value_type & rowPair, dataRoot->find(label)->second)
-	    {
-	    if (cptPoints >= nbElements)
-		{
-		break;
-		}
-	    int cptCoords = 0;
-	    BOOST_FOREACH(ptree::value_type & itemPair, rowPair.second)
-		{
-		if(cptCoords >= dim)
-		    {
-		    break;
-		    }
-		target[cptPoints * dim + cptCoords] = itemPair.second.get_value<int>();
-		cptCoords++;
-		}
-	    cptPoints++;
-	    }
-	}
-    logVector("[ParametrManager] : Read from table " + label, target, nbElements * dim);
+    trajParams.SAVE_PICKING_STRATEGY = dataRoot.get<bool>("SAVE_PICKING_STRATEGY", true);
+    trajParams.ARE_STRATEGIES_GUARANTEED = dataRoot.get<bool>("ARE_STRATEGIES_GUARANTEED", true);
+    initSeed(dataRoot, trajParams);
+
+    if (controlParameters->DIM_TY > 0) {
+        ptree tycheDataRoot;
+        ptree defaultValues;
+        
+        ptree::assoc_iterator tycheParamsPos = dataRoot.find("TYCHE_PARAMETERS");
+        if (tycheParamsPos == dataRoot.not_found()) {
+            spdlog::warn("[ParametrManager] : No tyche parameters found for tychastic problem, all values will be the default");
+        }
+        else {
+            trajParams.TYCHE_PARAMS = new tycheParams[controlParameters->DIM_TY];
+            tycheDataRoot = tycheParamsPos->second;                      
+            ptree::assoc_iterator defaultValuesPos = tycheDataRoot.find("DEFAULT_VALUES");
+            if (defaultValuesPos != tycheDataRoot.not_found()) {
+                defaultValues = defaultValuesPos->second;
+                ptree::assoc_iterator newDataRootPos = tycheDataRoot.find("TYCHE_SPECIFIC_VALUES");
+                if (newDataRootPos == tycheDataRoot.not_found()) {
+                    tycheDataRoot.clear();
+                }
+                else {
+                    tycheDataRoot = newDataRootPos->second;
+                }
+            }
+        }
+        if (tycheDataRoot.size() < controlParameters->DIM_TY) {
+            spdlog::warn("[ParametrManager] : Tyche parameters list size (which is {}) smaller than CONTROL_TY_DIMENSION (which is {})",
+                         tycheDataRoot.size(), controlParameters->DIM_TY);
+            spdlog::warn("[ParametrManager] : The parameters list will be consumed until no more parameters are left, after which default values will be given");
+        }
+        else if (tycheDataRoot.size() > controlParameters->DIM_TY) {
+            spdlog::warn("[ParametrManager] : Tyche parameters list size (which is {}) different to CONTROL_TY_DIMENSION (which is {})",
+                         tycheDataRoot.size(), controlParameters->DIM_TY);
+            spdlog::warn("[ParametrManager] : Parameters whose index exceeds the dimension will be ignored");
+            tycheDataRoot.erase(std::next(tycheDataRoot.begin(), controlParameters->DIM_TY), tycheDataRoot.end());
+        }  
+        
+        ptree::iterator it = tycheDataRoot.begin();
+        for (unsigned long long int i = 0; i < tycheDataRoot.size(); ++i) {
+            mergeJSONPtreeInto(defaultValues, it->second);
+            readTycheParameters(it->second, trajParams.TYCHE_PARAMS[i]);
+            ++it;
+        }
+        for (unsigned long long int i = tycheDataRoot.size(); i < controlParameters->DIM_TY; ++i) {
+            readTycheParameters(defaultValues, trajParams.TYCHE_PARAMS[i]);
+        }
+    }
+}
+
+void ParametersManager::readTycheParameters(ptree &dataRoot, tycheParams &tycheParams) {
+    
+    tycheParams.TYCHE_DISTRIBUTION = dataRoot.get<TycheDistribution>("TYCHE_DISTRIBUTION", UNIFORM);
+    boost::optional<double> optTycheValue = dataRoot.get_optional<double>("CONSTANT_TYCHE_VALUE");
+    
+    if (tycheParams.TYCHE_DISTRIBUTION == CONSTANT) {
+        if (optTycheValue) {
+            tycheParams.CONSTANT_TYCHE_VALUE = *optTycheValue;
+        }
+        else {
+            spdlog::warn("Constant tyche distribution requested but no value was given, defaulting to 0");
+            tycheParams.CONSTANT_TYCHE_VALUE = 0.0;
+        }
     }
 
-void ParametersManager::readDoubleTabData(ptree *dataRoot, double *target, string label, int nbElements, int dim)
-    {
-    if (dataRoot->find(label) != dataRoot->not_found())
-	{
-	int cptPoints = 0;
-	BOOST_FOREACH(ptree::value_type & rowPair, dataRoot->find(label)->second)
-	    {
-	    if (cptPoints >= nbElements)
-		{
-		break;
-		}
-	    int cptCoords = 0;
-	    BOOST_FOREACH(ptree::value_type & itemPair, rowPair.second)
-		{
-		if(cptCoords >= dim)
-		    {
-		    break;
-		    }
-		target[cptPoints * dim + cptCoords] = itemPair.second.get_value<double>();
-		cptCoords++;
-		}
-	    cptPoints++;
-	    }
-	}
-    logVector("[ParametrManager] : Read from table " + label, target, nbElements * dim);
+    tycheParams.MAX_NB_REROLLS = dataRoot.get<int>("MAX_NB_REROLLS", 10);
+}
+
+void ParametersManager::readModelParametersFromJson(ptree &allParamsRoot) {
+    ptree dataRoot;
+
+    spdlog::info("[ParametrManager] : Reading of Model parameters");
+
+    ptree::assoc_iterator modelParametersPos = allParamsRoot.find("MODEL_PARAMETERS");
+    if (modelParametersPos != allParamsRoot.not_found()) {
+        dataRoot = modelParametersPos->second;
+
+        for (ptree::iterator pos = dataRoot.begin(); pos != dataRoot.end(); ++pos) {
+            if (pos->second.empty()) {
+                modelParameters[pos->first] = pos->second.data();
+            }
+            else {
+                for (ptree::iterator it = pos->second.begin(); it != pos->second.end(); ++it) {
+                    modelParameters.addToList(pos->first, it->second.data());
+                }
+            }
+        }
+    }
+    else {
+        spdlog::info("[ParametrManager] : No model parameters found");
+    }
+    spdlog::info("[ParametrManager] : Read model parameters : FINISHED");
+}
+
+void ParametersManager::toPixels(double *bubbleRadius) {
+    for (unsigned long long int i = 0; i < gridParameters->DIM; ++i) {
+        double unitPerPixels = (gridParameters->LIMSUP[i] - gridParameters->LIMINF[i]) / gridParameters->NBPOINTS[i];
+        bubbleRadius[i] = bubbleRadius[i] / unitPerPixels;
+    }
+}
+
+void ParametersManager::initBubble(ptree &dataRoot, trajectoryParams &trajParameters) {
+
+    trajParameters.BUBBLE_RADIUS = new double[gridParameters->DIM];
+    double * const bubbleRadius = trajParameters.BUBBLE_RADIUS;
+
+    try {
+        this->readTabData(&dataRoot, bubbleRadius, "BUBBLE_RADIUS", gridParameters->DIM, 0.5);
+    }
+    // Si la taille n'est pas donnée comme un tableau, peut-être qu'elle est donnée comme un nombre ?
+    catch (...) {
+        double radius = dataRoot.get<double>("BUBBLE_RADIUS", 0.5);
+        std::fill(bubbleRadius, bubbleRadius + gridParameters->DIM, radius);
     }
 
-void ParametersManager::readTabData(ptree *dataRoot, double *target, string label, int nbElements)
-    {
-    if (dataRoot->find(label) != dataRoot->not_found())
-	{
-	ptree tabTree = dataRoot->find(label)->second;
-	ptree::const_iterator it = tabTree.begin();
-	for (auto tabIndice = 0; tabIndice < nbElements; tabIndice++)
-	    {
-	    target[tabIndice] = (*it).second.get_value<double>();
-	    it++;
-	    }
-	logVector("[ParametrManager] : Read from table " + label, target, nbElements);
-	}
+    trajParameters.BUBBLE_INTERPRETATION =
+        dataRoot.get<BubbleInterpretation>("BUBBLE_INTERPRETATION", MOORE);
+
+
+    bool allEqual = true;
+
+    if (!isInPixelsUnits(trajParameters.BUBBLE_INTERPRETATION))
+    {        
+        toPixels(bubbleRadius);      
     }
+
+    bubbleRadius[0] = std::ceil(bubbleRadius[0]);
+    for (unsigned long long int i = 1; i < gridParameters->DIM; ++i) {
+        // Notre code n'exploite qu'une bulle en taille de pixels entiers
+        // On veut que la bulle englobe entièrement la zone souhaitée
+        // et la bulle doit au moins avoir une taille en pixels de 1, d'où le ceil
+        bubbleRadius[i] = std::ceil(bubbleRadius[i]);
+        allEqual &= (bubbleRadius[i-1] == bubbleRadius[i]);
+    }    
+
+    if (!allEqual) {
+        if (trajParameters.BUBBLE_INTERPRETATION == EUCLIDEAN_PX) {
+            spdlog::warn("[ParametrManager] : Euclidean pixel distance requested but different bubble radiuses given for each dimension. Assuming ELLIPTIC_PX");
+            trajParameters.BUBBLE_INTERPRETATION = ELLIPTIC_PX;
+        }
+        else if (trajParameters.BUBBLE_INTERPRETATION == EUCLIDEAN) {
+            trajParameters.BUBBLE_INTERPRETATION = ELLIPTIC;
+        }
+    }
+    else {
+        if (trajParameters.BUBBLE_INTERPRETATION == ELLIPTIC) {
+            trajParameters.BUBBLE_INTERPRETATION = EUCLIDEAN;
+        }
+        else if (trajParameters.BUBBLE_INTERPRETATION == ELLIPTIC_PX) {
+            trajParameters.BUBBLE_INTERPRETATION = EUCLIDEAN_PX;
+        }
+    }
+}
+
+void ParametersManager::initSeed(ptree &dataRoot, trajectoryParams &params) {
+    ptree::assoc_iterator seedRoot = dataRoot.find("SEED");
+    if (seedRoot == dataRoot.not_found()) {
+        params.SEED_LENGTH = 0;
+    }
+    else if (seedRoot->second.empty()) {
+        boost::optional<int> seedValue = dataRoot.get_optional<int>("SEED");
+        if (!seedValue) {
+            params.SEED_LENGTH = 0;
+        }
+        else {
+            params.SEED_LENGTH = 1;
+            params.SEED = new unsigned long long int[1];
+            params.SEED[0] = *seedValue;
+        }
+        
+    }
+    else {
+        params.SEED_LENGTH = seedRoot->second.size();
+        params.SEED = new unsigned long long int[params.SEED_LENGTH];
+        readTabDataSkipInvalid(&dataRoot, params.SEED, "SEED", params.SEED_LENGTH);
+    }
+}
+
+void mergeJSONPtreeInto(const ptree &from, ptree &to) {
+    int i = 0;
+    for (ptree::const_iterator it = from.begin(); it != from.end(); ++it) {
+        ptree::assoc_iterator child = to.find(it->first);
+        if (child == to.not_found()) {
+            to.put_child(it->first, it->second);
+        }
+        // Si le champ est un champ composé
+        else if (!it->second.empty()) {
+            // Si on a un tableau
+            if (it->first == "") {
+                // Les deux tableaux doivent avoir la même taille
+                for (auto j = to.size(); j < from.size(); ++j) {
+                    ptree newEmpty;
+                    to.put_child("", newEmpty);
+                }
+                mergeJSONPtreeInto(it->second, std::next(to.begin(), i)->second);
+            }
+            // Si on a un objet
+            else {
+                mergeJSONPtreeInto(it->second, child->second);
+            }
+        }
+        ++i;
+    }
+}
+
 ParametersManager::~ParametersManager()
     {
     // TODO Auto-generated destructor stub
     }
 
+
+TrajectoryParametersManager::TrajectoryParametersManager(ParametersManager *pm, int trajIndex) :
+    parametersManager(pm),
+    trajIndex(trajIndex) {}
+
+const trajectoryParams *TrajectoryParametersManager::getTrajectoryParameters() const {
+    return &(parametersManager->getTrajectoryParametersList()[trajIndex]);
+}
+
+int TrajectoryParametersManager::getNbTrajectories() const {
+    return parametersManager->getNbTrajectories();
+}
+
+int TrajectoryParametersManager::getTrajectoryIndex() const {
+    return trajIndex;
+}
+
+const gridParams *TrajectoryParametersManager::getGridParameters() const {
+    return parametersManager->getGridParameters();
+}
+    
+const algoViabiParams *TrajectoryParametersManager::getAlgoParameters() const {
+    return parametersManager->getAlgoParameters();
+}
+    
+const controlParams *TrajectoryParametersManager::getControlParameters() const {
+    return parametersManager->getControlParameters();
+}
+    
+const systemParams *TrajectoryParametersManager::getSystemParameters() const {
+    return parametersManager->getSystemParameters();
+}
+        
+void *TrajectoryParametersManager::getModelHandle(void) {
+    return parametersManager->getModelHandle();
+}
+    
+const modelParams *TrajectoryParametersManager::getModelParameters() const {
+    return parametersManager->getModelParameters();
+}

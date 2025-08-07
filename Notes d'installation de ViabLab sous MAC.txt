@@ -1,0 +1,275 @@
+#### Suivez https://viability-theory.org/node/22/ pour cloner le dossier VIABLAB  ####
+
+#### Installer cmake-3.13.5 ####
+	#### Telecharger cmake-3.13.5-Darwin-x86_64.tar.gz sur https://github.com/Kitware/CMake/releases/tag/v3.13.5 ####
+
+	#### Verifier le nom de cmake : ####
+	sunxt@SunXTdeMacBook-Air % cd ~/Downloads
+	sunxt@SunXTdeMacBook-Air Downloads % ls ~/Downloads | grep cmake
+		## répond ##
+		cmake-3.13.5-Darwin-x86_64.tar
+
+	#### Accédez au répertoire de téléchargement et décompressez le fichier : ####
+	sunxt@SunXTdeMacBook-Air Downloads % tar -xvf cmake-3.13.5-Darwin-x86_64.tar
+
+	#### Déplacez-le dans le dossier viablab : ####
+	sunxt@SunXTdeMacBook-Air Downloads % mv cmake-3.13.5-Darwin-x86_64 ~/Desktop/viablab/cmake
+
+	#### Verifier la version: ####
+	sunxt@SunXTdeMacBook-Air Downloads % ~/Desktop/viablab/cmake/CMake.app/Contents/bin/cmake --version
+		## répond ## 
+		cmake version 3.13.5
+
+	#### Ajouter la commande cmake au PATH global pour l'utiliser plus facilement : ####
+	sunxt@SunXTdeMacBook-Air Downloads % nano ~/.zshrc
+		#### Ajoutez la ligne suivante à la fin du fichier : ####
+		export PATH="$HOME/Desktop/viablab/cmake/cmake-3.13.5-Darwin-x86_64/CMake.app/Contents/bin:$PATH"
+		#### Sauvegardez et quittez (appuyez sur Ctrl + X, puis Y, et enfin Entrée). ####
+		#### Appliquez les modifications : ####
+		sunxt@SunXTdeMacBook-Air Downloads % source ~/.zshrc
+
+#### Vérifiez que le dossier VIABLAB/build est vide ####
+	sunxt@SunXTdeMacBook-Air Downloads % cd ~/VIABLAB 
+ 	sunxt@SunXTdeMacBook-Air VIABLAB % rm -rf build
+	sunxt@SunXTdeMacBook-Air VIABLAB % mkdir build 
+
+
+#### Dans le fichier source/CMakeLists.txt, remplacez le contenu sous la ligne < ## Substitute the text within the parentheses with your ... path > par vos propres chemins d'accès ... ####
+
+#### Générez le projet avec CMake depuis le dossier build ####
+	sunxt@SunXTdeMacBook-Air VIABLAB % cd build 
+	sunxt@SunXTdeMacBook-Air build % cmake -G "Unix Makefiles" -D CMAKE_BUILD_TYPE=Debug ../source
+		## répond ## 
+		-- The C compiler identification is GNU 14.2.0
+		-- The CXX compiler identification is GNU 14.2.0
+		-- Checking whether C compiler has -isysroot
+		-- Checking whether C compiler has -isysroot - yes
+		-- Checking whether C compiler supports OSX deployment target flag
+		-- Checking whether C compiler supports OSX deployment target flag - yes
+		-- Check for working C compiler: /opt/homebrew/bin/gcc-14
+		-- Check for working C compiler: /opt/homebrew/bin/gcc-14 -- works
+		-- Detecting C compiler ABI info
+		-- Detecting C compiler ABI info - done
+		-- Detecting C compile features
+		-- Detecting C compile features - done
+		-- Checking whether CXX compiler has -isysroot
+		-- Checking whether CXX compiler has -isysroot - yes
+		-- Checking whether CXX compiler supports OSX deployment target flag
+		-- Checking whether CXX compiler supports OSX deployment target flag - yes
+		-- Check for working CXX compiler: /opt/homebrew/bin/g++-14
+		-- Check for working CXX compiler: /opt/homebrew/bin/g++-14 -- works
+		-- Detecting CXX compiler ABI info
+		-- Detecting CXX compiler ABI info - done
+		-- Detecting CXX compile features
+		-- Detecting CXX compile features - done
+		-- Boost  found.
+		.. OPTIONS: -std=c++17
+		-- [-O3] MODE.
+		-- SPD LOG   DIR :  /Users/sunxt/VIABLAB/source/spdlog/include  
+		-- Looking for pthread.h
+		-- Looking for pthread.h - found
+		-- Looking for pthread_create
+		-- Looking for pthread_create - found
+		-- Found Threads: TRUE  
+		-- BOOST INCLUDE DIR : /opt/homebrew/include
+		-- Viab_SOURCES content: src/Bubble.cpp;src/DiscretPointImage.cpp;src/Grid.cpp;src/GridBitSet.cpp;src/GridMicroMacro.cpp;src/ParametersManager.cpp;src/SysDyn.cpp;src/Trajectory.cpp;src/TrajectoryHelpers.cpp;src/ViabProblemFactory.cpp;src/Viabi.cpp;src/ViabiBitSet.cpp;src/ViabiMicroMacro.cpp;src/ViabiMicroMacroDiscrete.cpp;src/ViabiMicroMacroTrajectoryHelper.cpp;src/WeakDeclarations.cpp;src/main_main.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/ARKerU_data.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/ExempleViabi2D_data.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/Exemple_multiDim_data.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/data_Coeur.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/data_Demo.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/data_Julia2D.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/data_Lac.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/data_LotkaVolterra.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/data_SimplePopGrowth.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/data_labyrinthe.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/equilibres4D_data.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/pareto_data.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/resilience_data.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/testPendule_data.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/zermelo_Lmin.cpp
+		Found model : /Users/sunxt/VIABLAB/source/data/zermelo_tmin.cpp
+		Building ViabLab as executable
+		-- Configuring done
+		-- Generating done
+		-- Build files have been written to: /Users/sunxt/VIABLAB/build
+
+#### Dans la zone destinée à l'implémentation dans ViabLab, télécharger les deux fichiers .h et .json ####
+#### Copier le fichier .json dans le répertoire ~/VIABLAB/INPUT et le fichier .h dans le répertoire  ~/VIABLAB/source/data/ ####
+#### Editer le fichier ~/VIABLAB/source/data/ModelDataInclusion.h ####
+#### Remplacer dans la ligne qui commence par string paramsFile, le nom du fichier .json par celui du fichier que vous venez de copier : si ce fichier se nomme Lac_params.json, écrire : ####
+	string paramsFile = "Lac_params.json";
+#### Remplacer dans la ligne qui commence par #include, le nom du fichier .h par celui du fichier que vous venez de copier : si ce fichier se nomme data_Lac.h, écrire : ####
+	#include  "../data//data_Lac.h"
+#### Enregistrer le fichier ModelDataInclusion.h ####
+
+#### Générez avec make (en utilisant tous les CPU du Mac pour accélérer la compilation) ####
+	sunxt@SunXTdeMacBook-Air build % make -j$(sysctl -n hw.logicalcpu)
+		## répond ## 
+		Scanning dependencies of target viabLabLib
+		[  2%] Building CXX object CMakeFiles/viabLabLib.dir/src/Grid.cpp.o
+		[  1%] Building CXX object CMakeFiles/viabLabLib.dir/src/Bubble.cpp.o
+		[  4%] Building CXX object CMakeFiles/viabLabLib.dir/src/GridMicroMacro.cpp.o
+		[  5%] Building CXX object CMakeFiles/viabLabLib.dir/src/ParametersManager.cpp.o
+		[  7%] Building CXX object CMakeFiles/viabLabLib.dir/src/GridBitSet.cpp.o
+		[  8%] Building CXX object CMakeFiles/viabLabLib.dir/src/DiscretPointImage.cpp.o
+		[ 11%] Building CXX object CMakeFiles/viabLabLib.dir/src/SysDyn.cpp.o
+		[ 11%] Building CXX object CMakeFiles/viabLabLib.dir/src/Trajectory.cpp.o
+		[ 14%] Building CXX object CMakeFiles/viabLabLib.dir/src/ViabProblemFactory.cpp.o
+		[ 14%] Building CXX object CMakeFiles/viabLabLib.dir/src/TrajectoryHelpers.cpp.o
+		[ 16%] Building CXX object CMakeFiles/viabLabLib.dir/src/Viabi.cpp.o
+		[ 17%] Building CXX object CMakeFiles/viabLabLib.dir/src/ViabiBitSet.cpp.o
+		[ 19%] Building CXX object CMakeFiles/viabLabLib.dir/src/ViabiMicroMacro.cpp.o
+		[ 20%] Building CXX object CMakeFiles/viabLabLib.dir/src/ViabiMicroMacroDiscrete.cpp.o
+		[ 22%] Building CXX object CMakeFiles/viabLabLib.dir/src/ViabiMicroMacroTrajectoryHelper.cpp.o
+		[ 23%] Building CXX object CMakeFiles/viabLabLib.dir/src/WeakDeclarations.cpp.o
+		[ 25%] Building CXX object CMakeFiles/viabLabLib.dir/src/main_main.cpp.o
+		[ 26%] Linking CXX static library libviabLabLib.a
+		[ 26%] Built target viabLabLib
+		Scanning dependencies of target viabLabExe
+		Scanning dependencies of target testPendule_data
+		Scanning dependencies of target zermelo_Lmin
+		Scanning dependencies of target data_SimplePopGrowth
+		Scanning dependencies of target pareto_data
+		Scanning dependencies of target data_Lac
+		Scanning dependencies of target equilibres4D_data
+		Scanning dependencies of target ExempleViabi2D_data
+		[ 27%] Building CXX object CMakeFiles/testPendule_data.dir/data/testPendule_data.cpp.o
+		[ 30%] Building CXX object CMakeFiles/zermelo_Lmin.dir/data/zermelo_Lmin.cpp.o
+		[ 30%] Building CXX object CMakeFiles/data_SimplePopGrowth.dir/data/data_SimplePopGrowth.cpp.o
+		[ 32%] Building CXX object CMakeFiles/pareto_data.dir/data/pareto_data.cpp.o
+		[ 33%] Building CXX object CMakeFiles/equilibres4D_data.dir/data/equilibres4D_data.cpp.o
+		[ 35%] Building CXX object CMakeFiles/ExempleViabi2D_data.dir/data/ExempleViabi2D_data.cpp.o
+		[ 36%] Building CXX object CMakeFiles/data_Lac.dir/data/data_Lac.cpp.o
+		[ 38%] Linking CXX shared library ExempleViabi2D_data.so
+		[ 39%] Linking CXX shared library testPendule_data.so
+		[ 41%] Linking CXX shared library data_SimplePopGrowth.so
+		[ 42%] Linking CXX shared library zermelo_Lmin.so
+		[ 44%] Linking CXX shared library pareto_data.so
+		[ 45%] Linking CXX shared library equilibres4D_data.so
+		[ 45%] Built target pareto_data
+		[ 45%] Built target testPendule_data
+		[ 45%] Built target equilibres4D_data
+		[ 45%] Built target data_SimplePopGrowth
+		[ 45%] Built target zermelo_Lmin
+		[ 45%] Built target ExempleViabi2D_data
+		Scanning dependencies of target data_Julia2D
+		Scanning dependencies of target data_Demo
+		[ 47%] Building CXX object CMakeFiles/viabLabExe.dir/src/Bubble.cpp.o
+		Scanning dependencies of target ARKerU_data
+		Scanning dependencies of target resilience_data
+		Scanning dependencies of target Exemple_multiDim_data
+		Scanning dependencies of target zermelo_tmin
+		[ 48%] Building CXX object CMakeFiles/data_Julia2D.dir/data/data_Julia2D.cpp.o
+		[ 51%] Building CXX object CMakeFiles/data_Demo.dir/data/data_Demo.cpp.o
+		[ 51%] Building CXX object CMakeFiles/zermelo_tmin.dir/data/zermelo_tmin.cpp.o
+		[ 52%] Building CXX object CMakeFiles/resilience_data.dir/data/resilience_data.cpp.o
+		[ 54%] Building CXX object CMakeFiles/Exemple_multiDim_data.dir/data/Exemple_multiDim_data.cpp.o
+		[ 55%] Building CXX object CMakeFiles/ARKerU_data.dir/data/ARKerU_data.cpp.o
+		[ 57%] Linking CXX shared library resilience_data.so
+		[ 58%] Linking CXX shared library data_Julia2D.so
+		[ 61%] Linking CXX shared library zermelo_tmin.so
+		[ 61%] Linking CXX shared library data_Demo.so
+		[ 61%] Built target data_Julia2D
+		[ 61%] Built target resilience_data
+		[ 61%] Built target zermelo_tmin
+		Scanning dependencies of target data_LotkaVolterra
+		Scanning dependencies of target data_Coeur
+		[ 61%] Built target data_Demo
+		[ 63%] Building CXX object CMakeFiles/viabLabExe.dir/src/DiscretPointImage.cpp.o
+		[ 64%] Building CXX object CMakeFiles/data_LotkaVolterra.dir/data/data_LotkaVolterra.cpp.o
+		[ 66%] Building CXX object CMakeFiles/data_Coeur.dir/data/data_Coeur.cpp.o
+		Scanning dependencies of target data_labyrinthe
+		[ 67%] Building CXX object CMakeFiles/data_labyrinthe.dir/data/data_labyrinthe.cpp.o
+		[ 69%] Linking CXX shared library data_Lac.so
+		[ 69%] Built target data_Lac
+		[ 70%] Building CXX object CMakeFiles/viabLabExe.dir/src/Grid.cpp.o
+		[ 72%] Linking CXX shared library data_LotkaVolterra.so
+		[ 73%] Linking CXX shared library data_Coeur.so
+		[ 75%] Linking CXX shared library data_labyrinthe.so
+		[ 75%] Built target data_LotkaVolterra
+		[ 75%] Built target data_Coeur
+		[ 76%] Building CXX object CMakeFiles/viabLabExe.dir/src/GridBitSet.cpp.o
+		[ 77%] Building CXX object CMakeFiles/viabLabExe.dir/src/GridMicroMacro.cpp.o
+		[ 77%] Built target data_labyrinthe
+		[ 79%] Building CXX object CMakeFiles/viabLabExe.dir/src/ParametersManager.cpp.o
+		[ 80%] Linking CXX shared library Exemple_multiDim_data.so
+		[ 80%] Built target Exemple_multiDim_data
+		[ 82%] Building CXX object CMakeFiles/viabLabExe.dir/src/SysDyn.cpp.o
+		[ 83%] Linking CXX shared library ARKerU_data.so
+		[ 83%] Built target ARKerU_data
+		[ 85%] Building CXX object CMakeFiles/viabLabExe.dir/src/Trajectory.cpp.o
+		[ 86%] Building CXX object CMakeFiles/viabLabExe.dir/src/TrajectoryHelpers.cpp.o
+		[ 88%] Building CXX object CMakeFiles/viabLabExe.dir/src/ViabProblemFactory.cpp.o
+		[ 89%] Building CXX object CMakeFiles/viabLabExe.dir/src/Viabi.cpp.o
+		[ 91%] Building CXX object CMakeFiles/viabLabExe.dir/src/ViabiBitSet.cpp.o
+		[ 92%] Building CXX object CMakeFiles/viabLabExe.dir/src/ViabiMicroMacro.cpp.o
+		[ 94%] Building CXX object CMakeFiles/viabLabExe.dir/src/ViabiMicroMacroDiscrete.cpp.o
+		[ 95%] Building CXX object CMakeFiles/viabLabExe.dir/src/ViabiMicroMacroTrajectoryHelper.cpp.o
+		[ 97%] Building CXX object CMakeFiles/viabLabExe.dir/src/WeakDeclarations.cpp.o
+		[ 98%] Building CXX object CMakeFiles/viabLabExe.dir/src/main_main.cpp.o
+		[100%] Linking CXX executable viabLabExe
+		[100%] Built target viabLabExe
+
+#### Exécutez un fichier .os spécifique avec viablabExe ####
+	sunxt@SunXTdeMacBook-Air build % ./viabLabExe data_lac     
+    	## répond ##    
+		[2025-05-09 15:48:31.830] [info] Loading model information
+		[ViabLog] [info] Start of Viablab programm : initialization of model parameters
+		[ViabLog] [info] [ParametrManager] : Reading of controls parameters
+		[ViabLog] [info] [ParametrManager] : Input json file ../INPUT/Lac_params.json
+		[ViabLog] [info] [ParametrManager] : Read control : FINISHED
+		[ViabLog] [info] [ParametrManager] : Reading of Grid parameters
+		[ViabLog] [info] [ParametrManager] : Input json file ../INPUT/Lac_params.json
+		[ViabLog] [info] [ParametrManager] : Read grid params : FINISHED
+		[ViabLog] [info] [ParametrManager] : Reading of Algorithm parameters
+		[ViabLog] [info] [ParametrManager] : Input json file ../INPUT/Lac_params.json
+		[ViabLog] [info] [ParametrManager] : Read algorithm params : FINISHED
+		[ViabLog] [info] [ParametrManager] : Reading of System parameters
+		[ViabLog] [info] [ParametrManager] : Input json file ../INPUT/Lac_params.json
+		[ViabLog] [info] [ParametrManager] : Read system params : FINISHED
+		[ViabLog] [info] Succesfully loaded symbol : dynamics
+		[ViabLog] [info] Using default symbol for dynamics_tych
+		[ViabLog] [info] Using default symbol for constraintsX
+		[ViabLog] [info] Using default symbol for constraintsXU
+		[ViabLog] [info] Succesfully loaded symbol : jacobian
+		[ViabLog] [info] Using default symbol for jacobian_tych
+		[ViabLog] [info] Succesfully loaded symbol : localDynBounds
+		[ViabLog] [info] Using default symbol for m
+		[ViabLog] [info] Using default symbol for l
+		[ViabLog] [info] Using default symbol for m_tych
+		[ViabLog] [info] Using default symbol for l_tych
+		[ViabLog] [info] Using default symbol for target
+		[ViabLog] [info] Using default symbol for l_fd
+		[ViabLog] [info] Using default symbol for l_tych_fd
+		[ViabLog] [info] Using default symbol for target_fd
+		[ViabLog] [info] Using default symbol for constraintsXU_fd
+		[ViabLog] [info] Using default symbol for controlEligibilityForTraj_fd
+		[ViabLog] [info] Using default symbol for dynamics_tych_fd
+		[ViabLog] [info] Using default symbol for constraintsX_fd
+		[ViabLog] [info] Using default symbol for dynConstraintsForTraj
+		[ViabLog] [info] Using default symbol for constraintsXUY_fd
+		[ViabLog] [info] Starting loading model specific data
+		[ViabLog] [info] Succesfully loaded symbol : loadModelData
+		[ViabLog] [info] [System] : Dynamic system initialization finished
+		[ViabLog] [warning] Initialization of constraints
+		 Initialisation de contraintes
+		 debut de la boucle de rafinements nb refine = 0
+		=============================Debut viab kernel ==============================
+		nouvelle boucle while
+		Itération 0 terminée. Nombre de points  points enlevés: 14209
+		nouvelle boucle while
+		Itération 1 terminée. Nombre de points  points enlevés: 13304
+		
+		......
+		
+		nouvelle boucle while
+		Itération 625 terminée. Nombre de points  points enlevés: 1
+		nouvelle boucle while
+		Itération 626 terminée. Nombre de points  points enlevés: 0
+		fini nbIter=627==============================================================================
+		Elapsed time : 5.88538 sec.
+
+		[ViabLog] [warning] Elapsed time  GLOBAL: 6.620033025741577 sec
+		[ViabLog] [info] Using default symbol for postProcess
+		sunxt@SunXTdeMacBook-Air build % 

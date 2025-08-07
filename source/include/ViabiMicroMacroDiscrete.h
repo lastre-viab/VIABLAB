@@ -35,14 +35,14 @@ public:
     //virtual void initialiseConstraints() const;
     //virtual void initialiseTargetOrConstraints() const;
 
-    virtual void ViabilityKernel(bool sortieOK, int nbArret);
+    virtual void ViabilityKernel(int nbArret);
     virtual void CaptureBasin();
-    virtual void GarantedViabilityKernel(bool sortieOK, int nbArret);
+    virtual void GarantedViabilityKernel(int nbArret);
 
     virtual void initialiseConstraints();
     virtual SysDyn* GetSysDynForViabProblem();
     GridMicroMacro* GetGridForViabProblem();
-    void computeViableTrajectories();
+    void computeViableTrajectory(ViabiMicroMacroTrajectoryHelper *trajectoryHelper, TrajectoryParametersManager *tpm);
 
     virtual void computeTrajectories();
     virtual void loadViableSets();
@@ -51,7 +51,7 @@ public:
     void viabKerValFunc(unsigned long long int nbArret);
     void viabKerGarantiValFunc(unsigned long long int nbArret);
 
-    double computeOptimalCaptTrajectory(double *initPosition, string fileName, bool &succes);
+    double computeOptimalCaptTrajectory(ViabiMicroMacroTrajectoryHelper *trajectoryHelper, double *initPosition, double timeHorizon, string fileName, bool &succes);
 
     /*!
      *   \brief  Fonction qui initialise la cible dans la base de données représentant
@@ -87,8 +87,6 @@ public:
 
 private:
 
-    ViabiMicroMacroTrajectoryHelper *trajectoryHelper;
-
     GridMicroMacro *grid;
     /*!
      *  \brief  Copie pour raisons de rapidté  de la valeur de dimension d'état
@@ -105,9 +103,9 @@ private:
     double *vTab;
     double *vTab_tmp;
 
-    void InitViabiMicroMacroDiscrete(algoViabiParams avp);
+    void InitViabiMicroMacroDiscrete(const algoViabiParams &avp);
     void saveValFunctions();
-    void computeOptimalTrajectories();
+    void computeOptimalTrajectory(ViabiMicroMacroTrajectoryHelper *trajectoryHelper, TrajectoryParametersManager *tpm);
 
     vector<unsigned long long int> indicesCn;
     vector<unsigned long long int> indicesCn_tmp;
@@ -295,7 +293,7 @@ private:
 
     bool testConstraintesForCell(unsigned long long int numCell);
 
-    int targ_or_dep;
+    TargetOrDeparture targ_or_dep;
     int computeTmin;
 
     };

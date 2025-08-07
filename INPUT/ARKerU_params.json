@@ -1,0 +1,101 @@
+{
+    "ALGORITHM_PARAMETERS": {
+        "COMPUTE_MIN_TIME": 0,
+        "COMPUTE_VIABLE_SET": 1,
+        "GRID_REFINMENTS_NUMBER": 0,
+        "INITIAL_POINTS": [
+        ],
+        "INTERMEDIATE_SAVINGS": 0,
+        "ITERATION_STOP_LEVEL": 0,
+        "LEVEL": 0,
+        "NUMBER_OF_TRAJECTORIES": 0,
+        "PROJECTION_AXIS": [
+            1,
+            0,
+            0
+        ],
+        "SAVE_BOUNDARY": 1,
+        "SAVE_PROJECTION": 0,
+        "SAVE_SLICE": 0,
+        "SAVE_SLICE_BOUND": 0,
+        "SAVE_SUBLEVEL": 0,
+        "SAVE_VIABSET_LIGHT": 1,
+        "SET_TYPE": 1,
+        "TARGET_OR_DEPARTURE": 1,
+        "TRAJECTORY_TYPE": 1
+    },
+    "CONTROL_PARAMETERS": {
+        "CONTROL_DIMENSION": 3,
+        "CONTROL_GRID_POINTS": [
+            126,
+            21,
+            21
+        ],
+        "CONTROL_MAX_VALUES": [
+            126,
+            2,
+            15
+        ],
+        "CONTROL_MIN_VALUES": [
+            1,
+            0.05,
+            2
+        ]
+    },
+    "GRID_PARAMETERS": {
+        "GRID_MAIN_DIR": 1,
+        "GRID_METHOD": 1,
+        "LOWER_LIMIT_IS_NOT_CONSTRAINT": [
+            1,
+            0,
+            0
+        ],
+        "OUTPUT_FILE_PREFIX": "ARKerU",
+        "SLICE_DIRECTIONS": [
+            0,
+            0,
+            0
+        ],
+        "SLICE_LEVELS": [
+            0,
+            0,
+            0
+        ],
+        "SLICE_LEVELS_DISCRETE": [
+            0,
+            0,
+            0
+        ],
+        "STATE_DIMENSION": 3,
+        "STATE_GRID_POINTS": [
+            41,
+            31,
+            51
+        ],
+        "STATE_MAX_VALUES": [
+            100000,
+            1
+        ],
+        "STATE_MIN_VALUES": [
+            0,
+            0,
+            0
+        ],
+        "STATE_PERIODIC": [
+            0,
+            0,
+            0
+        ],
+        "UPPER_LIMIT_IS_NOT_CONSTRAINT": [
+            0,
+            0,
+            0
+        ]
+    },
+    "SYSTEM_PARAMETERS": {
+        "COST_BOUND_CONSTANT": 2,
+        "COST_LIPSCHITZ_CONSTANT": 1,
+        "DYNAMICS_TYPE": 2,
+        "TIME_HORIZON": 20
+    }
+}

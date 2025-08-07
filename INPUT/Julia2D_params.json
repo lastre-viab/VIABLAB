@@ -1,0 +1,72 @@
+{
+    "ALGORITHM_PARAMETERS": {
+        "COMPUTE_MIN_TIME": 0,
+        "COMPUTE_VIABLE_SET": 1,
+        "GRID_REFINMENTS_NUMBER": 1,
+        "INTERMEDIATE_SAVINGS": 0,
+        "ITERATION_STOP_LEVEL": 0,
+        "LEVEL": 1,
+        "NUMBER_OF_TRAJECTORIES": 0,
+        "PROJECTION_AXIS": [
+            0,
+            0
+        ],
+        "SAVE_BOUNDARY": 1,
+        "SAVE_PROJECTION": 0,
+        "SAVE_SLICE": 0,
+        "SAVE_SLICE_BOUND": 0,
+        "SAVE_SUBLEVEL": 0,
+        "SAVE_VIABSET_LIGHT": 0,
+        "SET_TYPE": 1,
+        "TARGET_OR_DEPARTURE": 1,
+        "TRAJECTORY_TYPE": 1
+    },
+    "CONTROL_PARAMETERS": {
+    },
+    "GRID_PARAMETERS": {
+        "GRID_MAIN_DIR": 0,
+        "GRID_METHOD": 1,
+        "LOWER_LIMIT_IS_NOT_CONSTRAINT": [
+            0,
+            0
+        ],
+        "OUTPUT_FILE_PREFIX": "Julia",
+        "SLICE_DIRECTIONS": [
+            0,
+            0
+        ],
+        "SLICE_LEVELS": [
+            1,
+            1
+        ],
+        "SLICE_LEVELS_DISCRETE": [
+            0,
+            0
+        ],
+        "STATE_DIMENSION": 2,
+        "STATE_GRID_POINTS": [
+            4001,
+            4001
+        ],
+        "STATE_MAX_VALUES": [
+            2,
+            2
+        ],
+        "STATE_MIN_VALUES": [
+            -2,
+            -2
+        ],
+        "STATE_PERIODIC": [
+            0,
+            0
+        ],
+        "UPPER_LIMIT_IS_NOT_CONSTRAINT": [
+            0,
+            0
+        ]
+    },
+    "SYSTEM_PARAMETERS": {
+        "DYNAMICS_TYPE": 2,
+        "TIME_HORIZON": 10
+    }
+}

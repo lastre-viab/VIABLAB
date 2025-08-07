@@ -25,6 +25,7 @@
 #define SYSDYN_H_
 
 #include "defs.h"
+#include "Params.h"
 #include "Grid.h"
 
 /*!
@@ -43,6 +44,11 @@ public:
      */
     virtual ~SysDyn();
 
+    SysDyn(const SysDyn &) = delete;
+    SysDyn(const SysDyn &&) = delete;
+    SysDyn& operator=(const SysDyn &) = delete;
+    SysDyn& operator=(SysDyn&& data);
+
     /*!
      * \brief Fonction  d?����finissant la dynamique
      *
@@ -54,12 +60,10 @@ public:
      * @param[in] u : la variable  de contr?����le
      * @param[out] res : le r?����sultat
      */
-    void (*dynamics)(double*, double*, double*);
-    void (*dynamics_tych)(double*, double*, double*, double*);
-    void (*dynamics_fd)(unsigned long long int*, unsigned long long int*,
-	    unsigned long long int*);
-    void (*dynamics_tych_fd)(unsigned long long int*, unsigned long long int*,
-	    unsigned long long int*, unsigned long long int*);
+    void (*dynamics)(const double*, const double*, double*);
+    void (*dynamics_tych)(const double*, const double*, const double*, double*);
+    void (*dynamics_fd)(const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
+    void (*dynamics_tych_fd)(const unsigned long long int*, const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
 
     /*!
      * \brief Pointeur sur l'une des fonctions membres d?����finissant une m?����thode de discr?����tisation
@@ -71,8 +75,8 @@ public:
      * @param[in] u : la variable  de contr?����le
      * @param[out] res : le r?����sultat
      */
-    void (SysDyn::*discretDynamics)(double*, double*, double*, double rho);
-    void (SysDyn::*discretDynamics_tych)(double*, double*, double*, double*, double rho);
+    void (SysDyn::*discretDynamics)(const double*, const double*, double*, double rho) const;
+    void (SysDyn::*discretDynamics_tych)(const double*, const double*, const double*, double*, double rho) const;
 
     /*!
      * \brief Pointeur sur l'une des fonctions membres d?����finissant
@@ -86,9 +90,7 @@ public:
      *
      *\see LC, computeLC, jacobian
      */
-    double (SysDyn::*calcul_L)(double *x);
-
-    void setRho(double r);
+    double (SysDyn::*calcul_L)(const double *x) const;
     /*!
      * \brief Pointeur sur l'une des fonctions membres d?����finissant
      * une m?����thode de calcul de la constante M de brne  de la dynamique
@@ -101,7 +103,7 @@ public:
      *
      *\see M, computeM, localDynBounds
      */
-    double (SysDyn::*calcul_M)(double *x);
+    double (SysDyn::*calcul_M)(const double *x) const;
 
     /*!
      * \brief Cette fonction d?����finit les contraintes sur le contr?����le, elle correspond ?���� la d?����finition  de U(x)
@@ -113,10 +115,21 @@ public:
      * @param[in] u le contr?����le
      * @return valeur r?����elle si (x,u)  est dans le graphe de U(x), \f$ +\infty\f$ sinon
      */
-    double (*constraintsXU)(double *x, double *u);
-    double (*constraintsXV_tych)(double *x, double *v);
-    double (*constraintsXU_fd)(unsigned long long int *x, unsigned long long int *u);
-    double (*controlEligibilityForTraj_fd)(unsigned long long int *x, unsigned long long int *u, unsigned long long int *previousU);
+    double (*constraintsXU)(const double *x, const double *u);
+    double (*constraintsXV_tych)(const double *x, const double *v);
+    double (*constraintsXU_fd)(const unsigned long long int *x, const unsigned long long int *u);
+    double (*controlEligibilityForTraj_fd)(const unsigned long long int *x, const unsigned long long int *u, const unsigned long long int *previousU);
+    /*!
+     * \brief  Cette fonction d?����finit les contraintes sur l'?����tat, elle correspond a la d?����finition k(x)
+     *
+     * Attention!  Cette fonction est d?����finie par l'utilisateur  dans une fichier "dataMonModele.h"
+     * Ici dans le code c'est un param?����tre dont ne conna?����t que la "signature" : les types des arguments  et de la sortie
+     *
+     * @param[in] x l'?����tat x
+     * @return valeur r?����elle si\f$x\in K\f$, \f$ +\infty\f$ sinon
+     */
+    double (*constraintsX)(const double*);
+    double (*constraintsX_fd)(const unsigned long long int*);
 
     /*!
      * \brief  Cette fonction d?����finit les contraintes sur l'?����tat, elle correspond a la d?����finition k(x)
@@ -127,19 +140,7 @@ public:
      * @param[in] x l'?����tat x
      * @return valeur r?����elle si\f$x\in K\f$, \f$ +\infty\f$ sinon
      */
-    double (*constraintsX)(double*);
-    double (*constraintsX_fd)(unsigned long long int*);
-
-    /*!
-     * \brief  Cette fonction d?����finit les contraintes sur l'?����tat, elle correspond a la d?����finition k(x)
-     *
-     * Attention!  Cette fonction est d?����finie par l'utilisateur  dans une fichier "dataMonModele.h"
-     * Ici dans le code c'est un param?����tre dont ne conna?����t que la "signature" : les types des arguments  et de la sortie
-     *
-     * @param[in] x l'?����tat x
-     * @return valeur r?����elle si\f$x\in K\f$, \f$ +\infty\f$ sinon
-     */
-    double (*dynConstraintsForTraj)(double*, double*);
+    double (*dynConstraintsForTraj)(const double*, double*);
 
     /*!
      * \brief  Cette fonction d?����finit la cible, elle correspond a la d?����finition de c(x)
@@ -150,8 +151,8 @@ public:
      * @param[in] x l'?����tat x
      * @return valeur r?����elle si\f$x\in C\f$, \f$ +\infty\f$ sinon
      */
-    double (*target)(double*);
-    double (*target_fd)(unsigned long long int*);
+    double (*target)(const double*);
+    double (*target_fd)(const unsigned long long int*);
 
     /*!
      * \brief  Cette fonction correspond ?���� la d?����finition de l(x,u) dans le cas d'un probl?����me d'optimisation
@@ -164,11 +165,12 @@ public:
      * @param[in] u contr?����le
      * @return valeur r?����elle si\f$(x,u)\in Dom(l)\f$, \f$ +\infty\f$ sinon
      */
-    double (*lFunc)(double *x, double *u);
-    double (*lFunc_tych)(double *x, double *u, double *v);
-    double (*lFunc_fd)(unsigned long long int *x, unsigned long long int *u);
-    double (*lFunc_tych_fd)(unsigned long long int *x,
-	    unsigned long long int *u, unsigned long long int *v);
+    double (*lFunc)(const double *x, const double *u);
+    double (*lFunc_tych)(const double *x, const double *u, const double *v);
+    double (*lFunc_fd)(const unsigned long long int *x, const unsigned long long int *u);
+    double (*lFunc_tych_fd)(const unsigned long long int *x,
+                            const unsigned long long int *u,
+                            const unsigned long long int *v);
 
     /*!
      * \brief  Cette fonction correspond a la d?����finition de mu(x,u)  qui definit les contraintes
@@ -181,7 +183,7 @@ public:
      * @return valeur r?����elle si\f$(x,u)\in Dom(l)\f$, \f$ +\infty\f$ sinon
      */
 
-    double (*muFunc_fd)(unsigned long long int *x, unsigned long long int *u);
+    double (*muFunc_fd)(const unsigned long long int *x, const unsigned long long int *u);
 
     /*!
      * \brief  Cette fonction correspond ?���� la d?����finition de m(x,u) dans le cas d'un probl?����me d'optimisation
@@ -194,9 +196,8 @@ public:
      * @param[in] u contr?����le
      * @return valeur r?����elle si\f$(x,u)\in Dom(l)\f$, \f$ +\infty\f$ sinon
      */
-    double (*mFunc)(double *x, double *u);
-    double (*mFunc_tych)(double *x, double *u, double *v);
-
+    double (*mFunc)(const double *x, const double *u);
+    double (*mFunc_tych)(const double *x, const double *u, const double *v);
     /*!
      * \brief Constructeur principal
      *
@@ -211,7 +212,7 @@ public:
      *
      * \see systemParams, controlParams, Grid
      */
-    SysDyn(systemParams SP, int, controlParams cp, Grid *refGrid);
+    SysDyn(const systemParams &SP, int, const controlParams &cp, Grid *refGrid);
 
     /*
      * Dans la conception actuelle la classe sysDyn est la seule ?���� poss?����der l'information sur les controles: la dimension, le
@@ -245,27 +246,30 @@ public:
      * M?����thode d'acc?����s: renvoie la dimension de l'espace des  contr?����les
      * @return dimC
      */
-    unsigned long long int getDimC();
+    unsigned long long int getDimC() const;
     /*!
      * M?����thode d'acc?����s: renvoie les nb de points par axe des  contr?����les
      * @return NbPointsC
      */
     unsigned long long int* getNbPointsC();
+        
     /*!
      * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
      * @return  ControlCoords
      */
-    double** getControlCoords();
+    double **getControlCoords() const;
+
     /*!
      * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
      * @return  ControlCoords
      */
+        
     unsigned long long int** getControlIntCoords();
     /*!
      * M?����thode d'acc?����s: renvoie le nombre total de points de discr?����tisation de contr?����les
      * @return  ControlCoords
      */
-    unsigned long long int getTotalNbPointsC();
+    unsigned long long int getTotalNbPointsC() const;
 
     /*!
      * M?����thode d'acc?����s: renvoie les bornes inf du pav?���� contenant les  contr?����les
@@ -290,7 +294,7 @@ public:
      * M?����thode d'acc?����s: renvoie la dimension de l'espace des  contr?����les
      * @return dimC
      */
-    unsigned long long int getDimTy();
+    unsigned long long int getDimTy() const;
     /*!
      * M?����thode d'acc?����s: renvoie les nb de points par axe des  contr?����les
      * @return NbPointsC
@@ -300,7 +304,7 @@ public:
      * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
      * @return  ControlCoords
      */
-    double** getTychCoords();
+    double** getTychCoords() const;
     /*!
      * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
      * @return  ControlCoords
@@ -310,7 +314,7 @@ public:
      * M?����thode d'acc?����s: renvoie le nombre total de points de discr?����tisation de contr?����les
      * @return  ControlCoords
      */
-    unsigned long long int getTotalNbPointsTy();
+    unsigned long long int getTotalNbPointsTy() const;
 
     /*   ***************************************************************
      *  Fin des m?����thodes d'acc?����s aux param?����tres de controles
@@ -323,24 +327,13 @@ public:
      * @param x variable d'?����tat
      * @param u variable de contr?����le
      */
-    double calculRho_local(double *x);
+    double calculRho_local(const double *x) const;
 
     /*!
      * m?����thode d'acc?����s au param?����tre qui d?����finit  si le pas de temps
      *  des algorithmes doit ?����tre local ou global (par rapport ?���� la grille d'?����tat)
      */
     bool isTimeStepGlobal();
-
-    /*!
-     * M?����thode d'acc?����s  qui renvoie l'horizon de temps pour les calculs concern?����s
-     * @return timeHorizon
-     */
-    double getTimeHorizon();
-    /*!
-     * M?����thode d'acc?����s  qui renvoie le pas de temps pour les calculs concern?����s
-     * @return rho
-     */
-    double getTimeStep();
 
     int getFDDynType();
     string getRetroFileName();
@@ -349,55 +342,72 @@ public:
      *  \brief Méthode  qui retourne le type de dynamique
      * @return dynType
      */
-    int getDynType();
+    DynType getDynType();
 
     void setDynamicsForward();
     void setDynamicsBackward();
 
+    enum PointStatus : unsigned char {
+        VALID_TRAJECTORY_POINT,
+        OUTSIDE_DOMAIN,
+        OUTSIDE_CONSTRAINTS,
+        OUTSIDE_GRID,
+    };
+    PointStatus checkKernelRelation(double *point) const;
 
+    bool isViableControl(const double *x, const double *u, double *image, double rho) const;
+    bool isViableControl_tych(const double *x, const double *u, const double *v, double *image, double rho) const;
+    bool isViableGuaranteedControl(const double *x, const double *u, double rho) const;
+
+    void getTychasticImage(const double *x, const double *u, const double *v, double *imageVect, double rho) const;
+        
+    const Grid *getGrid() const;
+    int getDim() const;
 private:
 
-    double calculL_local_num(double *x);
-    double calculMF_local_num(double *x);
-    double calculL_local_ana(double *x);
-    double calculMF_local_ana(double *x);
+    void initializeMethods(const systemParams &SP);
+        
+    double calculL_local_num(const double *x) const;
+    double calculMF_local_num(const double *x) const;
+    double calculL_local_ana(const double *x) const;
+    double calculMF_local_ana(const double *x) const;
 
-    double calculL_local_num_tych(double *x);
-    double calculMF_local_num_tych(double *x);
-    double calculL_local_ana_tych(double *x);
+    double calculL_local_num_tych(const double *x) const;
+    double calculMF_local_num_tych(const double *x) const;
+    double calculL_local_ana_tych(const double *x) const;
 
-    double returnL_local_ana(double *x);
+    double returnL_local_ana(const double *x) const;
 
-    double returnMF_local_ana(double *x);
+    double returnMF_local_ana(const double *x) const;
 
     /*!
      * Méthode  qui sert  dans le cas où la dynamique est déjà discrète en temps
      * mais continue en espace
      */
-    void FDiscret(double *x, double *u, double *res, double rho);
+    void FDiscret(const double *x, const double *u, double *res, double rho) const;
     /*!
      * Méthodes  qui seront utilisées dans le cas où
      * la dynamique est continue en temps et en espace
      */
-    void FDiscretEuler(double *x, double *u, double *res, double rho);
-    void FDiscretRK2(double *x, double *u, double *res, double rho);
-    void FDiscretRK4(double *x, double *u, double *res, double rho);
+    void FDiscretEuler(const double *x, const double *u, double *res, double rho) const;
+    void FDiscretRK2(const double *x, const double *u, double *res, double rho) const;
+    void FDiscretRK4(const double *x, const double *u, double *res, double rho) const;
 
-    void FDiscret_tych(double *x, double *u, double *v, double *res, double rho);
+    void FDiscret_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
     /*!
      * Méthodes  qui seront utilisées dans le cas où
      * la dynamique est continue en temps et en espace
      */
-    void FDiscretEuler_tych(double *x, double *u, double *v, double *res, double rho);
-    void FDiscretRK2_tych(double *x, double *u, double *v, double *res, double rho);
-    void FDiscretRK4_tych(double *x, double *u, double *v, double *res, double rho);
+    void FDiscretEuler_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
+    void FDiscretRK2_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
+    void FDiscretRK4_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
 
 
     int fd_dyn_type;
     double timeHorizon;
     string retroFileName;
     int discretisation;
-    int dynType;
+    DynType dynType;
     int dimS;
     int dimC;
     double *limInfC;
@@ -424,18 +434,16 @@ private:
     double lfunc_L;  // constante de Lipschitz
     double lfunc_MF;  // majoration de la norme de la dynamique
 
-    double rho;
     double *image, *FXmoinsH, *xTemp, *FXplusH;
-    Grid *gr;
+    Grid *grid;
     bool globalTimeStep;
-    int computeMF;
-    int computeLC;
+    ComputeMethod computeMF;
+    ComputeMethod computeLC;
     double **jacob;
-    void (*localDynBounds)(double *x, double *res);
-    void (*jacobian)(double *x, double *u, double **jacob);
-    void (*jacobian_tych)(double *x, double *u, double *v, double **jacob);
+    void (*localDynBounds)(const double *x, double *res);
+    void (*jacobian)(const double *x, const double *u, double **jacob);
+    void (*jacobian_tych)(const double *x, const double *u, const double *v, double **jacob);
     double dynSignFactor;
-
-    };
+};
 
 #endif /* SYSDYN_H_ */

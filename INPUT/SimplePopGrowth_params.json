@@ -1,0 +1,90 @@
+{
+    "ALGORITHM_PARAMETERS": {
+        "COMPUTE_MIN_TIME": false,
+        "COMPUTE_VIABLE_SET": false,
+        "GRID_REFINMENTS_NUMBER": 0,
+        "INTERMEDIATE_SAVINGS": false,
+        "ITERATION_STOP_LEVEL": 0,
+        "LEVEL": 1,
+        "PROJECTION_AXIS": [
+            1,
+            0
+        ],
+        "SAVE_BOUNDARY": true,
+        "SAVE_PROJECTION": false,
+        "SAVE_SLICE": false,
+        "SAVE_SLICE_BOUND": false,
+        "SAVE_SUBLEVEL": false,
+        "SAVE_VIABSET_LIGHT": false,
+        "SET_TYPE": "VIAB"
+    },
+    "CONTROL_PARAMETERS": {
+        "CONTROL_DIMENSION": 1,
+        "CONTROL_GRID_POINTS": [
+            101
+        ],
+        "CONTROL_MAX_VALUES": [
+            0.5
+        ],
+        "CONTROL_MIN_VALUES": [
+            -0.5
+        ]
+    },
+    "GRID_PARAMETERS": {
+        "GRID_MAIN_DIR": 0,
+        "GRID_METHOD": "BS",
+        "LOWER_LIMIT_IS_NOT_CONSTRAINT": [
+            false,
+            false
+        ],
+        "OUTPUT_FILE_PREFIX": "SimplePopGrowth",
+        "SLICE_DIRECTIONS": [
+            0,
+            0
+        ],
+        "SLICE_LEVELS": [
+            1,
+            1
+        ],
+        "SLICE_LEVELS_DISCRETE": [
+            0,
+            0
+        ],
+        "STATE_DIMENSION": 2,
+        "STATE_GRID_POINTS": [
+            1001,
+            1001
+        ],
+        "STATE_MAX_VALUES": [
+            3,
+            2
+        ],
+        "STATE_MIN_VALUES": [
+            0.2,
+            -2
+        ],
+        "STATE_PERIODIC": [
+            false,
+            false
+        ],
+        "UPPER_LIMIT_IS_NOT_CONSTRAINT": [
+            false,
+            false
+        ]
+    },
+    "SYSTEM_PARAMETERS": {
+        "DYNAMICS_TYPE": "CC",
+        "DYN_BOUND": 1.0,
+        "DYN_BOUND_COMPUTE_METHOD": "NUMERICAL_CALC",
+        "IS_TIMESTEP_GLOBAL": false,
+        "LIPSCHITZ_CONSTANT": 1.0,
+        "LIPSCHITZ_CONSTANT_COMPUTE_METHOD": "NUMERICAL_CALC",
+        "TIME_DISCRETIZATION_SCHEME": "RK4"
+    },
+    "TRAJECTORY_PARAMETERS": [{
+        "TRAJECTORY_TYPE": "CAUTIOUS",
+        "INITIAL_POINT": [1.1, 0.9],
+        "TRAJECTORY_TIME_HORIZON": 10,
+        "BUBBLE_RADIUS": 0.5
+    }]
+}

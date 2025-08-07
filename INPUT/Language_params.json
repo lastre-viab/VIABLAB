@@ -1,0 +1,102 @@
+{
+    "ALGORITHM_PARAMETERS": {
+        "COMPUTE_MIN_TIME": false,
+        "COMPUTE_VIABLE_SET": true,
+        "GRID_REFINMENTS_NUMBER": 1,
+        "INITIAL_POINTS": [
+            [1.1, 0.9]
+        ],
+        "INTERMEDIATE_SAVINGS": false,
+        "ITERATION_STOP_LEVEL": 0,
+        "LEVEL": 1,
+        "NUMBER_OF_TRAJECTORIES": 0,
+        "PROJECTION_AXIS": [
+            1,
+            0
+        ],
+        "SAVE_BOUNDARY": true,
+        "SAVE_PROJECTION": false,
+        "SAVE_SLICE": false,
+        "SAVE_SLICE_BOUND": false,
+        "SAVE_SUBLEVEL": false,
+        "SAVE_VIABSET_LIGHT": false,
+        "SET_TYPE": "VIAB",
+        "TARGET_OR_DEPARTURE": 1,
+        "TRAJECTORY_TYPE": "VD",
+        "BUBBLE_INTERPRETATION": "MOORE",
+        "BUBBLE_RADIUS": 0.8
+    },
+    "CONTROL_PARAMETERS": {
+        "CONTROL_DIMENSION": 1,
+        "CONTROL_GRID_POINTS": [
+            100
+        ],
+        "CONTROL_MAX_VALUES": [
+            0.1
+        ],
+        "CONTROL_MIN_VALUES": [
+            -0.1
+        ]
+    },
+    "GRID_PARAMETERS": {
+        "GRID_MAIN_DIR": 0,
+        "GRID_METHOD": "BS",
+        "LOWER_LIMIT_IS_NOT_CONSTRAINT": [
+            0,
+            0,
+            0
+        ],
+        "OUTPUT_FILE_PREFIX": "Language",
+        "SLICE_DIRECTIONS": [
+            0,
+            0,
+            0
+        ],
+        "SLICE_LEVELS": [
+            1,
+            1,
+            1
+        ],
+        "SLICE_LEVELS_DISCRETE": [
+            0,
+            0,
+            0
+        ],
+        "STATE_DIMENSION": 3,
+        "STATE_GRID_POINTS": [
+            51,
+            51,
+            51
+        ],
+        "STATE_MAX_VALUES": [
+            1,
+            1,
+            1
+        ],
+        "STATE_MIN_VALUES": [
+            0.2,
+            0.2,
+            0
+        ],
+        "STATE_PERIODIC": [
+            0,
+            0,
+            0
+        ],
+        "UPPER_LIMIT_IS_NOT_CONSTRAINT": [
+            0,
+            0,
+            0
+        ]
+    },
+    "SYSTEM_PARAMETERS": {
+        "DYNAMICS_TYPE": "CC",
+        "DYN_BOUND": 1.0,
+        "DYN_BOUND_COMPUTE_METHOD": "NUMERICAL_CALC",
+        "IS_TIMESTEP_GLOBAL": false,
+        "LIPSCHITZ_CONSTANT": 1.0,
+        "LIPSCHITZ_CONSTANT_COMPUTE_METHOD": "NUMERICAL_CALC",
+        "TIME_DISCRETIZATION_SCHEME": "RK4",
+        "TIME_HORIZON": 10
+    }
+}

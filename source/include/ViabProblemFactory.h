@@ -34,7 +34,7 @@ class ViabProblemFactory
 public:
     ViabProblemFactory();
     ViabProblemFactory(ParametersManager *pm);
-    Viabi* constructViabilityProblem(int gridMethod);
+    Viabi* constructViabilityProblem(GridMethod gridMethod);
     virtual ~ViabProblemFactory();
 
 private:

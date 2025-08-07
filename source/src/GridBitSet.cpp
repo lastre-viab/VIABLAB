@@ -25,9 +25,9 @@
 #include <iostream>
 using namespace std;
 
-Grid_BitSet::Grid_BitSet(gridParams gp) :
-		Grid()
-    {
+Grid_BitSet::Grid_BitSet(const gridParams &gp) :
+    Grid()
+{
     // TODO Auto-generated constructor stub
 
     string dataFileName;
@@ -91,10 +91,10 @@ Grid_BitSet::Grid_BitSet(gridParams gp) :
     nbPointsTotalSubGrid = 1;
 
     /*
-     * gridType=0 <=> Grid points are vertexes of teh grid
-     * gridType=1 <=> Grid points are centers of the grid
+     * arePointsGridCenters=0 <=> Grid points are vertexes of teh grid
+     * arePointsGridCenters=1 <=> Grid points are centers of the grid
      */
-    gridType = gp.GRID_TYPE;
+    arePointsGridCenters = gp.GRID_TYPE;
 
     maxStep = 0;
     for (int i = 0; i < dim; i++)
@@ -232,8 +232,8 @@ Grid_BitSet::Grid_BitSet(gridParams gp) :
 
     }
 
-void Grid_BitSet::copyGrid(boost::dynamic_bitset<> **grIn,
-	boost::dynamic_bitset<> **grOut)
+void Grid_BitSet::copyGrid(const boost::dynamic_bitset<> * const *grIn,
+	boost::dynamic_bitset<> **grOut) const
     {
 #pragma omp parallel for num_threads(nbOMPThreads)  shared( grIn, grOut) default(none)
     for (unsigned long long int posX = 0; posX < nbPointsTotalSubGrid; posX++)
@@ -242,45 +242,45 @@ void Grid_BitSet::copyGrid(boost::dynamic_bitset<> **grIn,
 	}
     }
 
-void Grid_BitSet::findNearestViabPointInCell(double *startPoint,
-	double *currentPoint, double *newPoint,
-	double (*dynConstraints)(double*, double*))
-    {
+void Grid_BitSet::findNearestViabPointInCell(const double *startPoint,
+                                             const double *currentPoint, double *newPoint,
+                                             double (*dynConstraints)(const double*, double*)) const
+{
     unsigned long long int posTemp, cellNum = localizePoint(currentPoint);
     double minDist = PLUS_INF, dist;
     double testV[dim];
     double oldPoint[dim];
     for (int i = 0; i < dim; i++)
 	{
-	oldPoint[i] = startPoint[i];
+        oldPoint[i] = startPoint[i];
 	}
     unsigned long long int testI[dim];
     for (int ii = 0; ii < nbPointsCube; ii++)
 	{
-	posTemp = cellNum + indicesDecalCell[ii];
+        posTemp = cellNum + indicesDecalCell[ii];
 
-	numToIntAndDoubleCoords(posTemp, testI, testV);
-	if ((*dynConstraints)(oldPoint, testV) < PLUS_INF)
+        numToIntAndDoubleCoords(posTemp, testI, testV);
+        if ((*dynConstraints)(oldPoint, testV) < PLUS_INF)
 	    {
-	    if (isInSet(testI))
-		{
-		dist = 0.0;
-		for (int i = 0; i < dim; i++)
-		    {
-		    dist += (testV[i] - currentPoint[i])
-				    * (testV[i] - currentPoint[i]);
-		    }
-		if (dist < minDist)
-		    {
-		    for (int i = 0; i < dim; i++)
-			{
-			newPoint[i] = testV[i];
-			}
-		    }
-		}
+            if (isInSet(testI))
+            {
+                dist = 0.0;
+                for (int i = 0; i < dim; i++)
+                {
+                    dist += (testV[i] - currentPoint[i])
+                        * (testV[i] - currentPoint[i]);
+                }
+                if (dist < minDist)
+                {
+                    for (int i = 0; i < dim; i++)
+                    {
+                        newPoint[i] = testV[i];
+                    }
+                }
+            }
 	    }
 	}
-    }
+}
 
 void Grid_BitSet::refine()
     {
@@ -383,7 +383,7 @@ void Grid_BitSet::refine()
 	    {
 	    indice[kl] = 2 * indice[kl];
 	    }
-	intCoordsToNum_gen(dim - 1, nbPointsSubGridNew, indice, &posNew);
+	posNew = intCoordsToNum_gen(dim - 1, nbPointsSubGridNew, indice);
 
 	*gridTabNew[posNew] = *gridTab[pos];
 
@@ -519,11 +519,11 @@ void Grid_BitSet::refine()
     cout << " Grid refinement finished\n";
     }
 
-unsigned long long int Grid_BitSet::getNbPointsTotalSubGrid()
+unsigned long long int Grid_BitSet::getNbPointsTotalSubGrid() const
     {
     return nbPointsTotalSubGrid;
     }
-unsigned long long int* Grid_BitSet::getNbPointsSubGrid()
+const unsigned long long int* Grid_BitSet::getNbPointsSubGrid() const
     {
     return nbPointsSubGrid;
     }
@@ -547,7 +547,7 @@ Grid_BitSet::~Grid_BitSet()
 
     }
 
-void Grid_BitSet::printGrid(void)
+void Grid_BitSet::printGrid(void) const
     {
     // cout<< " La grille ici est BitSet!\n";
     }
@@ -555,24 +555,24 @@ void Grid_BitSet::addPointToSet(unsigned long long int pos, double val)
     {
     this->numToIntCoords(pos, tempIntCoords);
     unsigned long long int posX;
-    this->intCoordsToNum_dm1(tempIntCoords, &posX);
+    posX = this->intCoordsToNum_dm1(tempIntCoords);
     this->setPoint(posX, tempIntCoords[dirTramage], true);
 
     }
-void Grid_BitSet::savePointsList(string fileName)
+void Grid_BitSet::savePointsList(const string &fileName) const
     {
     // cout<< " couou\n";
     }
-void Grid_BitSet::addPointToSet(unsigned long long int *coords, double val)
+void Grid_BitSet::addPointToSet(const unsigned long long int *coords, double val)
     {
     setPoint(coords, true);
     }
 
-void Grid_BitSet::setPoint(unsigned long long int *coords, bool val)
+void Grid_BitSet::setPoint(const unsigned long long int *coords, bool val)
     {
     unsigned long long int posX;
 
-    this->intCoordsToNum_dm1(coords, &posX);
+    posX = this->intCoordsToNum_dm1(coords);
 
     (*gridTab[posX])[coords[dirTramage]] = true;
 
@@ -587,13 +587,13 @@ void Grid_BitSet::setPoint(unsigned long long int posX,
 
     }
 
-unsigned long long int Grid_BitSet::getDirTram()
+unsigned long long int Grid_BitSet::getDirTram() const
     {
     return dirTramage;
     }
 
 boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueBis(
-	unsigned long long int posX, bool print)
+	unsigned long long int posX, bool print) const
 		{
     print = false;
     int i = 0;
@@ -666,7 +666,7 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueBis(
 	    {
 	    // cout<< " trame pas vide "<<laTrame<<endl;
 	    int k = 0;
-	    while ((posX + indicesDecalSub[k] < 0) & (k < pow3Sub))
+	    while ((indicesDecalSub[k] < 0 && posX < ((unsigned long long int) -indicesDecalSub[k])) && (k < pow3Sub))
 		{
 		if (print)
 		    cout << " k =" << k << " indices dcal="
@@ -694,7 +694,7 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueBis(
 
 		while (k < pow3Sub)
 		    {
-		    if ((posX + indicesDecalSub[k] >= 0)
+                if ((indicesDecalSub[k] < 0 && posX >= ((unsigned long long int) -indicesDecalSub[k]))
 			    & (posX + indicesDecalSub[k] < nbPointsTotalSubGrid))
 			{
 			masque1 = (((*gridTab[posX + indicesDecalSub[k]])));
@@ -783,7 +783,7 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueBis(
 		}
 
 boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasque(
-	unsigned long long int posX)
+	unsigned long long int posX) const
 		{
     int i = 0;
     double x = limInf[0] + step[0];
@@ -830,8 +830,8 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasque(
 	    }
 	else
 	    {
-	    int k = 0;
-	    while ((posX + indicesDecalSub[k] < 0) & (k < pow3Sub))
+	    int k = 0;        
+	    while ((indicesDecalSub[k] < 0 && posX < ((unsigned long long int) -indicesDecalSub[k])) && (k < pow3Sub))
 		{
 		//cout<< " k ="<<k<< " indices dcal="<<indicesDecalSub[k]<<endl;
 		k++;
@@ -857,7 +857,7 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasque(
 
 		while (k < pow3Sub)
 		    {
-		    if (posX + indicesDecalSub[k] >= 0)
+            if (indicesDecalSub[k] < 0 && posX >= ((unsigned long long int)-indicesDecalSub[k]))
 			{
 			masque &= (((*gridTab[posX + indicesDecalSub[k]])));
 
@@ -930,7 +930,7 @@ void Grid_BitSet::refineTrameMasque(unsigned long long int posX,
     // on test si la trame n'est pas vide
 
     int k = 0;
-    while ((posX + indicesDecalSub[k] < 0) & (k < pow3Sub))
+    while ((indicesDecalSub[k] < 0 && posX < ((unsigned long long int)-indicesDecalSub[k])) && k < pow3Sub)
 	{
 	// cout<< " k ="<<k<< " indices dcal="<<indicesDecalSub[k]<<endl;
 	k++;
@@ -953,7 +953,7 @@ void Grid_BitSet::refineTrameMasque(unsigned long long int posX,
 	    }
 	while (k < pow3Sub)
 	    {
-	    if (posX + indicesDecalSub[k] >= 0
+            if ((indicesDecalSub[k] < 0 && posX >= ((unsigned long long int) -indicesDecalSub[k]))
 		    && posX + indicesDecalSub[k] < nbPointsTotalSubGrid)
 		{
 		numToIntCoords_gen(posX + indicesDecalSub[k], dim - 1,
@@ -984,37 +984,40 @@ void Grid_BitSet::refineTrameMasque(unsigned long long int posX,
  *  sont num�ro
  */
 
-void Grid_BitSet::loadSet(string fileName)
-    {
+void Grid_BitSet::loadSet(const string &fileName)
+{
     string line;
-    ifstream *userDataFile = new ifstream();
-    double xCoords[dim], val;
+    ifstream userDataFile(fileName);
+    double xCoords[dim];
+    bool val;
+    unsigned long long int xCoordsInt[dim];
     istringstream sstr;
-
-    userDataFile->open(fileName);
-    if (userDataFile->good())
+    
+    if (!userDataFile)
 	{
-	for (unsigned long long int posX = 0; posX < nbPointsTotalSubGrid;
-		posX++)
-	    {
-	    for (unsigned long long int k = 0; k < longTrame; k++)
-		{
-		getline((*userDataFile), line);
-		line.append(" ");
-		sstr.str(line);
-
-		for (int i = 0; i < dim; i++)
-		    {
-		    sstr >> xCoords[i];
-		    }
-		sstr >> val;
-		(*gridTab[posX])[k] = val;
-		}
-	    }
-	}
+        spdlog::error("Error loading set, could not open set file : {}", fileName);
     }
+    else {
+        while (getline(userDataFile, line)) {
+            sstr.str(line);
 
-void Grid_BitSet::saveValOnGrid(string fileName)
+            for (int d = 0; d < dim; ++d)
+            {
+                sstr >> xCoords[d];
+                // Transformation inverse des coordonnées en double vers les coordonnées entières
+                const double xCoordsIntI =
+                    (xCoords[d] - limInf[d])/step[d] - 0.5*arePointsGridCenters;
+                xCoordsInt[d] = llround(xCoordsIntI);
+            }
+            sstr >> val;
+            
+            unsigned long long int posX = this->intCoordsToNum_dm1(xCoordsInt);
+            (*gridTab[posX])[xCoordsInt[dirTramage]] = val;
+        }
+	}
+}
+
+void Grid_BitSet::saveValOnGrid(const string &fileName) const
     {
     //cout<<"ecriture  de l'ensemble dans un fichier \n";
     // instructions
@@ -1055,7 +1058,7 @@ void Grid_BitSet::saveValOnGrid(string fileName)
 			{
 			fichierB << xCoordsDouble[l1] << " ";
 			}
-		    fichierB << "1.0 \n";
+		    fichierB << "1 \n";
 		    }
 		else
 		    {
@@ -1063,7 +1066,7 @@ void Grid_BitSet::saveValOnGrid(string fileName)
 			{
 			fichierB << xCoordsDouble[l1] << " ";
 			}
-		    fichierB << "0.0 \n";
+		    fichierB << "0 \n";
 		    }
 		}
 	    }  // fin de for de parcours de la trame
@@ -1075,7 +1078,7 @@ void Grid_BitSet::saveValOnGrid(string fileName)
 	cerr << "Erreur � l'ouverture !" << endl;
     }
 
-void Grid_BitSet::saveValOnGridLight(string fileName)
+void Grid_BitSet::saveValOnGridLight(const string &fileName) const
     {
     //cout<<"ecriture  de l'ensemble dans un fichier \n";
     // instructions
@@ -1116,7 +1119,7 @@ void Grid_BitSet::saveValOnGridLight(string fileName)
 			{
 			fichierB << xCoordsDouble[l1] << " ";
 			}
-		    fichierB << "1.0 \n";
+		    fichierB << "1 \n";
 		    }
 		}
 	    }  // fin de for de parcours de la trame
@@ -1127,91 +1130,94 @@ void Grid_BitSet::saveValOnGridLight(string fileName)
 	// sinon
 	cerr << "Erreur � l'ouverture !" << endl;
     }
-void Grid_BitSet::intCoordsToNum_dm1(unsigned long long int *coords,
-	unsigned long long int *res)
-    {
+unsigned long long int Grid_BitSet::intCoordsToNum_dm1(const unsigned long long int *coords) const
+{
+    unsigned long long int res;
     if (dirTramage > 0)
-	{
-	(*res) = coords[0];
-	int i = 0;
-	while (i < (int) dirTramage - 1)
-	    {
-	    (*res) = (*res) * nbPointsSubGrid[i + 1] + coords[i + 1];
-	    i++;
-	    }
-	i = dirTramage;
-	while (i < dim - 1)
-	    {
-	    //cout <<"  i="<<i<<endl;
-	    (*res) = (*res) * nbPointsSubGrid[i] + coords[i + 1];
-	    i++;
-	    }
-	//cout<< "  res = "<<*res<<endl;
-	}
-    else
-	{
-	(*res) = coords[1];
-	//cout<< " dir tramage est  "<<dirTramage<<endl;
-
-	//cout<< "  res = "<<*res<<endl;
-	int i = 1;
-
-	while (i < dim - 1)
-	    {
-	    //cout <<"  i="<<i<<endl;
-	    (*res) = (*res) * nbPointsSubGrid[i] + coords[i + 1];
-	    i++;
-	    }
-	//cout<< "  res = "<<*res<<endl;
-	}
+    {
+        res = coords[0];
+        int i = 0;
+        while (i < (int) dirTramage - 1)
+        {
+            res = res * nbPointsSubGrid[i + 1] + coords[i + 1];
+            i++;
+        }
+        i = dirTramage;
+        while (i < dim - 1)
+        {
+            //cout <<"  i="<<i<<endl;
+            res = res * nbPointsSubGrid[i] + coords[i + 1];
+            i++;
+        }
+        //cout<< "  res = "<<*res<<endl;
     }
+    else
+    {
+        res = coords[1];
+        //cout<< " dir tramage est  "<<dirTramage<<endl;
+
+        //cout<< "  res = "<<*res<<endl;
+        int i = 1;
+
+        while (i < dim - 1)
+        {
+            //cout <<"  i="<<i<<endl;
+            res = res * nbPointsSubGrid[i] + coords[i + 1];
+            i++;
+        }
+        //cout<< "  res = "<<*res<<endl;
+    }
+    return res;
+}
 void Grid_BitSet::numToIntAndDoubleCoords_dm1(unsigned long long int num,
-	unsigned long long int *resI, double *resD)
+	unsigned long long int *resI, double *resD) const
     {
     unsigned long long int temp = num;
 
     for (int d = (int) dim - 1; d >= dirTramage + 1; d--)
 	{
-	resI[d] = temp % nbPoints[d];  // coordonn�es enti�res du point
-	resD[d] = limInf[d] + step[d] * resI[d] + 0.5 * gridType * step[d];
-
-	temp = (temp - resI[d]) / nbPoints[d];
+        const unsigned long long int resId = temp % nbPoints[d];  // coordonn�es enti�res du point
+        const double resDd = limInf[d] + step[d] * resId + 0.5 * arePointsGridCenters * step[d];
+        temp /= nbPoints[d];
+        resI[d] = resId;
+        resD[d] = resDd;
 	}
     for (int d = (int) dirTramage - 1; d >= 0; d--)
 	{
-	resI[d] = temp % nbPoints[d];  // coordonn�es enti�res du point
-	resD[d] = limInf[d] + step[d] * resI[d] + 0.5 * gridType * step[d];
-
-	temp = (temp - resI[d]) / nbPoints[d];
+        const unsigned long long int resId = temp % nbPoints[d];  // coordonn�es enti�res du point
+        const double resDd = limInf[d] + step[d] * resId + 0.5 * arePointsGridCenters * step[d];
+        temp /= nbPoints[d];
+        resI[d] = resId;
+        resD[d] = resDd;
 	}
 
     }
+
 inline void Grid_BitSet::numToIntCoords_dm1(unsigned long long int num,
-	unsigned long long int *res)
-    {
+                                            unsigned long long int *res) const
+{
 
     unsigned long long int temp = num;
     // cout<< "num= "<<num<<" to int coords nbPoints "; printVector(nbPoints, dim);
 
     for (int d = dim - 1; d > dirTramage; d--)
-	{
-	res[d] = temp % nbPoints[d];        // coordonn�es enti�res du point
-	temp = (temp - res[d]) / nbPoints[d];
-	//   cout<< " temp= "<<temp<< " res ="<<res[d]<<endl;
-
-	}
-    for (int d = dirTramage - 1; d >= 0; d--)
-	{
-	res[d] = temp % nbPoints[d];        // coordonn�es enti�res du point
-	temp = (temp - res[d]) / nbPoints[d];
-	//   cout<< " temp= "<<temp<< " res ="<<res[d]<<endl;
-
-	}
+    {
+        const unsigned long long int resd = temp % nbPoints[d];        // coordonn�es enti�res du point
+        temp /= nbPoints[d];
+        res[d] = resd;
 
     }
+    for (int d = dirTramage - 1; d >= 0; d--)
+    {
+        const unsigned long long int resd = temp % nbPoints[d];        // coordonn�es enti�res du point
+        temp /= nbPoints[d];
+        res[d] = resd;
+    }
+
+}
 
 inline void Grid_BitSet::numToSubGridCoords(unsigned long long int num,
-	unsigned long long int *res)
+	unsigned long long int *res) const
     {
 
     unsigned long long int temp = num;
@@ -1234,24 +1240,34 @@ inline void Grid_BitSet::numToSubGridCoords(unsigned long long int num,
 
     }
 
-unsigned long long int Grid_BitSet::getLongTrame()
+unsigned long long int Grid_BitSet::getLongTrame() const
     {
     return longTrame;
 
     }
 
-boost::dynamic_bitset<>** Grid_BitSet::getGridTab()
+boost::dynamic_bitset<>**Grid_BitSet::getGridTab()
+{
+    return gridTab;
+}
+
+const boost::dynamic_bitset<>* const *Grid_BitSet::getGridTab() const
 		{
     return gridTab;
 		}
 
-boost::dynamic_bitset<>** Grid_BitSet::getGridTabNew()
+boost::dynamic_bitset<> **Grid_BitSet::getGridTabNew()
+{
+    return gridTabNew;
+}
+
+const boost::dynamic_bitset<> * const *Grid_BitSet::getGridTabNew() const
 		{
     return gridTabNew;
 		}
 
-void Grid_BitSet::saveProjetion(string fileName,
-	unsigned long long int *projection)
+void Grid_BitSet::saveProjetion(const string &fileName,
+	const unsigned long long int *projection) const
     {
     //cout<<"projection de la fonction valeur  dans un fichier \n";
     // instructions
@@ -1353,7 +1369,7 @@ void Grid_BitSet::saveProjetion(string fileName,
 
     }
 
-void Grid_BitSet::saveCoupe(string nomFichier)
+void Grid_BitSet::saveCoupe(const string &nomFichier) const
     {
 
     unsigned long long int pos;
@@ -1401,7 +1417,7 @@ void Grid_BitSet::saveCoupe(string nomFichier)
 	cerr << "Erreur � l'ouverture !" << endl;
     //cout<<"fichier fini\n";
     }
-void Grid_BitSet::saveCoupeBoundary(string nomFichier)
+void Grid_BitSet::saveCoupeBoundary(const string &nomFichier) const
     {
     boost::dynamic_bitset<> masqueFront;
     bool test;
@@ -1461,7 +1477,7 @@ void Grid_BitSet::saveCoupeBoundary(string nomFichier)
 	cerr << "Erreur � l'ouverture !" << endl;
     //cout<<"fichier fini\n";
     }
-void Grid_BitSet::saveBoundary(string nomFichier)
+void Grid_BitSet::saveBoundary(const string &nomFichier) const
     {
 
     boost::dynamic_bitset<> masqueFront;
@@ -1507,17 +1523,17 @@ void Grid_BitSet::saveBoundary(string nomFichier)
 	cerr << "Erreur � l'ouverture !" << endl;
     //cout<<"fichier fini\n";
     }
-bool Grid_BitSet::isInSet(unsigned long long int *coords)
+bool Grid_BitSet::isInSet(const unsigned long long int *coords) const
     {
     unsigned long long int posX;
 
-    this->intCoordsToNum_dm1(coords, &posX);
+    posX = this->intCoordsToNum_dm1(coords);
 
     return (*gridTab[posX])[coords[dirTramage]];
     }
 
 
-int Grid_BitSet::getNumberOfViableNeighbors(unsigned long long int pos)
+int Grid_BitSet::getNumberOfViableNeighbors(unsigned long long int pos) const
     {
     int res = 0;
     unsigned long long int tempPos;
@@ -1537,7 +1553,7 @@ int Grid_BitSet::getNumberOfViableNeighbors(unsigned long long int pos)
     return res;
     }
 
-unsigned long long int Grid_BitSet::getNearestPointInSet(double *coords)
+unsigned long long int Grid_BitSet::getNearestPointInSet(const double *coords) const
     {
     unsigned long long int nearest = this->nbTotalPoints + 1; // means that teh is no near points that are viable
     double minDist = PLUS_INF;
@@ -1565,11 +1581,6 @@ unsigned long long int Grid_BitSet::getNearestPointInSet(double *coords)
 	    }
 	}
     return nearest;
-    }
-
-void savePointsList(string fileName)
-    {
-
     }
 
 void Grid_BitSet::computeSubGridShifts()

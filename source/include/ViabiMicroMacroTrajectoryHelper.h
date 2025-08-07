@@ -22,25 +22,26 @@
 
 #ifndef SRC_VIABIMICROMACROTRAJECTORYHELPER_H_
 #define SRC_VIABIMICROMACROTRAJECTORYHELPER_H_
+
 #include "GridMicroMacro.h"
 #include "SysDyn.h"
+#include "ParametersManager.h"
 
 class ViabiMicroMacroTrajectoryHelper
-    {
+{
 public:
     ViabiMicroMacroTrajectoryHelper();
 
-    ViabiMicroMacroTrajectoryHelper(GridMicroMacro *gr, SysDyn *ds, int type);
+    ViabiMicroMacroTrajectoryHelper(GridMicroMacro *gr, SysDyn *ds, TrajectoryParametersManager *params);
 
     virtual ~ViabiMicroMacroTrajectoryHelper();
 
-    double computeOptimalTrajectory(double *initPosition, string fileName, bool &succes);
-    double computeOptimalTrajectory_new(double *initPosition, string fileName, bool &succes);
+    double computeOptimalTrajectory(double *initPosition, double timeHorizon, string fileName, bool &succes);
 
     int findOptiControl(double *currentPos, double budget, unsigned long long int optimDiscreteSuccessor, double &dt, int nbStepIter,
 	    double stepCoeff, double *resPos, bool &succes, double &nextBudget);
 
-    unsigned long long int findOptimalDiscreteSuccessor(unsigned long long int pos, double dt);
+    unsigned long long int findOptimalDiscreteSuccessor(unsigned long long int pos, double normalizedTime, double dt);
 
     double computeOptimalTrajectory_Lmin(double *initPosition, string fileName, bool &succes);
 
@@ -62,8 +63,10 @@ public:
     unsigned long long int findViabControlMinValue_DD(double budget, unsigned long long int *currentPos, unsigned long long int currentControl,
 	    unsigned long long int *resPos, double &newBudget, bool &succes);
 
-private:
-
+    int *getPreferedControlIndexes();
+    int *sortPreferedControlIndexes(const double *x, double t, int strategyIndex = 0);
+    
+private:    
     GridMicroMacro *grid;
     /*!
      *  \brief  Copie pour raisons de rapidté  de la valeur de dimension d'état
@@ -80,6 +83,11 @@ private:
     int typeTraj;
     string filePrefix;
     SysDyn *dynsys;
-    };
+
+    int trajIndex;
+    indexSorter_t sortIndexes;
+    controlWeight_t controlWeight;
+    int *preferedControlIndexes;
+};
 
 #endif /* SRC_VIABIMICROMACROTRAJECTORYHELPER_H_ */

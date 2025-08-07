@@ -24,22 +24,32 @@
 #ifndef SRC_PARAMETERSMANAGER_H_
 #define SRC_PARAMETERSMANAGER_H_
 
-#include "../include/defs.h"
+#include "Params.h"
+#include "ModelParameters.h"
+
+using namespace boost::property_tree;
 
 class ParametersManager
-    {
+{       
 public:
-    ParametersManager();
-    ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp, systemParams *sp);
-    ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp, systemParams *sp, int nbOmpThreads, string paramsFile);
-    gridParams* getGridParameters();
-    algoViabiParams* getAlgoParameters();
-    controlParams* getControlParameters();
-    systemParams* getSystemParameters();
-    void readControlParametersFromJson();
-    void readGridParametersFromJson();
-    void readSystemParametersFromJson();
-    void readAlgoParametersFromJson();
+    ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp, systemParams *sp, int nbOmpThreads, const string &paramsFile, void *modelHandle);
+    const gridParams* getGridParameters() const;
+    const algoViabiParams* getAlgoParameters() const;
+    const controlParams* getControlParameters() const;
+    const systemParams* getSystemParameters() const;
+    const std::vector<trajectoryParams> &getTrajectoryParametersList() const;
+    std::vector<trajectoryParams> &getTrajectoryParametersList();
+    int getNbTrajectories() const;
+    
+    void *getModelHandle();
+    const modelParams *getModelParameters() const;
+    
+    void readControlParametersFromJson(ptree &allParamsRoot);
+    void readGridParametersFromJson(ptree &allParamsRoot);
+    void readSystemParametersFromJson(ptree &allParamsRoot);
+    void readAlgoParametersFromJson(ptree &allParamsRoot);
+    void readTrajectoryParametersListFromJson(ptree &allParamsRoot);
+    void readModelParametersFromJson(ptree &allParamsRoot);
     virtual ~ParametersManager();
 
 private:
@@ -47,14 +57,46 @@ private:
     algoViabiParams *algoParameters;
     controlParams *controlParameters;
     systemParams *systemParameters;
+    std::vector<trajectoryParams> trajectoryParametersList;
+    
+    void *modelHandle;
     int nbOmpThreads;
     string parametersFileName;
-    void readTabData(ptree *dataRoot, double *target, string label, int nbElements);
-    void readTabData(ptree *dataRoot, unsigned long long int *target, string label, int nbElements);
-    void readTabData(ptree *dataRoot, int *target, string label, int nbElements);
-    void readDoubleTabData(ptree *dataRoot, int *target, string label, int nbElements, int dim);
-    void readDoubleTabData(ptree *dataRoot, double *target, string label, int nbElements, int dim);
-    void readDoubleTabData(ptree *dataRoot, unsigned long long int *target, string label, int nbElements, int dim);
-    };
+
+    modelParams modelParameters;
+
+    template<typename T>
+    void readTabDataSkipInvalid(ptree *dataRoot, T *target, const string &label, int &nbElements);
+
+    template<typename T>
+    void readTabData(ptree *dataRoot, T *target, const string &label, int nbElements, const T &defaultValue);
+        
+
+    void readTrajectoryParameters(ptree &trajParamsRoot, trajectoryParams &params);
+    void readTycheParameters(ptree &tycheParamsRoot, tycheParams &params);
+    
+    void toPixels(double *bubbleRadius);
+    void initBubble(ptree &dataRoot, trajectoryParams &params);
+    void initSeed(ptree &dataRoot, trajectoryParams &params);
+};
+
+class TrajectoryParametersManager {
+public:
+    TrajectoryParametersManager(ParametersManager *pm, int trajIndex);
+    const trajectoryParams *getTrajectoryParameters() const;
+    int getNbTrajectories() const;
+    int getTrajectoryIndex() const;
+    const gridParams* getGridParameters() const;    
+    const algoViabiParams* getAlgoParameters() const;    
+    const controlParams* getControlParameters() const;    
+    const systemParams* getSystemParameters() const;        
+    void *getModelHandle(void);    
+    const modelParams *getModelParameters() const;   
+private:
+    ParametersManager *parametersManager;
+    int trajIndex;
+};
+
+void mergeJSONPtreeInto(const ptree &from, ptree &to);
 
 #endif /* SRC_PARAMETERSMANAGER_H_ */
