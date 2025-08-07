@@ -58,6 +58,7 @@
 /source/data/ex4_Viabi2D_data.h
 build/*
 OUTPUT/
+LOG/
 CMakeFiles/
 Default/
 .settings/
