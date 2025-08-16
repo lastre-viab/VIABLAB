@@ -6,9 +6,10 @@
 #include <unordered_map>
 #include <vector>
 #include <sstream>
+#include "viablab_export.h"
 
 // En lowerCase par cohérence avec les autres paramètres
-class modelParams {
+class VIABLAB_LIBRARY_EXPORT modelParams {
 public:
     std::string &operator[](const std::string &str);
     const std::string &operator[](const std::string &str) const;

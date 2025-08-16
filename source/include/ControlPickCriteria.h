@@ -2,6 +2,7 @@
 #define CONTROLPICKCRITERIA_H
 
 #include <vector>
+#include "viablab_export.h"
 
 class SysDyn;
 class Trajectory;
@@ -12,7 +13,7 @@ struct pickedControl;
 #include "ControlPicker.h"
 #include "TrajectoryHelpers.h"
 
-class ControlPickCriteria
+class VIABLAB_LIBRARY_EXPORT ControlPickCriteria
 {
 public:
     using StrategyIndexBitFlag = ControlPicker::StrategyIndexBitFlag;

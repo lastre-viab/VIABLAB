@@ -44,9 +44,9 @@
 #include "boost/foreach.hpp"
 using namespace boost::property_tree;
 
-#include "../spdlog/include/spdlog/spdlog.h"
-#include "../spdlog/include/spdlog/sinks/stdout_color_sinks.h" // or "../stdout_sinks.h" if no colors needed
-#include "../spdlog/include/spdlog/sinks/basic_file_sink.h"
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/stdout_color_sinks.h" // or "../stdout_sinks.h" if no colors needed
+#include "spdlog/sinks/basic_file_sink.h"
 /*
  #if defined(__APPLE__)
 
@@ -55,8 +55,7 @@ using namespace boost::property_tree;
  #endif
  #include <inttypes.h>
  */
-
-//#include <magick++.h>
+#include <map>
 #include <omp.h>
 #include <ctime>
 #include <sys/time.h>

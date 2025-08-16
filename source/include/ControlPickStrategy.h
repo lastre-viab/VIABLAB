@@ -8,7 +8,7 @@
 class ControlPicker;
 class ControlPickCriteria;
 
-class ControlPickStrategy {    
+class VIABLAB_LIBRARY_EXPORT ControlPickStrategy {    
 public:
     ControlPickStrategy() = default;
     /*
@@ -21,7 +21,7 @@ public:
     virtual const std::string &getName() const = 0;
 };
 
-class UserPickStrategy : public ControlPickStrategy {    
+class VIABLAB_LIBRARY_EXPORT UserPickStrategy : public ControlPickStrategy {    
 public:
     UserPickStrategy() = default;
     virtual ~UserPickStrategy() = default;

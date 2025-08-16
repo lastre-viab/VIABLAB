@@ -73,8 +73,8 @@ bool isValidNeighbor(const unsigned long long int *coord1, const unsigned long l
 
 class CustomStrategy final : public UserPickStrategy {
 public:    
-    OptionalCu pickControl(const OptionalCu &previousStrategyResult,
-    ControlPickCriteria &criteria) override {
+    OptionalCu pickControl(const OptionalCu &previousStrategyResult, ControlPickCriteria &criteria) override 
+	{
 
         double rho = criteria.getGridTimeStep();
         pickedControl p {

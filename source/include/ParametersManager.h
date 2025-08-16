@@ -26,10 +26,11 @@
 
 #include "Params.h"
 #include "ModelParameters.h"
+#include "viablab_export.h"
 
 using namespace boost::property_tree;
 
-class ParametersManager
+class VIABLAB_LIBRARY_EXPORT ParametersManager
 {       
 public:
     ParametersManager(gridParams *gp, algoViabiParams *avp, controlParams *cp, systemParams *sp, int nbOmpThreads, const string &paramsFile, void *modelHandle);

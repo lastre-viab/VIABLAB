@@ -9,7 +9,7 @@
   Choisit le même que l'itération précédente (le contrôle renvoyé par getLastControlIndex de traj) en modifiant possiblement le pas de temps rho.
   Si celui-ci n'est pas viable, renvoie UNSATISFIED_STRATEGY
 */
-class HeavyPickStrategy final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT HeavyPickStrategy final : public ControlPickStrategy {
 public:
     HeavyPickStrategy(int initCu);
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
@@ -30,7 +30,7 @@ private:
   Si le contrôle réel n'est pas viable, renvoie celui de grille.
   Si le contrôle de grille n'est pas viable, renvoie UNSATISFIED_STRATEGY
  */
-class FirstPickStrategyBitSet final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT FirstPickStrategyBitSet final : public ControlPickStrategy {
 public:
     FirstPickStrategyBitSet(ViabiBitSetTrajectoryHelper *);
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
@@ -49,7 +49,7 @@ private:
   
   Si le premier n'est pas viable, renvoie UNSATISFIED_STRATEGY
  */
-class FirstOnlyPickStrategy final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT FirstOnlyPickStrategy final : public ControlPickStrategy {
 public:
     FirstOnlyPickStrategy() = default;
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
@@ -65,7 +65,7 @@ private:
 
   Renvoie toujours UNSATISFIED_STRATEGY
  */
-class ShuffleStrategy final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT ShuffleStrategy final : public ControlPickStrategy {
 public:
     ShuffleStrategy() = default;
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
@@ -80,7 +80,7 @@ private:
   Réordonne les preferedControlIndexes selon l'ordre dicté par
   la fonction utilisateur controlWeight par ordre décroissant des poids.
  */
-class SortStrategy final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT SortStrategy final : public ControlPickStrategy {
 public:
     SortStrategy() = default;
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
@@ -94,7 +94,7 @@ private:
 /*!
   Réapplique l'ordre par défaut des contrôles.
  */
-class ResetOrderStrategy final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT ResetOrderStrategy final : public ControlPickStrategy {
 public:
     ResetOrderStrategy() = default;
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
@@ -114,7 +114,7 @@ private:
   Sinon, renvoie le contrôle le plus proche de previousStrategyResult viable pour
   la trajectoire réelle.
  */
-class ClosestPickStrategy final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT ClosestPickStrategy final : public ControlPickStrategy {
 public:
     ClosestPickStrategy() = default;
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
@@ -136,7 +136,7 @@ private:
   Si previousStrategyResult n'est pas un contrôle, renvoie previousStrategyResult.
   Sinon, renvoie le contrôle vérifiant les conditions ci-dessus.
  */
-class PreferedPickStrategy final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT PreferedPickStrategy final : public ControlPickStrategy {
 public:
     PreferedPickStrategy() = default;
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
@@ -161,7 +161,7 @@ private:
 
   Renvoie le contrôle choisi par le ControlPicker
  */
-class BubblePickStrategy final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT BubblePickStrategy final : public ControlPickStrategy {
 public:
     BubblePickStrategy(int strategyIndex, const TrajectoryParametersManager *, const Grid *);
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
@@ -197,7 +197,7 @@ private:
   Si aucun contrôle ne satisfait ce critère, le contrôle initial est renvoyé tel
   quel et un message de warning est affiché
  */
-class SmoothPickStrategy final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT SmoothPickStrategy final : public ControlPickStrategy {
 public:
     SmoothPickStrategy(double maxAngleRadians);
 
@@ -221,7 +221,7 @@ private:
   Choisit l'indice du contrôle le plus proche du contrôle renvoyé par la fonction
   temporalControl de l'utilisateur.
  */
-class TemporalControlPickStrategy final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT TemporalControlPickStrategy final : public ControlPickStrategy {
 public:
     TemporalControlPickStrategy(const TrajectoryParametersManager *);
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
@@ -243,7 +243,7 @@ private:
   distance euclidienne) du centre de la bulle situé sur le bord du
   noyau de viabilité.
  */
-class BubbleBorderPickStrategy final : public ControlPickStrategy {
+class VIABLAB_LIBRARY_EXPORT BubbleBorderPickStrategy final : public ControlPickStrategy {
 public:
     BubbleBorderPickStrategy(int strategyIndex, const TrajectoryParametersManager *, const Grid *);
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
