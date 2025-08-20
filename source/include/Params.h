@@ -29,7 +29,8 @@ struct gridParams
     bool *SORTIE_OK_SUP;
     int OMP_THREADS;
     GridMethod GRID_METHOD;
-
+    unsigned long long int DIM_HC;
+    unsigned long long int DIM_HD;
     };
 
 /*!
@@ -39,7 +40,7 @@ struct gridParams
  */
 
 struct controlParams
-{
+    {
     unsigned long long int DIMC;        //!<  dimension  de controles
     unsigned long long int *NBPOINTSC; //!<  nombre de points par axe en cas de discr�tisation
     double *LIMINFC;      //!<  limites inf de chaque variable de controle
@@ -49,7 +50,12 @@ struct controlParams
     unsigned long long int *NBPOINTS_TY; //!<  nombre de points par axe en cas de discr�tisation
     double *LIMINF_TY;      //!<  limites inf de chaque variable de controle
     double *LIMSUP_TY;       //!<  limites sup de chaque variable de controle
-};
+
+    unsigned long long int DIM_HT;        //!<  dimension  de controles
+    unsigned long long int *NBPOINTS_HT; //!<  nombre de points par axe en cas de discr�tisation
+    double *LIMINF_HT;      //!<  limites inf de chaque variable de controle
+    double *LIMSUP_HT;       //!<  limites sup de chaque variable de controle
+    };
 
 /*!
  * \struct systemParams
@@ -58,11 +64,15 @@ struct controlParams
  */
 
 struct systemParams
-{
+    {
     void (*DYNAMICS)(const double*, const double*, double*);
     void (*DYNAMICS_TYCH)(const double*, const double*, const double*, double*);
     void (*DYNAMICS_FD)(const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
     void (*DYNAMICS_TYCH_FD)(const unsigned long long int*, const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
+
+    void (*DYNAMICS_HYBRID_D)(const double*, const unsigned long long int*, const double*, const unsigned long long int*, unsigned long long int*);
+    void (*DYNAMICS_HYBRID_C)(const double*, const unsigned long long int*, const double*, const unsigned long long int*, double*);
+    double (*CONSTR_XU_HYBRID)(const double*, const unsigned long long int*, const double*, const unsigned long long int*);
 
     double (*CONSTR_XU)(const double*, const double *u);
     double (*CONSTR_XV_TYCH)(const double*, const double *v);
@@ -98,10 +108,10 @@ struct systemParams
     DynType DYN_TYPE;     // type of dynamics : FD, CD,
     FdDynType FD_DYN_TYPE; // pour indiquer le type de repr�sentation de la dynamique : fonction ou fihciers r�tro
     std::string RETRO_FILE_NAME;
-};
+    };
 
 struct algoViabiParams
-{
+    {
 
     SetType SET_TYPE;
     bool COMPUTE_SET;
@@ -121,12 +131,12 @@ struct algoViabiParams
     unsigned long long int *PROJECTION;
     int ITERATION_STOP_LEVEL;
     TargetOrDeparture TARGET_OR_DEPARTURE;
-};
+    };
 
 struct algoViabiBoolParams
-{
+    {
     unsigned long long int NB_GO_RAM;
-};
+    };
 
 struct tycheParams {
     // Nombre maximal de tirage de ce tyché en cas de non correspondance de la contrainte état-tyché
@@ -149,7 +159,7 @@ struct trajectoryParams {
     double INIT_VALUE_FD;
     unsigned long long int *INIT_POINT_FD;
     double *INIT_CONTROL;
-    
+
     double maxTime;    
     // Rayon de la bulle sur chaque dimenseion
     double *BUBBLE_RADIUS;    

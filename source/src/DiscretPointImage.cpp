@@ -34,7 +34,7 @@ void DiscretPointImage::Build()
     double doubleVect1[dim];
     double rho;
     try
-    {
+	{
 	rho = dynsys->calculRho_local(pointDoubleCoords);
 
 	unsigned long long int cu;
@@ -53,9 +53,9 @@ void DiscretPointImage::Build()
 	    if (dynsys->constraintsXU(pointDoubleCoords, controlCoords[cu]) < PLUS_INF)
 		{
 		try
-		{
+		    {
 		    (dynsys->*(dynsys->discretDynamics))(pointDoubleCoords, controlCoords[cu], doubleVect1, rho);
-		}
+		    }
 		catch (...)
 		    {
 		    std::cout << "Allocation failed dans discrete dyn: " << std::flush;
@@ -124,9 +124,9 @@ void DiscretPointImage::Build()
 		else
 		    {
 		    list<unsigned long long int> newList =
-			    {
-				    cu
-			    };
+			{
+			cu
+			};
 		    (*imageCellsWithControls)[cellnum] = newList;
 		    }
 
@@ -134,14 +134,14 @@ void DiscretPointImage::Build()
 
 	    }
 	_isBuilt = true;
-    }
+	}
     catch (...)
 	{
 	std::cout << "exception dans calcul discrete image " << std::flush;
 	cout.flush();
 	throw;
 	}
-   // cout << " fin calcul discrete image " << std::flush;
+    // cout << " fin calcul discrete image " << std::flush;
     }
 
 bool DiscretPointImage::testConstraintesForCell(unsigned long long int numCell)
@@ -149,7 +149,7 @@ bool DiscretPointImage::testConstraintesForCell(unsigned long long int numCell)
     bool res = true;
     const long long int *indicesDecalCell = grid->getIndicesDecalCell();
     double *tempDoublePointCoords = new double[dim];
-unsigned long long int tempIntCoords[dim];
+    unsigned long long int tempIntCoords[dim];
     int nbPointsCube = (int) pow(2.0, dim);	//pow(2.0, dim);
     unsigned long long int pos;
     int i = 0;

@@ -10,7 +10,7 @@
 
 class TychasticFirstGuaranteedPickStrategy final : public TychasticControlPickStrategy {
 public:
-    TychasticFirstGuaranteedPickStrategy() = default;
+    TychasticFirstGuaranteedPickStrategy(ViabiTrajectoryHelper *vth);
     OptionalCu pickControl(const OptionalCu &previousStrategyResult,
                            TychasticControlPickCriteria &criteria) override final;
     const std::string &getName() const override final;
@@ -18,7 +18,7 @@ public:
 private:
 
     OptionalCu findViableDiscreteControl(const double *xCoordsDouble, TychasticControlPickCriteria &criteria);
-    
+    ViabiTrajectoryHelper *trajectoryHelper;
     static const std::string name;
 };
 

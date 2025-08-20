@@ -26,11 +26,12 @@
 #include "GridMicroMacro.h"
 #include "SysDyn.h"
 #include "ParametersManager.h"
+#include "ViabiTrajectoryHelper.h"
 
-class ViabiMicroMacroTrajectoryHelper
+class ViabiMicroMacroTrajectoryHelper final :public ViabiTrajectoryHelper
 {
 public:
-    ViabiMicroMacroTrajectoryHelper();
+    ViabiMicroMacroTrajectoryHelper() = default;
 
     ViabiMicroMacroTrajectoryHelper(GridMicroMacro *gr, SysDyn *ds, TrajectoryParametersManager *params);
 
@@ -65,29 +66,17 @@ public:
 
     int *getPreferedControlIndexes();
     int *sortPreferedControlIndexes(const double *x, double t, int strategyIndex = 0);
+    virtual PointStatus checkKernelRelation(double *position) const;
     
 private:    
     GridMicroMacro *grid;
-    /*!
-     *  \brief  Copie pour raisons de rapidté  de la valeur de dimension d'état
-     */
-    int dim;
-    /*!
-     *  \brief  Copie pour raisons de rapidté  de la valeur de dimension de contrôle
-     */
-    int dimC;
+
     /*!
      *  \brief Pointeur sur la base de données servant à enregister la rétroaction optimale
      */
     double *vTab;
     int typeTraj;
     string filePrefix;
-    SysDyn *dynsys;
-
-    int trajIndex;
-    indexSorter_t sortIndexes;
-    controlWeight_t controlWeight;
-    int *preferedControlIndexes;
 };
 
 #endif /* SRC_VIABIMICROMACROTRAJECTORYHELPER_H_ */

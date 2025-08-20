@@ -19,12 +19,10 @@ public:
     
     TychasticControlPickCriteria(TychasticControlPicker *picker,
                                  const trajectoryParams &tp,
-                                 SysDyn *sysDyn,
                                  TychasticTrajectory *traj, TrajectoryPoints *trajDiscrete,
                                  int strategyIndex, StrategyIndexBitFlag &flag, int tycheIndex);
     TychasticControlPickCriteria(TychasticControlPicker *picker,
                                  const trajectoryParams &tp,
-                                 SysDyn *sysDyn,
                                  TychasticTrajectory *traj, TrajectoryPoints *trajDiscrete,
                                  int strategyIndex, StrategyIndexBitFlag &flag, int tycheIndex, double timeStep);
     
@@ -96,7 +94,7 @@ public:
     
     ~TychasticControlPickCriteria() = default;
 private:
-    
+    ViabiTrajectoryHelper *trajectoryHelper;
     TychasticControlPicker *controlPicker;
     SysDyn *sysDyn;
     TychasticTrajectory *traj;

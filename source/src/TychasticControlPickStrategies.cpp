@@ -3,6 +3,9 @@
 #include "../include/TrajectoryPointsSimulation.h"
 #include "../include/TychasticTrajectorySimulation.h"
 
+TychasticFirstGuaranteedPickStrategy::TychasticFirstGuaranteedPickStrategy(ViabiTrajectoryHelper *viabiHelper) :
+    trajectoryHelper(viabiHelper) {}
+
 OptionalCu TychasticFirstGuaranteedPickStrategy::findViableDiscreteControl(const double *xCoordsDouble, TychasticControlPickCriteria &criteria) {
     
     SysDyn *sysDyn = criteria.getSysDyn();
@@ -19,7 +22,7 @@ OptionalCu TychasticFirstGuaranteedPickStrategy::findViableDiscreteControl(const
     unsigned long long int prefCu = 0;
     bool viableFound = false;
     do {
-        viableFound = sysDyn->isViableGuaranteedControl(xCoordsDouble, controlCoords[preferedControlIndexes[prefCu]], rho);
+        viableFound = trajectoryHelper->isViableGuaranteedControl(xCoordsDouble, controlCoords[preferedControlIndexes[prefCu]], rho);
     } while (!viableFound && (++prefCu) < nbTotalC);
     
     if (!viableFound) {

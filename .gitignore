@@ -59,6 +59,7 @@
 build/*
 OUTPUT/
 LOG/
+Doc/
 CMakeFiles/
 Default/
 .settings/

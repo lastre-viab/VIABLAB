@@ -18,10 +18,10 @@ class VIABLAB_LIBRARY_EXPORT ControlPickCriteria
 public:
     using StrategyIndexBitFlag = ControlPicker::StrategyIndexBitFlag;
     
-    ControlPickCriteria(ControlPicker *picker, SysDyn *sysDyn,
+    ControlPickCriteria(ControlPicker *picker,
                         Trajectory *traj, TrajectoryPoints *trajDiscrete,
                         int strategyIndex, StrategyIndexBitFlag &flag);
-    ControlPickCriteria(ControlPicker *picker, SysDyn *sysDyn,
+    ControlPickCriteria(ControlPicker *picker,
                         Trajectory *traj, TrajectoryPoints *trajDiscrete,
                         int strategyIndex, StrategyIndexBitFlag &flag, double timeStep);
     ControlPicker *getPicker();
@@ -70,6 +70,7 @@ public:
     
     ~ControlPickCriteria() = default;
 private:
+    ViabiTrajectoryHelper * trajectoryHelper;
     ControlPicker *picker;
     SysDyn *sysDyn;
     Trajectory *traj;

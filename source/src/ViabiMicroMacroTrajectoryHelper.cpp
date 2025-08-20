@@ -26,32 +26,17 @@
 #include "../include/ViabiMicroMacroTrajectoryHelper.h"
 #include "../include/Params.h"
 
-ViabiMicroMacroTrajectoryHelper::ViabiMicroMacroTrajectoryHelper()
-{
-    // TODO Auto-generated constructor stub
 
-}
-
-ViabiMicroMacroTrajectoryHelper::ViabiMicroMacroTrajectoryHelper(GridMicroMacro *gr, SysDyn *ds, TrajectoryParametersManager *tpm)
+ViabiMicroMacroTrajectoryHelper::ViabiMicroMacroTrajectoryHelper(GridMicroMacro *gr, SysDyn *ds, TrajectoryParametersManager *tpm): ViabiTrajectoryHelper(ds,tpm)
 {
 
     const trajectoryParams *tp = tpm->getTrajectoryParameters();
     TypeTraj typeTraj = tp->TRAJECTORY_TYPE;
         
     grid = gr;
-    dynsys = ds;
-    dim = grid->dim;
-    dimC = dynsys->getDimC();
     filePrefix = grid->filePrefix;
     this->typeTraj = typeTraj;
     vTab = grid->getGridPtr();
-
-    unsigned long long int nbTotalC = dynsys->getTotalNbPointsC();    
-    preferedControlIndexes = new int[nbTotalC];
-    std::iota(preferedControlIndexes, preferedControlIndexes+nbTotalC, 0);
-    controlWeight = tp->CONTROL_WEIGHT;
-    sortIndexes = tp->SORT_INDEXES;
-    
     switch (typeTraj)
 	{
     case VD:
@@ -1545,3 +1530,7 @@ ViabiMicroMacroTrajectoryHelper::~ViabiMicroMacroTrajectoryHelper()
         delete [] preferedControlIndexes;
     }
 
+ViabiTrajectoryHelper::PointStatus ViabiMicroMacroTrajectoryHelper::checkKernelRelation(double *position) const
+    {
+    return VALID_TRAJECTORY_POINT;
+    }

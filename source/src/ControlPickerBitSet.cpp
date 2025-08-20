@@ -2,9 +2,8 @@
 #include "../include/ViabiBitSetTrajectoryHelper.h"
 #include "../include/ControlPickStrategies.h"
 
-ControlPickerBitSet::ControlPickerBitSet(ViabiBitSetTrajectoryHelper *viabiHelper, SysDyn *sysDyn, TrajectoryParametersManager *params) :
-    ControlPicker(sysDyn, params, &viabiHelper->sortIndexes),
-    viabiHelper(viabiHelper)
+ControlPickerBitSet::ControlPickerBitSet(ViabiTrajectoryHelper *viabiHelper, TrajectoryParametersManager *params) :
+    ControlPicker(viabiHelper, params, &viabiHelper->sortIndexes)
 {
     const trajectoryParams *tp = params->getTrajectoryParameters();   
     const ControlPickStrategyName *strategies = tp->STRATEGIES;
@@ -73,7 +72,7 @@ ControlPickerBitSet *ControlPickerBitSet::addHeavyPicker(int initCu) {
 }
 
 ControlPickerBitSet *ControlPickerBitSet::addFirstPicker() {     
-    addPicker(new FirstPickStrategyBitSet(viabiHelper));
+    addPicker(new FirstPickStrategyBitSet(dynamic_cast<ViabiBitSetTrajectoryHelper*>(trajectoryHelper)));
     return this;
 }
 

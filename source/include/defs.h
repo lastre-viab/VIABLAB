@@ -60,20 +60,12 @@ using namespace boost::property_tree;
 #include <ctime>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <numeric> // pour std::iota
 
 #define NB_MAX_TRAJ_ITER 100000000
 #define NB_MAX_TRAJ_SIMULATIONS 50
 
 #define DEV_PRINT 1
-
-#define GRID_DB_FILE "gridDB.db"
-
-#define RETRO_OPTI_FILE "retro_opti.db"
-
-#define RETRO_VIAB_FILE "retro_viabi.db"
-#define RETRO_DYN_FILE "retroDynDB.db"
-#define RETRO_DYN_TEXT_FILE "retroDynFile.dat"
-
 #include "Enums.h"
 #include "utilities.h"
 
@@ -233,33 +225,34 @@ inline bool imageCellCompare(imageCell c1, imageCell c2)
  *  � partir du num�ro du point dans la num�rotation alpha-num�rique
  * on obient le vecteur des coordonn�s enti�res
  */
-inline void numToIntCoords_gen(unsigned long long int num, unsigned long long int dim, const unsigned long long int *nbPoints, unsigned long long int *res)
-{
+inline void numToIntCoords_gen(unsigned long long int num, unsigned long long int dim, const unsigned long long int *nbPoints,
+	unsigned long long int *res)
+    {
     int temp = num;
 
     for (int d = dim - 1; d >= 0; d--)
 	{
-        const unsigned long long int resd = temp % nbPoints[d];        // coordonn�es enti�res du point
-        temp /= nbPoints[d];
-        res[d] =resd;
+	const unsigned long long int resd = temp % nbPoints[d];        // coordonn�es enti�res du point
+	temp /= nbPoints[d];
+	res[d] = resd;
 	}
-}
+    }
 
 /*! \brief Transformation  de num�rotation alpha-num�rique
  *  *  � partir du num�ro des coordonn�es enti�res du points dans la grille
  *  sont num�ro
  */
 inline unsigned long long int intCoordsToNum_gen(unsigned long long int dim, const unsigned long long int *nbPoints, unsigned long long int *coords)
-{
+    {
     unsigned long long int res = coords[0];
 
     for (unsigned long long int i = 0; i < dim - 1; i++)
 	{
-        res = res * nbPoints[i + 1] + coords[i + 1];
+	res = res * nbPoints[i + 1] + coords[i + 1];
 
 	}
     return res;
-}
+    }
 
 /*!
  *  le type intPair est d�fini pour le calcul des images
@@ -289,27 +282,26 @@ inline bool upairCompare(uintPair p1, uintPair p2)
     return (p1.first <= p2.first);
     }
 
-template <typename T>
+template<typename T>
 void printVector(const T *vect, unsigned long long int dim)
-{
+    {
     for (unsigned long long int k = 0; k < dim; k++)
 	{
-        cout << " " << vect[k];
+	cout << " " << vect[k];
 	}
     cout << endl;
-}
+    }
 
-
-template <typename T>
+template<typename T>
 void logVector(const string &msg, const T *vect, unsigned long long int dim)
-{
+    {
     ostringstream os;
     os << msg;
     for (unsigned long long int k = 0; k < dim; k++)
 	{
-        os << " " << vect[k];
+	os << " " << vect[k];
 	}
     spdlog::debug(os.str().c_str());
-}
+    }
 
 #endif /* DEFS_H_ */

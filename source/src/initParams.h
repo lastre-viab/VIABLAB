@@ -79,7 +79,7 @@ ParametersManager* initParams(void *modelHandle, const string &paramsFile, gridP
         sp.LIP = 1.0;
         sp.MF = 1.0;
         break;	
-    case HD:
+    case DH:
         sp.DYNAMICS = getUserSymbolOrDefault(modelHandle, dynamics_hybrid);
         break;
 	}

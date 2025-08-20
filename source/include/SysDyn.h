@@ -27,30 +27,31 @@
 #include "defs.h"
 #include "Params.h"
 #include "Grid.h"
+#include "ControlGrid.h"
 
 /*!
  * \class SysDyn
- * \brief La classe qui regroupe tous les ?����l?����ments d'un syst?����me dynamique
+ * \brief This class is designed to manage all the data related to the dynamical system
  */
 class SysDyn
     {
 public:
     /*!
-     * Constructeur vide
+     * Empty constructor
      */
     SysDyn();
     /*!
-     * Destructeur
+     * Destructor
      */
     virtual ~SysDyn();
 
-    SysDyn(const SysDyn &) = delete;
-    SysDyn(const SysDyn &&) = delete;
-    SysDyn& operator=(const SysDyn &) = delete;
-    SysDyn& operator=(SysDyn&& data);
+    SysDyn(const SysDyn&) = delete;
+    SysDyn(const SysDyn&&) = delete;
+    SysDyn& operator=(const SysDyn&) = delete;
+    SysDyn& operator=(SysDyn &&data);
 
     /*!
-     * \brief Fonction  d?����finissant la dynamique
+     * \brief Function pointer to the continuous dynamics. Is used for continuous and discrete time systems, with continuous space state
      *
      * Cette  fonction est d?����finie ici comme pointeur  pour permetre
      *  de la d?����finir  de mani?����re ext?����rieure ?���� la  classe
@@ -77,6 +78,7 @@ public:
      */
     void (SysDyn::*discretDynamics)(const double*, const double*, double*, double rho) const;
     void (SysDyn::*discretDynamics_tych)(const double*, const double*, const double*, double*, double rho) const;
+    void (SysDyn::*discretDynamics_hybrid)(const double *xc, unsigned long long int * xd, const double *uc, const unsigned long long int  *ud, double *resc, unsigned long long int resd, double rho) const;
 
     /*!
      * \brief Pointeur sur l'une des fonctions membres d?����finissant
@@ -142,6 +144,11 @@ public:
      */
     double (*dynConstraintsForTraj)(const double*, double*);
 
+    void (*dynamics_hybrid_d)(const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
+    void (*dynamics_hybrid_c)(const double*, const unsigned long long int*, const double*, double*);
+
+    double (*constr_xu_hybrid)(const double*, const unsigned long long int*, const double*, const unsigned long long int*);
+
     /*!
      * \brief  Cette fonction d?����finit la cible, elle correspond a la d?����finition de c(x)
      *
@@ -168,9 +175,7 @@ public:
     double (*lFunc)(const double *x, const double *u);
     double (*lFunc_tych)(const double *x, const double *u, const double *v);
     double (*lFunc_fd)(const unsigned long long int *x, const unsigned long long int *u);
-    double (*lFunc_tych_fd)(const unsigned long long int *x,
-                            const unsigned long long int *u,
-                            const unsigned long long int *v);
+    double (*lFunc_tych_fd)(const unsigned long long int *x, const unsigned long long int *u, const unsigned long long int *v);
 
     /*!
      * \brief  Cette fonction correspond a la d?����finition de mu(x,u)  qui definit les contraintes
@@ -213,7 +218,7 @@ public:
      * \see systemParams, controlParams, Grid
      */
     SysDyn(const systemParams &SP, int, const controlParams &cp, Grid *refGrid);
-
+    SysDyn(const systemParams &SP, int continuousStateDim, int discretStateDim, const controlParams &cp, Grid *grRef);
     /*
      * Dans la conception actuelle la classe sysDyn est la seule ?���� poss?����der l'information sur les controles: la dimension, le
      * nombre de points de dicr?����tisation,
@@ -252,18 +257,18 @@ public:
      * @return NbPointsC
      */
     unsigned long long int* getNbPointsC();
-        
-    /*!
-     * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
-     * @return  ControlCoords
-     */
-    double **getControlCoords() const;
 
     /*!
      * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
      * @return  ControlCoords
      */
-        
+    double** getControlCoords() const;
+
+    /*!
+     * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
+     * @return  ControlCoords
+     */
+
     unsigned long long int** getControlIntCoords();
     /*!
      * M?����thode d'acc?����s: renvoie le nombre total de points de discr?����tisation de contr?����les
@@ -316,6 +321,51 @@ public:
      */
     unsigned long long int getTotalNbPointsTy() const;
 
+    /*!
+        * M?����thode d'acc?����s: renvoie les bornes inf du pav?���� contenant les  contr?����les
+        * @return limInfC
+        */
+       double* getLimInfHybrid();
+
+       /*!
+        * M?����thode d'acc?����s: renvoie les bornes SUP du pav?���� contenant les  contr?����les
+        * @return limSupC
+        */
+
+       double* getLimSupHybrid();
+
+       /*!
+        * M?����thode d'acc?����s: renvoie le pas de discr?����tisation du pav?���� contenant les  contr?����les
+        * @return stepC
+        */
+
+       double* getStepHybrid();
+       /*!
+        * M?����thode d'acc?����s: renvoie la dimension de l'espace des  contr?����les
+        * @return dimC
+        */
+       unsigned long long int getDimHybrid() const;
+       /*!
+        * M?����thode d'acc?����s: renvoie les nb de points par axe des  contr?����les
+        * @return NbPointsC
+        */
+       unsigned long long int* getNbPointsHybrid();
+       /*!
+        * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
+        * @return  ControlCoords
+        */
+       double** getHybridCoords() const;
+       /*!
+        * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
+        * @return  ControlCoords
+        */
+       unsigned long long int** getHybridIntCoords();
+       /*!
+        * M?����thode d'acc?����s: renvoie le nombre total de points de discr?����tisation de contr?����les
+        * @return  ControlCoords
+        */
+       unsigned long long int getTotalNbPointsHybrid() const;
+
     /*   ***************************************************************
      *  Fin des m?����thodes d'acc?����s aux param?����tres de controles
      *
@@ -347,26 +397,16 @@ public:
     void setDynamicsForward();
     void setDynamicsBackward();
 
-    enum PointStatus : unsigned char {
-        VALID_TRAJECTORY_POINT,
-        OUTSIDE_DOMAIN,
-        OUTSIDE_CONSTRAINTS,
-        OUTSIDE_GRID,
-    };
-    PointStatus checkKernelRelation(double *point) const;
 
-    bool isViableControl(const double *x, const double *u, double *image, double rho) const;
-    bool isViableControl_tych(const double *x, const double *u, const double *v, double *image, double rho) const;
-    bool isViableGuaranteedControl(const double *x, const double *u, double rho) const;
 
     void getTychasticImage(const double *x, const double *u, const double *v, double *imageVect, double rho) const;
-        
-    const Grid *getGrid() const;
+
+    const Grid* getGrid() const;
     int getDim() const;
 private:
 
     void initializeMethods(const systemParams &SP);
-        
+
     double calculL_local_num(const double *x) const;
     double calculMF_local_num(const double *x) const;
     double calculL_local_ana(const double *x) const;
@@ -402,32 +442,26 @@ private:
     void FDiscretRK2_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
     void FDiscretRK4_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
 
+    void FDiscret_Hybrid(const double *xc, unsigned long long int * xd, const double *uc, const unsigned long long int  *ud, double *resc, unsigned long long int resd, double rho) const;
+
 
     int fd_dyn_type;
     double timeHorizon;
     string retroFileName;
     int discretisation;
     DynType dynType;
+
+    ControlGrid * controls;
+    ControlGrid * tyches;
+    ControlGrid * hybridTransistionControls;
+
     int dimS;
-    int dimC;
-    double *limInfC;
-    double *limSupC;
-    double *stepC;
-    unsigned long long int *nbPointsC;
-    double **controlCoords;
-    unsigned long long int **controlIntCoords;
-    unsigned long long int totalNbPointsC;
 
-    unsigned long long int *nbPointsTy;
-    int dimTy;
-    double *limInfTy;
-    double *limSupTy;
-    double *stepTy;
-    double **tychCoords;
-    unsigned long long int **tychIntCoords;
-    unsigned long long int totalNbPointsTych;
+    int dimS_hc;
+    int dimS_hd;
+
     bool isTychastic;
-
+    bool isHybrid;
     double L;  // constante de Lipschitz
     double MF;  // majoration de la norme de la dynamique
 
@@ -444,6 +478,6 @@ private:
     void (*jacobian)(const double *x, const double *u, double **jacob);
     void (*jacobian_tych)(const double *x, const double *u, const double *v, double **jacob);
     double dynSignFactor;
-};
+    };
 
 #endif /* SYSDYN_H_ */

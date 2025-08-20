@@ -1,7 +1,7 @@
 {
     "ALGORITHM_PARAMETERS": {
         "COMPUTE_MIN_TIME": false,
-        "COMPUTE_VIABLE_SET": false,
+        "COMPUTE_VIABLE_SET": true,
         "GRID_REFINMENTS_NUMBER": 0,
         "INTERMEDIATE_SAVINGS": false,
         "ITERATION_STOP_LEVEL": 0,
@@ -52,8 +52,8 @@
         ],
         "STATE_DIMENSION": 2,
         "STATE_GRID_POINTS": [
-            1001,
-            1001
+            501,
+            501
         ],
         "STATE_MAX_VALUES": [
             3,

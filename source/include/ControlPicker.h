@@ -7,65 +7,71 @@
 #include "Trajectory.h"
 #include "TrajectoryPoints.h"
 #include "Either.h"
-
+#include "ViabiTrajectoryHelper.h"
 class ControlPickStrategy;
 
 enum ControlPickFailureReason {
-    /* La raison pour laquelle aucun contrôle n'a été renvoyé
-       est que la stratégie n'a pas trouvé de contrôle la satisfaisant */
-    UNSATISFIED_STRATEGY,
-    // D'autres valeurs pourront être ajoutées plus tard
+	/* La raison pour laquelle aucun contrôle n'a été renvoyé
+	 est que la stratégie n'a pas trouvé de contrôle la satisfaisant */
+	UNSATISFIED_STRATEGY,
+// D'autres valeurs pourront être ajoutées plus tard
 };
 
 struct pickedControl {
-    double timeStep;
-    int controlIndex;
+	double timeStep;
+	int controlIndex;
 
-    bool operator==(const pickedControl &other) const {
-        return this->timeStep == other.timeStep
-            && this->controlIndex == other.controlIndex;
-    }
+	bool operator==(const pickedControl &other) const {
+		return this->timeStep == other.timeStep
+				&& this->controlIndex == other.controlIndex;
+	}
 };
 
 using OptionalCu = Either<pickedControl, ControlPickFailureReason>;
 
 class ControlPicker {
 public:
-    using StrategyIndexBitFlag = Trajectory::BitFlag;
-    
-    OptionalCu pickControl(
-        Trajectory &traj, TrajectoryPoints &trajDiscrete,
-        double rho, StrategyIndexBitFlag &flag);
+	using StrategyIndexBitFlag = Trajectory::BitFlag;
 
-    OptionalCu pickControlFromSubPickerList(int startIndex,
-        Trajectory &traj, TrajectoryPoints &trajDiscrete,
-        double rho, StrategyIndexBitFlag &flag);
+	OptionalCu pickControl(Trajectory &traj, TrajectoryPoints &trajDiscrete,
+			double rho, StrategyIndexBitFlag &flag);
 
-    ControlPicker operator=(const ControlPicker &) = delete;
-    ControlPicker(const ControlPicker &) = delete;
-    virtual ~ControlPicker();
+	OptionalCu pickControlFromSubPickerList(int startIndex, Trajectory &traj,
+			TrajectoryPoints &trajDiscrete, double rho,
+			StrategyIndexBitFlag &flag);
 
-    void setIndexSorter(indexSorter_t sortIndexes);
-    int *getPreferedControlIndexes();
-    int *sortPreferedControlIndexes(const double *x, double t, int strategyIndex);
+	ControlPicker operator=(const ControlPicker&) = delete;
+	ControlPicker(const ControlPicker&) = delete;
+	virtual ~ControlPicker();
 
-    int getNbStrategies() const;
-    int getTrajectoryIndex() const;
+	void setIndexSorter(indexSorter_t sortIndexes);
+	int* getPreferedControlIndexes();
+	int* sortPreferedControlIndexes(const double *x, double t,
+			int strategyIndex);
 
-    std::vector<std::string> getStrategyNames() const;
-    
-protected:    
-    ControlPicker(SysDyn *sysDyn, TrajectoryParametersManager *tpm, indexSorter_t *sorterPtr);
-    ControlPicker *addUserPicker(TrajectoryParametersManager *params, const std::string &name);
-    ControlPicker *addPicker(ControlPickStrategy *);
-    
-    SysDyn *sysDyn;
+	int getNbStrategies() const;
+	int getTrajectoryIndex() const;
+
+	std::vector<std::string> getStrategyNames() const;
+	ViabiTrajectoryHelper* GetTrajectoryHelper();
+
+protected:
+	ControlPicker(ViabiTrajectoryHelper *vth, TrajectoryParametersManager *tpm,
+			indexSorter_t *sorterPtr);
+	ControlPicker* addUserPicker(TrajectoryParametersManager *params,
+			const std::string &name);
+	ControlPicker* addPicker(ControlPickStrategy*);
+
+	SysDyn *sysDyn;
+	ViabiTrajectoryHelper *trajectoryHelper;
 private:
-    std::vector<ControlPickStrategy *> strategies;
-    controlWeight_t controlWeight;
-    indexSorter_t *sortIndexes;
-    int *preferedControlIndexes;
-    int trajIndex;
+
+
+	std::vector<ControlPickStrategy*> strategies;
+	controlWeight_t controlWeight;
+	indexSorter_t *sortIndexes;
+	int *preferedControlIndexes;
+	int trajIndex;
 };
 
 #endif /* CONTROLPICKER_H */

@@ -6,11 +6,11 @@ class ViabiBitSetTrajectoryHelper;
 
 class TychasticControlPickerBitSet final : public TychasticControlPicker {
 public:
-    TychasticControlPickerBitSet(ViabiBitSetTrajectoryHelper *viabi, SysDyn *sysDyn, TrajectoryParametersManager *params);
+    TychasticControlPickerBitSet(ViabiTrajectoryHelper *viabi, TrajectoryParametersManager *params);
     ~TychasticControlPickerBitSet() = default;
 private:    
-    void addGuaranteedStrategies(ViabiBitSetTrajectoryHelper *viabi, SysDyn *sysDyn, TrajectoryParametersManager *params);
-    void addNonGuaranteedStrategies(ViabiBitSetTrajectoryHelper *viabi, SysDyn *sysDyn, TrajectoryParametersManager *params);
+    void addGuaranteedStrategies(SysDyn *sysDyn, TrajectoryParametersManager *params);
+    void addNonGuaranteedStrategies(SysDyn *sysDyn, TrajectoryParametersManager *params);
     
     TychasticControlPickerBitSet *addFirstGuaranteedPicker();
 
@@ -25,8 +25,6 @@ private:
     TychasticControlPickerBitSet *addSmoothPicker(double maxAngleRadians);
     TychasticControlPickerBitSet *addTemporalControlPicker(const TrajectoryParametersManager *params);
     TychasticControlPickerBitSet *addBubbleBorderPicker(const TrajectoryParametersManager *params, const Grid *grid);
-
-    ViabiBitSetTrajectoryHelper *viabiHelper;
 };
 
 #endif /* CONTROLPICKERBITSET_H */

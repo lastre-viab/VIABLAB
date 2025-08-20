@@ -2,21 +2,20 @@
 #include "../include/ViabiBitSetTrajectoryHelper.h"
 #include "../include/TychasticControlPickStrategies.h"
 
-TychasticControlPickerBitSet::TychasticControlPickerBitSet(ViabiBitSetTrajectoryHelper *viabiHelper, SysDyn *sysDyn, TrajectoryParametersManager *params) :
-    TychasticControlPicker(sysDyn, params, &viabiHelper->sortIndexes),
-    viabiHelper(viabiHelper)
+TychasticControlPickerBitSet::TychasticControlPickerBitSet(ViabiTrajectoryHelper *viabiHelper, TrajectoryParametersManager *params) :
+    TychasticControlPicker(viabiHelper, params, &viabiHelper->sortIndexes)
 {
     const trajectoryParams *tp = params->getTrajectoryParameters();   
     
     if (tp->ARE_STRATEGIES_GUARANTEED) {
-        addGuaranteedStrategies(viabiHelper, sysDyn, params);        
+        addGuaranteedStrategies(sysDyn, params);
     }
     else {
-        addNonGuaranteedStrategies(viabiHelper, sysDyn, params);
+        addNonGuaranteedStrategies(sysDyn, params);
     }
 }
 
-void TychasticControlPickerBitSet::addNonGuaranteedStrategies(ViabiBitSetTrajectoryHelper *viabi, SysDyn *sysDyn, TrajectoryParametersManager *params) {
+void TychasticControlPickerBitSet::addNonGuaranteedStrategies(SysDyn *sysDyn, TrajectoryParametersManager *params) {
     
     const trajectoryParams *tp = params->getTrajectoryParameters();   
     const ControlPickStrategyName *strategies = tp->STRATEGIES;
@@ -27,7 +26,7 @@ void TychasticControlPickerBitSet::addNonGuaranteedStrategies(ViabiBitSetTraject
             addFirstNonGuaranteedPicker();
             break;
         case HEAVY: {
-            int initCu = viabiHelper->getClosestControlTo(tp->INIT_CONTROL);
+            int initCu = trajectoryHelper->getClosestControlTo(tp->INIT_CONTROL);
             addHeavyPicker(initCu);        
             break;
         }
@@ -78,7 +77,7 @@ void TychasticControlPickerBitSet::addNonGuaranteedStrategies(ViabiBitSetTraject
     }
 }
 
-void TychasticControlPickerBitSet::addGuaranteedStrategies(ViabiBitSetTrajectoryHelper *viabi, SysDyn *sysDyn, TrajectoryParametersManager *params) {
+void TychasticControlPickerBitSet::addGuaranteedStrategies(SysDyn *sysDyn, TrajectoryParametersManager *params) {
     
     const trajectoryParams *tp = params->getTrajectoryParameters();   
     const ControlPickStrategyName *strategies = tp->STRATEGIES;
@@ -86,7 +85,7 @@ void TychasticControlPickerBitSet::addGuaranteedStrategies(ViabiBitSetTrajectory
     for (int i = 0; i < tp->NB_STRATEGIES; ++i) {
         switch (strategies[i].getPredefinedStrategyName()) {
         case HEAVY: {
-            int initCu = viabiHelper->getClosestControlTo(tp->INIT_CONTROL);
+            int initCu = trajectoryHelper->getClosestControlTo(tp->INIT_CONTROL);
             addHeavyPicker(initCu);
             break;
         }
@@ -136,12 +135,12 @@ void TychasticControlPickerBitSet::addGuaranteedStrategies(ViabiBitSetTrajectory
 }
 
 TychasticControlPickerBitSet *TychasticControlPickerBitSet::addFirstGuaranteedPicker() {     
-    addPicker(new TychasticFirstGuaranteedPickStrategy());
+    addPicker(new TychasticFirstGuaranteedPickStrategy(trajectoryHelper));
     return this;
 }
 
 TychasticControlPickerBitSet *TychasticControlPickerBitSet::addFirstNonGuaranteedPicker() {
-    addPicker(new TychasticFirstNonGuaranteedPickStrategyBitSet(viabiHelper));
+    addPicker(new TychasticFirstNonGuaranteedPickStrategyBitSet(dynamic_cast<ViabiBitSetTrajectoryHelper*>(trajectoryHelper)));
     return this;
 }
 

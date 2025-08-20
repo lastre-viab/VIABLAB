@@ -145,7 +145,6 @@ private:
     void createPointsList();
     void addDataToPointsList(list<unsigned long long int>::iterator *startIt, unsigned long long int newPoint,
 	    list<unsigned long long int>::iterator *resIt);
-    
 
     };
 

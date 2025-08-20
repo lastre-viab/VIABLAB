@@ -15,7 +15,6 @@
 
 #define CONCAT(A, B) A ## B
 
-
 #define DEFINE_TRANSLATOR(TYPE, VALUES)                                \
     /* Classe servant à traduire une chaîne de caractère */            \
     /* dans le JSON vers une enum */                                   \
@@ -132,16 +131,15 @@
 
 DEFINE_ENUM(TypeTraj, TYPE_TRAJ_VALUES)
 
-inline bool isViableDefault(TypeTraj type) {
+inline bool isViableDefault(TypeTraj type)
+    {
     return type == VD || type == STOCHASTIC || type == WEIGHTED_CONTROLS;
-}
+    }
 
-inline bool isCautious(TypeTraj type) {
-    return type == CAUTIOUS
-        || type == WEIGHTED_CONTROLS_CAUTIOUS
-        || type == CAUTIOUS_HEAVY
-        || type == WEIGHTED_CONTROLS_CAUTIOUS_HEAVY;
-}
+inline bool isCautious(TypeTraj type)
+    {
+    return type == CAUTIOUS || type == WEIGHTED_CONTROLS_CAUTIOUS || type == CAUTIOUS_HEAVY || type == WEIGHTED_CONTROLS_CAUTIOUS_HEAVY;
+    }
 
 #define TIME_DISCRETIZATION_SCHEME_VALUES(FUNCTION) \
     FUNCTION(NO_DISCRETIZATION_SCHEME, 0)           \
@@ -175,10 +173,11 @@ DEFINE_ENUM(GridMethod, GRID_METHOD_VALUES)
  * valeurs pour la constante  qui definit le type de dynamique
  */
 #define DYN_TYPE_VALUES(FUNCTION)                                  \
-    FUNCTION(CC, 1) /*! continuous dynamics */                     \
-    FUNCTION(DC, 2) /*! discrete time dynamics*/                   \
+    FUNCTION(CC, 1) /*! continuous time and space dynamics */      \
+    FUNCTION(DC, 2) /*! discrete time continuous space dynamics*/  \
     FUNCTION(DD, 3) /*! full discrete ( time and space) dynamics*/ \
-    FUNCTION(HD, 4) /*! hybrid dynamics*/
+    FUNCTION(DH, 4) /*! discrete time hybrid space  dynamics*/     \
+    FUNCTION(CH, 5) /*! continous time hybrid space dynamics*/
 
 DEFINE_ENUM(DynType, DYN_TYPE_VALUES)
 
@@ -234,12 +233,10 @@ DEFINE_ENUM(TargetOrDeparture, TARGET_OR_DEPARTURE_VALUES)
 
 DEFINE_ENUM(BubbleInterpretation, BUBBLE_INTERPRETATION_VALUES)
 
-inline bool isInPixelsUnits(BubbleInterpretation interp) {
-    return interp == MOORE_PX
-        || interp == EUCLIDEAN_PX
-        || interp == ELLIPTIC_PX
-        || interp == CUSTOM_PX;
-}
+inline bool isInPixelsUnits(BubbleInterpretation interp)
+    {
+    return interp == MOORE_PX || interp == EUCLIDEAN_PX || interp == ELLIPTIC_PX || interp == CUSTOM_PX;
+    }
 
 // Ces valeurs sont utilisé dans 
 #define STRATEGY_VALUES(FUNCTION)               \

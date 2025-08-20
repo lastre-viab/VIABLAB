@@ -35,23 +35,26 @@ public:
 
     int getNbStrategies() const;
     int getTrajectoryIndex() const;
-
+    ViabiTrajectoryHelper* GetTrajectoryHelper();
     std::vector<std::string> getStrategyNames() const;
     
 protected:    
-    TychasticControlPicker(SysDyn *sysDyn, TrajectoryParametersManager *tpm, indexSorter_t *sorterPtr);
+    TychasticControlPicker(ViabiTrajectoryHelper * vth, TrajectoryParametersManager *tpm, indexSorter_t *sorterPtr);
     TychasticControlPicker *addUserPicker(TrajectoryParametersManager *params, const std::string &name);
     TychasticControlPicker *addPicker(TychasticControlPickStrategy *);
+    ViabiTrajectoryHelper *trajectoryHelper;
+    SysDyn *sysDyn;
     
 private:
     std::vector<TychasticControlPickStrategy *> strategies;
-    SysDyn *sysDyn;
+
     const trajectoryParams &tp;
     controlWeight_t controlWeight;
     indexSorter_t *sortIndexes;
     int *preferedControlIndexes;
     int trajIndex;
     int tycheIndex;
+
 };
 
 #endif /* TYCHASTICCONTROLPICKER_H */

@@ -27,9 +27,10 @@
 #include "Grid.h"
 #include "Params.h"
 
-class Grid_BitSet final : public Grid
+class Grid_BitSet : public Grid
 {
 public:
+	Grid_BitSet() = default;
     Grid_BitSet(const gridParams &gp);
     virtual ~Grid_BitSet();
     virtual void printGrid(void) const;
