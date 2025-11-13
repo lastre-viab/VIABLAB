@@ -43,12 +43,20 @@ Viabi* ViabProblemFactory::constructViabilityProblem(GridMethod gridMethod)
     {
     Viabi *vp;
     auto dynSysType = problemParameters->getSystemParameters()->DYN_TYPE;
-    if (gridMethod == BS)
+    if (gridMethod == BS || gridMethod == HBS)
 	{
-	vp = new ViabiBitSet(problemParameters);
+	if(dynSysType == CC || dynSysType == DC)
+	    {
+	    vp = new ViabiBitSet(problemParameters);
+	    }
+	else if( dynSysType == DH)
+	    {
+	    vp = new ViabiBitSetHybrid(problemParameters);
+	    }
 	}
     else
 	{
+	 spdlog::info("[Factory] : grid is micro-macro");
 	if(dynSysType == DD)
 	    {
 	    vp = new ViabiMicroMacroDiscrete(problemParameters);

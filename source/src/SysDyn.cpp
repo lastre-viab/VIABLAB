@@ -36,7 +36,7 @@ SysDyn::SysDyn(const systemParams &SP, int ds, const controlParams &cp, Grid *gr
     isHybrid = false;
 
     spdlog::info("[System] : Looking for control parameter : control dim is {}", cp.DIMC);
-    if(cp.DIMC > 0)
+    if (cp.DIMC > 0)
 	{
 	spdlog::info("[System] : Starting build of ControlGrid");
 	controls = new ControlGrid(cp.DIMC, cp.LIMINFC, cp.LIMSUPC, cp.NBPOINTSC);
@@ -46,7 +46,7 @@ SysDyn::SysDyn(const systemParams &SP, int ds, const controlParams &cp, Grid *gr
 	controls = new ControlGrid();
 	}
 
-    if(cp.DIM_TY > 0)
+    if (cp.DIM_TY > 0)
 	{
 	tyches = new ControlGrid(cp.DIM_TY, cp.LIMINF_TY, cp.LIMSUP_TY, cp.NBPOINTS_TY);
 	}
@@ -55,7 +55,7 @@ SysDyn::SysDyn(const systemParams &SP, int ds, const controlParams &cp, Grid *gr
 	tyches = new ControlGrid();
 	}
 
-    if(cp.DIM_HT > 0)
+    if (cp.DIM_HT > 0)
 	{
 	hybridTransistionControls = new ControlGrid(cp.DIM_HT, cp.LIMINF_HT, cp.LIMSUP_HT, cp.NBPOINTS_HT);
 	}
@@ -110,8 +110,8 @@ SysDyn::SysDyn(const systemParams &SP, int continuousStateDim, int discretStateD
     dimS_hd = discretStateDim;
 
     isTychastic = (cp.DIM_TY > 0);
-    isHybrid = true;
-    if(cp.DIMC > 0)
+    isHybrid = cp.DIM_HT > 0 || dimS_hd > 0;
+    if (cp.DIMC > 0)
 	{
 	spdlog::info("[System] : Starting build of ControlGrid");
 	controls = new ControlGrid(cp.DIMC, cp.LIMINFC, cp.LIMSUPC, cp.NBPOINTSC);
@@ -121,7 +121,7 @@ SysDyn::SysDyn(const systemParams &SP, int continuousStateDim, int discretStateD
 	controls = new ControlGrid();
 	}
 
-    if(cp.DIM_TY > 0)
+    if (cp.DIM_TY > 0)
 	{
 	tyches = new ControlGrid(cp.DIM_TY, cp.LIMINF_TY, cp.LIMSUP_TY, cp.NBPOINTS_TY);
 	}
@@ -130,7 +130,7 @@ SysDyn::SysDyn(const systemParams &SP, int continuousStateDim, int discretStateD
 	tyches = new ControlGrid();
 	}
 
-    if(cp.DIM_HT > 0)
+    if (cp.DIM_HT > 0)
 	{
 	hybridTransistionControls = new ControlGrid(cp.DIM_HT, cp.LIMINF_HT, cp.LIMSUP_HT, cp.NBPOINTS_HT);
 	}
@@ -182,6 +182,9 @@ void SysDyn::initializeMethods(const systemParams &SP)
     dynamics_fd = SP.DYNAMICS_FD;
     dynamics_tych_fd = SP.DYNAMICS_TYCH_FD;
     dynamics_tych = SP.DYNAMICS_TYCH;
+    dynamics_hybrid_c = SP.DYNAMICS_HYBRID_C;
+    dynamics_hybrid_d = SP.DYNAMICS_HYBRID_D;
+    resetmap_hybrid = SP.RESET_MAP_HYBRID;
 
     dynType = SP.DYN_TYPE;
 
@@ -196,6 +199,7 @@ void SysDyn::initializeMethods(const systemParams &SP)
     fd_dyn_type = SP.FD_DYN_TYPE;
     constraintsXU = SP.CONSTR_XU;
     constraintsXU_fd = SP.CONSTR_XU_fd;
+    constraintsXU_hybrid = SP.CONSTR_XU_HYBRID;
     constraintsXV_tych = SP.CONSTR_XV_TYCH;
     constraintsX = SP.CONSTR_X;
     constraintsX_fd = SP.CONSTR_X_fd;
@@ -222,31 +226,39 @@ void SysDyn::initializeMethods(const systemParams &SP)
 	{
     case ANALYTICAL:
 	SysDyn::calcul_M = &SysDyn::returnMF_local_ana;
+	SysDyn::calcul_M_hybrid = &SysDyn::returnMF_local_ana_hybrid;
 	break;
     case ANALYTICAL_CALC:
-	SysDyn::calcul_M = &SysDyn::calculMF_local_ana;
+
+	    SysDyn::calcul_M_hybrid = &SysDyn::calculMF_local_ana_hybrid;
+	    SysDyn::calcul_M = &SysDyn::calculMF_local_ana;
 	break;
     case NUMERICAL_CALC:
-	SysDyn::calcul_M = isTychastic ? &SysDyn::calculMF_local_num_tych : &SysDyn::calculMF_local_num;
+	    SysDyn::calcul_M_hybrid = &SysDyn::calculMF_local_num_hybrid;
+	    SysDyn::calcul_M = isTychastic ? &SysDyn::calculMF_local_num_tych : &SysDyn::calculMF_local_num;
+
 	break;
 	}
 
     switch (computeLC)
 	{
     case ANALYTICAL:
-	SysDyn::calcul_L =  &SysDyn::returnL_local_ana;
+	SysDyn::calcul_L = &SysDyn::returnL_local_ana;
+	SysDyn::calcul_L_hybrid = &SysDyn::returnL_local_ana_hybrid;
 	break;
     case ANALYTICAL_CALC:
-	SysDyn::calcul_L = isTychastic ? &SysDyn::calculL_local_ana_tych : &SysDyn::calculL_local_ana;
+	    SysDyn::calcul_L_hybrid = &SysDyn::calculL_local_ana_hybrid;
+	    SysDyn::calcul_L = isTychastic ? &SysDyn::calculL_local_ana_tych : &SysDyn::calculL_local_ana;
 	break;
     case NUMERICAL_CALC:
-	SysDyn::calcul_L = isTychastic ? &SysDyn::calculL_local_num_tych : &SysDyn::calculL_local_num;
+	    SysDyn::calcul_L_hybrid = &SysDyn::calculL_local_num_hybrid;
+	    SysDyn::calcul_L = isTychastic ? &SysDyn::calculL_local_num_tych : &SysDyn::calculL_local_num;
 	break;
 	}
 
     discretisation = SP.SCHEME;
 
-    if (dynType == DC)
+    if (dynType == DC || dynType == DH)
 	{
 	discretisation = NO_DISCRETIZATION_SCHEME;
 	}
@@ -256,23 +268,27 @@ void SysDyn::initializeMethods(const systemParams &SP)
     case NO_DISCRETIZATION_SCHEME:
 	SysDyn::discretDynamics = &SysDyn::FDiscret;
 	SysDyn::discretDynamics_tych = &SysDyn::FDiscret_tych;
+	SysDyn::discretDynamics_hybrid = &SysDyn::FDiscret_hybrid;
 	break;
     case EL:
 	SysDyn::discretDynamics = &SysDyn::FDiscretEuler;
 	SysDyn::discretDynamics_tych = &SysDyn::FDiscretEuler_tych;
+	SysDyn::discretDynamics_hybrid = &SysDyn::FDiscretEuler_hybrid;
 	break;
     case RK2:
 	SysDyn::discretDynamics = &SysDyn::FDiscretRK2;
 	SysDyn::discretDynamics_tych = &SysDyn::FDiscretRK2_tych;
+	SysDyn::discretDynamics_hybrid = &SysDyn::FDiscretRK2_hybrid;
 	break;
     case RK4:
 	SysDyn::discretDynamics = &SysDyn::FDiscretRK4;
 	SysDyn::discretDynamics_tych = &SysDyn::FDiscretRK4_tych;
+	SysDyn::discretDynamics_hybrid = &SysDyn::FDiscretRK4_hybrid;
 	break;
 	}
     }
 
-double **SysDyn::getControlCoords() const
+double** SysDyn::getControlCoords() const
     {
     return controls->GetControlCoords();
     }
@@ -404,6 +420,120 @@ void SysDyn::FDiscretEuler(const double *x, const double *u, double *res, double
 
     }
 
+void SysDyn::FDiscretRK4_hybrid(const double *xc, const unsigned long long int *xd, const double *uc, const unsigned long long int *ud, double *resc,
+	unsigned long long int * resd, double *tempResC, unsigned long long int *tempResD, double rho) const
+    {
+    int i;
+    double *ki, *y;
+    ki = new double[dimS_hc];
+    y = new double[dimS_hc];
+
+    FDiscret_hybrid(xc, xd, uc, ud, tempResC, tempResD, ki, resd, rho);
+
+    for (i = 0; i < dimS_hc; i++)
+	{
+	resc[i] = tempResC[i] + rho * dynSignFactor * ki[i] / 6.0;
+	y[i] = tempResC[i] + 0.5 * rho * dynSignFactor * ki[i];
+	}
+    grid->periodizePoint(y);
+
+    /*
+     * k2=f(x+0.5*rho*k1,u)
+     * res=res+rho*k2/3;
+     *
+     */
+
+    (*dynamics_hybrid_c)(y, tempResD, uc, ki);
+
+    for (i = 0; i < dimS_hc; i++)
+	{
+	y[i] = tempResC[i] + 0.5 * rho * dynSignFactor * ki[i];
+	resc[i] = resc[i] + rho * dynSignFactor * ki[i] / 3.0;
+	}
+
+    grid->periodizePoint(y);
+    /*
+     * k3=f(x+0.5*rho*k2,u)
+     * res=res+rho*k3/3;
+     *
+     */
+
+    (*dynamics_hybrid_c)(y, tempResD, uc, ki);
+
+    for (i = 0; i < dimS_hc; i++)
+	{
+	y[i] = tempResC[i] + rho * dynSignFactor * ki[i];
+	resc[i] = resc[i] + rho * dynSignFactor * ki[i] / 3.0;
+	}
+
+    grid->periodizePoint(y);
+
+    /*
+     * k4=f(x+rho*k3,u)
+     * res=res+rho*k4/6;
+     *
+     */
+
+    (*dynamics_hybrid_c)(y, tempResD, uc, ki);
+    for (i = 0; i < dimS_hc; i++)
+	{
+	resc[i] = resc[i] + rho * dynSignFactor * ki[i] / 6.0;
+	}
+
+    grid->periodizePoint(resc);
+    delete[] ki;
+    delete[] y;
+    }
+
+
+void SysDyn::FDiscretRK2_hybrid(const double *xc, const unsigned long long int *xd, const double *uc, const unsigned long long int *ud, double *resc,
+	unsigned long long int * resd, double *tempResC, unsigned long long int *tempResD, double rho) const
+    {
+
+    int i;
+    double *Fx, *Fres;
+    Fx = new double[dimS_hc];
+    Fres = new double[dimS_hc];
+    FDiscret_hybrid(xc, xd, uc, ud, tempResC, tempResD, Fx, resd, rho);
+
+    //   calculRho_local(x  );
+
+    for (i = 0; i < dimS_hc; i++)
+	{
+	resc[i] = tempResC[i] + rho * dynSignFactor * Fx[i];
+	}
+
+    grid->periodizePoint(resc);
+
+    (*dynamics_hybrid_c)(resc, tempResD, uc, Fres);
+
+    for (i = 0; i < dimS_hc; i++)
+	{
+	resc[i] = tempResC[i] + 0.5 * rho * dynSignFactor * (Fx[i] + Fres[i]);
+	}
+
+    grid->periodizePoint(resc);
+    delete[] Fx;
+    delete[] Fres;
+    }
+
+
+void SysDyn::FDiscretEuler_hybrid(const double *xc, const unsigned long long int *xd, const double *uc, const unsigned long long int *ud, double *resc,
+	unsigned long long int * resd, double *tempResC, unsigned long long int *tempResD,  double rho) const
+    {
+    FDiscret_hybrid(xc, xd, uc, ud, tempResC, tempResD, resc, resd, rho);
+    int i;
+
+
+    for (i = 0; i < dimS_hc; i++)
+	{
+	resc[i] = tempResC[i] + rho * dynSignFactor * resc[i];
+	}
+
+    grid->periodizePoint(resc);
+
+    }
+
 void SysDyn::FDiscretEuler_tych(const double *x, const double *u, const double *v, double *res, double rho) const
     {
 
@@ -434,6 +564,19 @@ void SysDyn::FDiscret_tych(const double *x, const double *u, const double *v, do
     grid->periodizePoint(res);
     }
 
+void SysDyn::FDiscret_hybrid(const double *xc, const unsigned long long int *xd, const double *uc, const unsigned long long int *ud, double *resc,
+	unsigned long long int * resd, double *tempResC, unsigned long long int *tempResD, double rho) const
+    {
+    //Step 1 : impulse transistion
+    (*resetmap_hybrid)(xc, xd, ud, tempResC, tempResD);
+    //Step 2  dynamics
+
+    // 2.A : dynamics of discrete state
+    (*dynamics_hybrid_d)(tempResC, tempResD, ud, resd);
+
+    //2.B Continuous evolution
+    (*dynamics_hybrid_c)(tempResC, tempResD, uc, resc);
+    }
 
 void SysDyn::FDiscretRK4(const double *x, const double *u, double *res, double rho) const
     {
@@ -557,7 +700,6 @@ void SysDyn::FDiscretRK4_tych(const double *x, const double *u, const double *v,
     delete[] y;
     }
 
-
 double SysDyn::calculRho_local(const double *x) const
     {
     if (dynType == DC)
@@ -568,6 +710,26 @@ double SysDyn::calculRho_local(const double *x) const
     double h = grid->maxStep;
     double LL = ((this->*calcul_L))(x);
     double MFF = ((this->*calcul_M))(x);
+    if (MFF * LL < 2.0 * h)
+	{
+	MFF = 1.0;
+	LL = 1.0;
+	}
+
+    rho1 = sqrt((2.0 * h) / (LL * MFF));
+    return rho1;
+    }
+
+double SysDyn::calculRho_local_hybrid(const double *xc, const unsigned long long int * xd) const
+    {
+    if (dynType == DC)
+	{
+	return 1.0;
+	}
+    double rho1;
+    double h = grid->maxStep;
+    double LL = ((this->*calcul_L_hybrid))(xc, xd);
+    double MFF = ((this->*calcul_M_hybrid))(xc, xd);
     if (MFF * LL < 2.0 * h)
 	{
 	MFF = 1.0;
@@ -657,7 +819,7 @@ double SysDyn::calculL_local_num(const double *x) const
 
     bool test = false;
     unsigned long long int totalNbPointsC = controls->GetTotalNbPoints();
-    double ** controlCoords = controls->GetControlCoords();
+    double **controlCoords = controls->GetControlCoords();
     for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
 	{
 	for (j = 0; j < dimS; j++)
@@ -719,6 +881,87 @@ double SysDyn::calculL_local_num(const double *x) const
     return max(L1, lfunc_L);
     }
 
+double SysDyn::calculL_local_num_hybrid(const double *xc, const unsigned long long int * xd) const
+    {
+    double *xTempL = new double[dimS_hc];
+    double *FXmoinsHL = new double[dimS_hc];
+    double *FXplusHL = new double[dimS_hc];
+
+    double *infX = grid->limInf;
+    double *pasX = grid->step;
+    double *supX = grid->limSup;
+
+    int i, j, k;
+    for (i = 0; i < dimS_hc; i++)
+	{
+	xTempL[i] = xc[i];
+	}
+    double L1 = 0;
+
+    bool test = false;
+    unsigned long long int totalNbPointsC = controls->GetTotalNbPoints();
+    double **controlCoords = controls->GetControlCoords();
+    for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
+	{
+	for (j = 0; j < dimS_hc; j++)
+	    {
+	    test = false;
+	    xTempL[j] = xTempL[j] - pasX[j];
+	    //on teste si l'indice courant de l'ensemble dilate n'est pas en dehors de l'espace
+	    if ((xTempL[j] <= supX[j]) && (xTempL[j] >= infX[j]))
+		{
+		// si l'indice est dans les limites de l'espace on  calcule le max de F(x,u) sur u
+
+		(*dynamics_hybrid_c)(xTempL, xd, controlCoords[nu], FXmoinsHL);
+		xTempL[j] = xTempL[j] + 2.0 * pasX[j];
+		}
+	    else
+		{
+		xTempL[j] = xc[j];
+		(*dynamics_hybrid_c)(xTempL, xd, controlCoords[nu], FXmoinsHL);
+		xTempL[j] = xTempL[j] + pasX[j];
+		test = true;
+		}
+
+	    if ((xTempL[j] <= supX[j]) && (xTempL[j] >= infX[j]))
+		{
+		// si l'indice est dans les limites de l'espace on  calcule le max de F(x,u) sur u
+
+		(*dynamics_hybrid_c)(xTempL, xd, controlCoords[nu], FXplusHL);
+		xTempL[j] = xTempL[j] - pasX[j];
+		}
+	    else
+		{
+		xTempL[j] = xTempL[j] - pasX[j];
+		(*dynamics_hybrid_c)(xTempL, xd, controlCoords[nu], FXplusHL);
+		test = true;
+		}
+
+	    for (k = 0; k < dimS; k++)
+		{
+		FXmoinsHL[k] = fabs(FXmoinsHL[k] - FXplusHL[k]);
+		if (test)
+		    {
+		    FXmoinsHL[k] /= pasX[k];
+		    }
+		else
+		    {
+		    FXmoinsHL[k] /= (2.0 * pasX[k]);
+		    }
+
+		if (FXmoinsHL[k] > L1)
+		    {
+		    L1 = FXmoinsHL[k];
+		    }
+		}
+	    }
+	}
+    delete[] xTempL;
+    delete[] FXplusHL;
+    delete[] FXmoinsHL;
+    return max(L1, lfunc_L);
+    }
+
 double SysDyn::calculL_local_num_tych(const double *x) const
     {
     double *xTempL = new double[dimS];
@@ -740,8 +983,8 @@ double SysDyn::calculL_local_num_tych(const double *x) const
     unsigned long long int totalNbPointsC = controls->GetTotalNbPoints();
     unsigned long long int totalNbPointsTych = tyches->GetTotalNbPoints();
 
-    double ** controlCoords = controls->GetControlCoords();
-    double ** tychCoords = tyches->GetControlCoords();
+    double **controlCoords = controls->GetControlCoords();
+    double **tychCoords = tyches->GetControlCoords();
     for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
 	{
 	for (unsigned long long int nv = 0; nv < totalNbPointsTych; nv++)
@@ -818,7 +1061,7 @@ double SysDyn::calculL_local_ana(const double *x) const
     double L1 = 0;
     double norme;
     unsigned long long int totalNbPointsC = controls->GetTotalNbPoints();
-    double ** controlCoords = controls->GetControlCoords();
+    double **controlCoords = controls->GetControlCoords();
     for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
 	{
 
@@ -842,6 +1085,42 @@ double SysDyn::calculL_local_ana(const double *x) const
     return max(L1, lfunc_L);
     }
 
+double SysDyn::calculL_local_ana_hybrid(const double *xc, const unsigned long long int * xd) const
+    {
+    int j, k;
+    double **jacob = new double*[dimS_hc];
+
+    for (int i = 0; i < dimS_hc; i++)
+	{
+	jacob[i] = new double[dimS_hc];
+	}
+    double L1 = 0;
+    double norme;
+    unsigned long long int totalNbPointsC = controls->GetTotalNbPoints();
+    double **controlCoords = controls->GetControlCoords();
+    for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
+	{
+
+	(*jacobian_hybrid)(xc, xd, controlCoords[nu], jacob);
+	norme = 0.;
+	for (k = 0; k < dimS_hc; k++)
+	    {
+	    for (j = 0; j < dimS_hc; j++)
+		{
+		norme = max(norme, abs(jacob[k][j]));
+		}
+	    }
+	L1 = max(L1, norme);
+	}
+
+    for (int i = 0; i < dimS_hc; i++)
+	{
+	delete[] jacob[i];
+	}
+    delete[] jacob;
+    return max(L1, lfunc_L);
+    }
+
 double SysDyn::calculL_local_ana_tych(const double *x) const
     {
     int j, k;
@@ -856,8 +1135,8 @@ double SysDyn::calculL_local_ana_tych(const double *x) const
     unsigned long long int totalNbPointsC = controls->GetTotalNbPoints();
     unsigned long long int totalNbPointsTych = tyches->GetTotalNbPoints();
 
-    double ** controlCoords = controls->GetControlCoords();
-    double ** tychCoords = tyches->GetControlCoords();
+    double **controlCoords = controls->GetControlCoords();
+    double **tychCoords = tyches->GetControlCoords();
     for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
 	{
 	for (unsigned long long int nv = 0; nv < totalNbPointsTych; nv++)
@@ -884,11 +1163,20 @@ double SysDyn::calculL_local_ana_tych(const double *x) const
     return max(L1, lfunc_L);
     }
 
-double SysDyn::returnL_local_ana(const double *x)  const
+double SysDyn::returnL_local_ana(const double *x) const
     {
     return max(L, lfunc_L);
     }
 double SysDyn::returnMF_local_ana(const double *x) const
+    {
+    return max(MF, lfunc_MF);
+    }
+
+double SysDyn::returnL_local_ana_hybrid(const double *xc, const unsigned long long int * xd) const
+    {
+    return max(L, lfunc_L);
+    }
+double SysDyn::returnMF_local_ana_hybrid(const double *xc, const unsigned long long int * xd) const
     {
     return max(MF, lfunc_MF);
     }
@@ -904,13 +1192,41 @@ double SysDyn::calculMF_local_num(const double *x) const
     double MF1 = 0.0;
     double normeImage;
     unsigned long long int totalNbPointsC = controls->GetTotalNbPoints();
-    double ** controlCoords = controls->GetControlCoords();
+    double **controlCoords = controls->GetControlCoords();
 
     for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
 	{
 	(*dynamics)(x, controlCoords[nu], image);
 	normeImage = 0.0;
 	for (int k = 0; k < dimS; k++)
+	    {
+	    normeImage = max(normeImage, abs(image[k]));
+	    }
+	MF1 = max(MF1, normeImage);
+
+	}
+    delete[] image;
+    return max(MF1, lfunc_MF);
+    }
+
+double SysDyn::calculMF_local_num_hybrid(const double *xc, const unsigned long long int * xd) const
+    {
+
+    //calcul de la taille e prevoir pour les coordonnees des indices de debut de parcours
+    //que la methode GPU va renvoyer
+
+    double *image = new double[dimS_hc];
+
+    double MF1 = 0.0;
+    double normeImage;
+    unsigned long long int totalNbPointsC = controls->GetTotalNbPoints();
+    double **controlCoords = controls->GetControlCoords();
+
+    for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
+	{
+	(*dynamics_hybrid_c)(xc, xd, controlCoords[nu], image);
+	normeImage = 0.0;
+	for (int k = 0; k < dimS_hc; k++)
 	    {
 	    normeImage = max(normeImage, abs(image[k]));
 	    }
@@ -934,8 +1250,8 @@ double SysDyn::calculMF_local_num_tych(const double *x) const
     unsigned long long int totalNbPointsC = controls->GetTotalNbPoints();
     unsigned long long int totalNbPointsTych = tyches->GetTotalNbPoints();
 
-    double ** controlCoords = controls->GetControlCoords();
-    double ** tychCoords = tyches->GetControlCoords();
+    double **controlCoords = controls->GetControlCoords();
+    double **tychCoords = tyches->GetControlCoords();
     for (unsigned long long int nu = 0; nu < totalNbPointsC; nu++)
 	{
 	for (unsigned long long int nv = 0; nv < totalNbPointsTych; nv++)
@@ -953,7 +1269,6 @@ double SysDyn::calculMF_local_num_tych(const double *x) const
     return max(MF1, lfunc_MF);
     }
 
-
 double SysDyn::calculMF_local_ana(const double *x) const
     {
 
@@ -963,6 +1278,23 @@ double SysDyn::calculMF_local_ana(const double *x) const
 
     normeImage = 0.0;
     for (int k = 0; k < dimS; k++)
+	{
+	normeImage = max(normeImage, abs(image[k]));
+	}
+    double MF1 = normeImage;
+    delete[] image;
+    return max(MF1, lfunc_MF);
+    }
+
+double SysDyn::calculMF_local_ana_hybrid(const double *xc, const unsigned long long int * xd) const
+    {
+
+    double *image = new double[dimS_hc];
+    double normeImage;
+    (*localDynBounds_hybrid)(xc, xd, image);
+
+    normeImage = 0.0;
+    for (int k = 0; k < dimS_hc; k++)
 	{
 	normeImage = max(normeImage, abs(image[k]));
 	}
@@ -999,15 +1331,17 @@ void SysDyn::setDynamicsBackward()
     dynSignFactor = -1.0;
     }
 
-
-void SysDyn::getTychasticImage(const double *x, const double *u, const double *v, double *imageVect, double rho) const {
+void SysDyn::getTychasticImage(const double *x, const double *u, const double *v, double *imageVect, double rho) const
+    {
     std::invoke(discretDynamics_tych, this, x, u, v, imageVect, rho);
-}
+    }
 
-const Grid *SysDyn::getGrid() const {
+const Grid* SysDyn::getGrid() const
+    {
     return grid;
-}
+    }
 
-int SysDyn::getDim() const {
+int SysDyn::getDim() const
+    {
     return dimS;
-}
+    }

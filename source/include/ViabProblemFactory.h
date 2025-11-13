@@ -16,7 +16,7 @@
  *
  *   You should have received a copy of the GNU Affero General Public License
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  Created on: 1 août 2021
+ *  Created on: 1 aoï¿½t 2021
  *      Author: adesi
  */
 
@@ -26,6 +26,7 @@
 #include "ParametersManager.h"
 #include "Viabi.h"
 #include "ViabiBitSet.h"
+#include "ViabiBitSetHybrid.h"
 #include "ViabiMicroMacro.h"
 #include "ViabiMicroMacroDiscrete.h"
 

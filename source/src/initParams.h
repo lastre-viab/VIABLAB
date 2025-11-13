@@ -32,90 +32,108 @@
 #include "../include/ParametersManager.h"
 
 template<typename T>
-T getUserSymbolOrDefaultTemplate(void *modelHandle, const char *symbolName, T defaultSymbol) {
+T getUserSymbolOrDefaultTemplate(void *modelHandle, const char *symbolName, T defaultSymbol)
+    {
     T symbol = (T) dlsym(modelHandle, symbolName);
-    if (symbol == nullptr) {
-        symbol = defaultSymbol;
-        spdlog::info("Using default symbol for {}", symbolName);
-    }
-    else {
-        spdlog::info("Succesfully loaded symbol : {}", symbolName);
-    }
+    if (symbol == nullptr)
+	{
+	symbol = defaultSymbol;
+	spdlog::info("Using default symbol for {}", symbolName);
+	}
+    else
+	{
+	spdlog::info("Succesfully loaded symbol : {}", symbolName);
+	}
     return symbol;
-}
+    }
 
 template<typename T>
-T getUserSymbol(void *modelHandle, const char *symbolName) {
+T getUserSymbol(void *modelHandle, const char *symbolName)
+    {
     T symbol = (T) dlsym(modelHandle, symbolName);
-    if (symbol == nullptr) {
-        spdlog::info("No {} symbol found", symbolName);
-    }
-    else {
-        spdlog::info("Succesfully loaded symbol : {}", symbolName);
-    }
+    if (symbol == nullptr)
+	{
+	spdlog::info("No {} symbol found", symbolName);
+	}
+    else
+	{
+	spdlog::info("Succesfully loaded symbol : {}", symbolName);
+	}
     return symbol;
-}
+    }
 
 #define getUserSymbolOrDefault(handle, f) getUserSymbolOrDefaultTemplate(handle, #f, &f)
 
-ParametersManager* initParams(void *modelHandle, const string &paramsFile, gridParams &gp, algoViabiParams &avp, controlParams &cp, systemParams &sp, int nbOmpThreads)
+ParametersManager* initParams(void *modelHandle, const string &paramsFile, gridParams &gp, algoViabiParams &avp, controlParams &cp, systemParams &sp,
+	int nbOmpThreads)
     {
 
-        ParametersManager *pm = new ParametersManager(&gp, &avp, &cp, &sp, nbOmpThreads, paramsFile, modelHandle);
-    
-	sp.DYNAMICS = getUserSymbolOrDefault(modelHandle, dynamics);
+    ParametersManager *pm = new ParametersManager(&gp, &avp, &cp, &sp, nbOmpThreads, paramsFile, modelHandle);
 
-	sp.DYNAMICS_TYCH = getUserSymbolOrDefault(modelHandle, dynamics_tych);
+    sp.DYNAMICS = getUserSymbolOrDefault(modelHandle, dynamics);
+
+    sp.DYNAMICS_TYCH = getUserSymbolOrDefault(modelHandle, dynamics_tych);
+
+    sp.DYNAMICS_HYBRID_C = getUserSymbolOrDefault(modelHandle, dynamics_hybrid_c);
+
+    sp.DYNAMICS_HYBRID_D = getUserSymbolOrDefault(modelHandle, dynamics_hybrid_d);
+
+    sp.RESET_MAP_HYBRID = getUserSymbolOrDefault(modelHandle, resetMap_hybrid);
 
     switch (sp.DYN_TYPE)
 	{
     case CC:
-        break;
+    case CH:
+	break;
     case DC:
-    case DD:	
-        sp.COMPUTE_LC = ANALYTICAL;
-        sp.COMPUTE_MF = ANALYTICAL;
-        
-        sp.LIP = 1.0;
-        sp.MF = 1.0;
-        break;	
+    case DD:
     case DH:
-        sp.DYNAMICS = getUserSymbolOrDefault(modelHandle, dynamics_hybrid);
-        break;
-	}
-	sp.CONSTR_X = getUserSymbolOrDefault(modelHandle, constraintsX);
+	sp.COMPUTE_LC = ANALYTICAL;
+	sp.COMPUTE_MF = ANALYTICAL;
 
-	sp.CONSTR_XU = getUserSymbolOrDefault(modelHandle, constraintsXU);
+	sp.LIP = 1.0;
+	sp.MF = 1.0;
+	break;
+	}
+    sp.CONSTR_X = getUserSymbolOrDefault(modelHandle, constraintsX);
+    sp.CONSTR_X_HYBRID = getUserSymbolOrDefault(modelHandle, constraintsX_hybrid);
+
+    sp.CONSTR_XU = getUserSymbolOrDefault(modelHandle, constraintsXU);
+
+    sp.CONSTR_XU_HYBRID = getUserSymbolOrDefault(modelHandle, constraintsXU_hybrid);
+
     sp.CONSTR_XV_TYCH = getUserSymbolOrDefault(modelHandle, constraintsXV_tych);
-	sp.JACOBIAN = getUserSymbolOrDefault(modelHandle, jacobian);
-	sp.JACOBIAN_TYCH = getUserSymbolOrDefault(modelHandle, jacobian_tych);
-	sp.LOCAL_DYN_BOUNDS = getUserSymbolOrDefault(modelHandle, localDynBounds);
-    
-	sp.M_FUNC = getUserSymbolOrDefault(modelHandle, m);
+    sp.JACOBIAN = getUserSymbolOrDefault(modelHandle, jacobian);
+    sp.JACOBIAN_HYBRID = getUserSymbolOrDefault(modelHandle, jacobian_hybrid);
+    sp.JACOBIAN_TYCH = getUserSymbolOrDefault(modelHandle, jacobian_tych);
+    sp.LOCAL_DYN_BOUNDS = getUserSymbolOrDefault(modelHandle, localDynBounds);
+    sp.LOCAL_DYN_BOUNDS_HYBRID = getUserSymbolOrDefault(modelHandle, localDynBounds_hybrid);
+
+    sp.M_FUNC = getUserSymbolOrDefault(modelHandle, m);
     sp.L_FUNC = getUserSymbolOrDefault(modelHandle, l);
 
-	sp.M_FUNC_TYCH = getUserSymbolOrDefault(modelHandle, m_tych);
+    sp.M_FUNC_TYCH = getUserSymbolOrDefault(modelHandle, m_tych);
     sp.L_FUNC_TYCH = getUserSymbolOrDefault(modelHandle, l_tych);
 
-	sp.TARGET = getUserSymbolOrDefault(modelHandle, target);
+    sp.TARGET = getUserSymbolOrDefault(modelHandle, target);
 
-	sp.L_FUNC_FD = getUserSymbolOrDefault(modelHandle, l_fd);
+    sp.L_FUNC_FD = getUserSymbolOrDefault(modelHandle, l_fd);
 
-	sp.L_FUNC_TYCH_FD = getUserSymbolOrDefault(modelHandle, l_tych_fd);
+    sp.L_FUNC_TYCH_FD = getUserSymbolOrDefault(modelHandle, l_tych_fd);
 
-	sp.TARGET_FD = getUserSymbolOrDefault(modelHandle, target_fd);
+    sp.TARGET_FD = getUserSymbolOrDefault(modelHandle, target_fd);
 
-	sp.CONSTR_XU_fd = getUserSymbolOrDefault(modelHandle, constraintsXU_fd);
+    sp.CONSTR_XU_fd = getUserSymbolOrDefault(modelHandle, constraintsXU_fd);
 
-	sp.CONTROL_ELIGIBILITY_FOR_TRAJ_fd = getUserSymbolOrDefault(modelHandle, controlEligibilityForTraj_fd);
+    sp.CONTROL_ELIGIBILITY_FOR_TRAJ_fd = getUserSymbolOrDefault(modelHandle, controlEligibilityForTraj_fd);
 
-	sp.DYNAMICS_TYCH_FD = getUserSymbolOrDefault(modelHandle, dynamics_tych_fd);
-    
-	sp.CONSTR_X_fd = getUserSymbolOrDefault(modelHandle, constraintsX_fd);
-    
-	sp.DYN_CONSTR_FOR_TRAJ = getUserSymbolOrDefault(modelHandle, dynConstraintsForTraj);
+    sp.DYNAMICS_TYCH_FD = getUserSymbolOrDefault(modelHandle, dynamics_tych_fd);
 
-	sp.MU_FUNC_FD = getUserSymbolOrDefault(modelHandle, constraintsXUY_fd);
+    sp.CONSTR_X_fd = getUserSymbolOrDefault(modelHandle, constraintsX_fd);
+
+    sp.DYN_CONSTR_FOR_TRAJ = getUserSymbolOrDefault(modelHandle, dynConstraintsForTraj);
+
+    sp.MU_FUNC_FD = getUserSymbolOrDefault(modelHandle, constraintsXUY_fd);
 
     std::vector<trajectoryParams> &trajParamsList = pm->getTrajectoryParametersList();
 
@@ -127,67 +145,75 @@ ParametersManager* initParams(void *modelHandle, const string &paramsFile, gridP
     cumulativeDistribution_t cumulativeDistribution = getUserSymbol<cumulativeDistribution_t>(modelHandle, "cumulativeDistribution");
     probabilityDensity_t probabilityDensity = getUserSymbol<probabilityDensity_t>(modelHandle, "probabilityDensity");
 
-    for (trajectoryParams &tp : trajParamsList) {
-        tp.CONTROL_WEIGHT = controlWeight;
-        switch (tp.TRAJECTORY_TYPE) {
-        case STOCHASTIC:
-            tp.SORT_INDEXES = &shuffleControlIndexes;
-            break;
-        case WEIGHTED_CONTROLS_CAUTIOUS_HEAVY:
-        case WEIGHTED_CONTROLS_CAUTIOUS:
-        case WEIGHTED_CONTROLS:
-            tp.SORT_INDEXES = &sortControlIndexesByWeight;            
-            if (tp.CONTROL_WEIGHT == nullptr) {
-                spdlog::warn("No control weight function defined even though WEIGHTED_CONTROLS was requested. Defaulting to arbitrary control order");
-                tp.SORT_INDEXES = &noSort;
-            }
-            else {
-                spdlog::info("Succesfully loaded symbol: controlWeight");
-            }
-            break;
-        case STRATEGY_LIST:
-            for (unsigned long long int i = 0; i < cp.DIM_TY; ++i) {
-                tp.TYCHE_PARAMS[i].USER_TYCHE = userTyche;
-                tp.TYCHE_PARAMS[i].PROBABILITY_DENSITY = probabilityDensity;
-                tp.TYCHE_PARAMS[i].CUMULATIVE_DISTRIBUTION = cumulativeDistribution;
-            }
-            break;
-        default:
-            tp.SORT_INDEXES = &noSort;
-        }
+    for (trajectoryParams &tp : trajParamsList)
+	{
+	tp.CONTROL_WEIGHT = controlWeight;
+	switch (tp.TRAJECTORY_TYPE)
+	    {
+	case STOCHASTIC:
+	    tp.SORT_INDEXES = &shuffleControlIndexes;
+	    break;
+	case WEIGHTED_CONTROLS_CAUTIOUS_HEAVY:
+	case WEIGHTED_CONTROLS_CAUTIOUS:
+	case WEIGHTED_CONTROLS:
+	    tp.SORT_INDEXES = &sortControlIndexesByWeight;
+	    if (tp.CONTROL_WEIGHT == nullptr)
+		{
+		spdlog::warn("No control weight function defined even though WEIGHTED_CONTROLS was requested. Defaulting to arbitrary control order");
+		tp.SORT_INDEXES = &noSort;
+		}
+	    else
+		{
+		spdlog::info("Succesfully loaded symbol: controlWeight");
+		}
+	    break;
+	case STRATEGY_LIST:
+	    for (unsigned long long int i = 0; i < cp.DIM_TY; ++i)
+		{
+		tp.TYCHE_PARAMS[i].USER_TYCHE = userTyche;
+		tp.TYCHE_PARAMS[i].PROBABILITY_DENSITY = probabilityDensity;
+		tp.TYCHE_PARAMS[i].CUMULATIVE_DISTRIBUTION = cumulativeDistribution;
+		}
+	    break;
+	default:
+	    tp.SORT_INDEXES = &noSort;
+	    }
 
-        tp.IS_VALID_NEIGHBOR = validator;
-        switch (tp.BUBBLE_INTERPRETATION) {
-        case MOORE:
-        case MOORE_PX:
-            tp.IS_VALID_NEIGHBOR = &belowInfiniteDistance;
-            break;
-        case EUCLIDEAN:
-        case EUCLIDEAN_PX:
-            tp.IS_VALID_NEIGHBOR = &belowEuclideanDistance;
-            break;
-        case ELLIPTIC:
-        case ELLIPTIC_PX:
-            tp.IS_VALID_NEIGHBOR = &belowEllipticDistance;
-            break;
-        case CUSTOM:
-            if (tp.IS_VALID_NEIGHBOR == nullptr) {
-                spdlog::warn("Custom bubble requested but no custom isValidNeighbor function given. Defaulting to MOORE");
-                tp.BUBBLE_INTERPRETATION = MOORE;
-                tp.IS_VALID_NEIGHBOR = &belowInfiniteDistance;
-            }
-            break;
-        case CUSTOM_PX:
-            if (tp.IS_VALID_NEIGHBOR == nullptr) {
-                spdlog::warn("Custom bubble requested but no custom isValidNeighbor function given. Defaulting to MOORE_PX");
-                tp.BUBBLE_INTERPRETATION = MOORE_PX;
-                tp.IS_VALID_NEIGHBOR = &belowInfiniteDistance;
-            }
-            break;
-        }
-        tp.TEMPORAL_CONTROL = temporalControl;
-    }
-    
+	tp.IS_VALID_NEIGHBOR = validator;
+	switch (tp.BUBBLE_INTERPRETATION)
+	    {
+	case MOORE:
+	case MOORE_PX:
+	    tp.IS_VALID_NEIGHBOR = &belowInfiniteDistance;
+	    break;
+	case EUCLIDEAN:
+	case EUCLIDEAN_PX:
+	    tp.IS_VALID_NEIGHBOR = &belowEuclideanDistance;
+	    break;
+	case ELLIPTIC:
+	case ELLIPTIC_PX:
+	    tp.IS_VALID_NEIGHBOR = &belowEllipticDistance;
+	    break;
+	case CUSTOM:
+	    if (tp.IS_VALID_NEIGHBOR == nullptr)
+		{
+		spdlog::warn("Custom bubble requested but no custom isValidNeighbor function given. Defaulting to MOORE");
+		tp.BUBBLE_INTERPRETATION = MOORE;
+		tp.IS_VALID_NEIGHBOR = &belowInfiniteDistance;
+		}
+	    break;
+	case CUSTOM_PX:
+	    if (tp.IS_VALID_NEIGHBOR == nullptr)
+		{
+		spdlog::warn("Custom bubble requested but no custom isValidNeighbor function given. Defaulting to MOORE_PX");
+		tp.BUBBLE_INTERPRETATION = MOORE_PX;
+		tp.IS_VALID_NEIGHBOR = &belowInfiniteDistance;
+		}
+	    break;
+	    }
+	tp.TEMPORAL_CONTROL = temporalControl;
+	}
+
     /*
      * Initialisation des paramètres de systèmes dynamique
      * Ici toutes les valeurs sont par defaut, non utilisés

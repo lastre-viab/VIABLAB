@@ -20,6 +20,12 @@ public:
 	unsigned long long int LocalizeHybridPoint(double * doubleCoords, unsigned long long int * intCoords);
 	unsigned long long int * GetContinuousStateShifts();
 	unsigned long long int getNbCellsContinuousState();
+	bool isHybridPointInGrid(double *, unsigned long long int *);
+	void saveHybridCoupe(const string &nomFichier) const;
+	void saveValOnGridHybrid(const string &fileName) const;
+	void saveValOnGridLightHybrid(const string &fileName) const;
+	void loadSetHybrid(const string &fileName);
+
 private:
 	void ComputeShiftsForContinuousState();
 	unsigned long long int * continuousStateShifts;

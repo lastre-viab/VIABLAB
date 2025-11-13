@@ -28,9 +28,9 @@
 #include "Params.h"
 
 class Grid_BitSet : public Grid
-{
+    {
 public:
-	Grid_BitSet() = default;
+    Grid_BitSet() = default;
     Grid_BitSet(const gridParams &gp);
     virtual ~Grid_BitSet();
     virtual void printGrid(void) const;
@@ -42,7 +42,7 @@ public:
     virtual unsigned long long int getNearestPointInSet(const double *coords) const;
 
     void findNearestViabPointInCell(const double *startPoint, const double *currentPoint,
-	double *newPoint, double (*dynConstraints)(const double*, double*)) const;
+	    double *newPoint, double (*dynConstraints)(const double*, double*)) const;
     virtual void savePointsList(const string &fileName) const;
     virtual void saveValOnGrid(const string &fileName) const;
     virtual void saveValOnGridLight(const string &fileName) const;
@@ -76,6 +76,32 @@ public:
 
     void refine();
 
+    /*!
+     * \brief Fonction qui calcule le num�ro d'un point � partir de ses coordonn�es enti�res
+     *
+     * @param coords pointeur sur l'adresse m�moire o� sont stock�es les  coordonn�es enti�res d'un point
+     * @param res num�ro obtenu
+     *
+     * Remarques:
+     *  -  Supposons que les nombres de points de grille par axe sont repr�sent�s par le vecteur
+     *  \f$(n_0,n_1,\dots, n_{d-1})\f$ . La num�rotation est suppos�e �tre  dans l'ordre alpha-num�rique des
+     *  coordonn�es enti�res des points
+     *   \f$ (i_0,i_1,...i_{d-1})\f$ avec pour tout \f$j=0,\dots, d-1\f$ , \f$ i_j = 0,\dots, n_j-1\f$.
+     *   Cette  fonction calcule  la transformation suivante
+     *   \f[
+     *   (i_0,i_1,...i_{d-1}) \mapsto i_0+i_1*n_0+i_2*n_1*n_0+\dots +i_{d_1}\prod_{j=0}^{d-2}n_j
+     *   \f]
+     */
+
+protected :
+    unsigned long long int intCoordsToNum_dm1(const unsigned long long int *coords) const;
+    int dirTramage;
+    boost::dynamic_bitset<> **gridTab;
+    boost::dynamic_bitset<> **gridTabNew;
+    unsigned long long int *nbPointsSubGrid;
+
+    unsigned long long int longTrame;
+    unsigned long long int nbPointsTotalSubGrid;
 private:
     int cp1; //pas de calcul des d�riv�es partielles: x+hx/pas1 , y+hy/p1
     int pp1;
@@ -101,20 +127,17 @@ private:
      */
     unsigned long long int *nbCellsSub;
 
-    int dirTramage;
+
     unsigned long long int *twoPowers;
     unsigned long long int nbP_dm1;
-    unsigned long long int longTrame;
     double li_trame;
     double ls_trame;
-    boost::dynamic_bitset<> **gridTab;
-    boost::dynamic_bitset<> **gridTabNew;
+
     int nbOMPThreads;
 
-    unsigned long long int *nbPointsSubGrid;
+
     unsigned long long int *px;
 
-    unsigned long long int nbPointsTotalSubGrid;
 
     unsigned long long int *tempIntCoords;
 
@@ -173,23 +196,6 @@ private:
     void numToIntAndDoubleCoords_dm1(unsigned long long int num,
 	    unsigned long long int *resI, double *resD) const;
 
-    /*!
-     * \brief Fonction qui calcule le num�ro d'un point � partir de ses coordonn�es enti�res
-     *
-     * @param coords pointeur sur l'adresse m�moire o� sont stock�es les  coordonn�es enti�res d'un point
-     * @param res num�ro obtenu
-     *
-     * Remarques:
-     *  -  Supposons que les nombres de points de grille par axe sont repr�sent�s par le vecteur
-     *  \f$(n_0,n_1,\dots, n_{d-1})\f$ . La num�rotation est suppos�e �tre  dans l'ordre alpha-num�rique des
-     *  coordonn�es enti�res des points
-     *   \f$ (i_0,i_1,...i_{d-1})\f$ avec pour tout \f$j=0,\dots, d-1\f$ , \f$ i_j = 0,\dots, n_j-1\f$.
-     *   Cette  fonction calcule  la transformation suivante
-     *   \f[
-     *   (i_0,i_1,...i_{d-1}) \mapsto i_0+i_1*n_0+i_2*n_1*n_0+\dots +i_{d_1}\prod_{j=0}^{d-2}n_j
-     *   \f]
-     */
-    unsigned long long int intCoordsToNum_dm1(const unsigned long long int *coords) const;
     /*!
      * \brief Fonction  qui identifie la maille  de la grille qui contient le point
      * de coordonn�es r�elles donn�es

@@ -65,6 +65,9 @@ public:
     void (*dynamics_tych)(const double*, const double*, const double*, double*);
     void (*dynamics_fd)(const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
     void (*dynamics_tych_fd)(const unsigned long long int*, const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
+    void (*dynamics_hybrid_d)(const double*, const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
+    void (*dynamics_hybrid_c)(const double*, const unsigned long long int*, const double*, double*);
+    void (*resetmap_hybrid)(const double *, const unsigned long long int*, const unsigned long long int*, double *, const unsigned long long int*);
 
     /*!
      * \brief Pointeur sur l'une des fonctions membres d?����finissant une m?����thode de discr?����tisation
@@ -78,7 +81,7 @@ public:
      */
     void (SysDyn::*discretDynamics)(const double*, const double*, double*, double rho) const;
     void (SysDyn::*discretDynamics_tych)(const double*, const double*, const double*, double*, double rho) const;
-    void (SysDyn::*discretDynamics_hybrid)(const double *xc, unsigned long long int * xd, const double *uc, const unsigned long long int  *ud, double *resc, unsigned long long int resd, double rho) const;
+    void (SysDyn::*discretDynamics_hybrid)(const double *xc, const unsigned long long int * xd, const double *uc, const unsigned long long int  *ud, double *resc, unsigned long long int *resd, double *tempReset, unsigned long long int *tempResD, double rho) const;
 
     /*!
      * \brief Pointeur sur l'une des fonctions membres d?����finissant
@@ -107,6 +110,21 @@ public:
      */
     double (SysDyn::*calcul_M)(const double *x) const;
 
+    double (SysDyn::*calcul_L_hybrid)(const double *xc, const unsigned long long int * xd) const;
+        /*!
+         * \brief Pointeur sur l'une des fonctions membres d?����finissant
+         * une m?����thode de calcul de la constante M de brne  de la dynamique
+         *
+         * la valeur de ce pointeur est initialis?����e dans le constructeur  en fonction
+         *  des param?����tres d'utilisateur d?����finissant ses choix par rapport au calcul de
+         *  la constante M
+         *
+         * @param[in] x : la variable d'?����tat
+         *
+         *\see M, computeM, localDynBounds
+         */
+        double (SysDyn::*calcul_M_hybrid)(const double *xc, const unsigned long long int * xd) const;
+
     /*!
      * \brief Cette fonction d?����finit les contraintes sur le contr?����le, elle correspond ?���� la d?����finition  de U(x)
      *
@@ -120,6 +138,9 @@ public:
     double (*constraintsXU)(const double *x, const double *u);
     double (*constraintsXV_tych)(const double *x, const double *v);
     double (*constraintsXU_fd)(const unsigned long long int *x, const unsigned long long int *u);
+    double (*constraintsXU_hybrid)(const double*, const unsigned long long int*, const double*, const unsigned long long int*);
+
+
     double (*controlEligibilityForTraj_fd)(const unsigned long long int *x, const unsigned long long int *u, const unsigned long long int *previousU);
     /*!
      * \brief  Cette fonction d?����finit les contraintes sur l'?����tat, elle correspond a la d?����finition k(x)
@@ -132,7 +153,7 @@ public:
      */
     double (*constraintsX)(const double*);
     double (*constraintsX_fd)(const unsigned long long int*);
-
+    double (*constraintsX_hybrid)(const double*,const unsigned long long int*);
     /*!
      * \brief  Cette fonction d?����finit les contraintes sur l'?����tat, elle correspond a la d?����finition k(x)
      *
@@ -144,10 +165,7 @@ public:
      */
     double (*dynConstraintsForTraj)(const double*, double*);
 
-    void (*dynamics_hybrid_d)(const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
-    void (*dynamics_hybrid_c)(const double*, const unsigned long long int*, const double*, double*);
 
-    double (*constr_xu_hybrid)(const double*, const unsigned long long int*, const double*, const unsigned long long int*);
 
     /*!
      * \brief  Cette fonction d?����finit la cible, elle correspond a la d?����finition de c(x)
@@ -322,49 +340,49 @@ public:
     unsigned long long int getTotalNbPointsTy() const;
 
     /*!
-        * M?����thode d'acc?����s: renvoie les bornes inf du pav?���� contenant les  contr?����les
-        * @return limInfC
-        */
-       double* getLimInfHybrid();
+     * M?����thode d'acc?����s: renvoie les bornes inf du pav?���� contenant les  contr?����les
+     * @return limInfC
+     */
+    double* getLimInfHybrid();
 
-       /*!
-        * M?����thode d'acc?����s: renvoie les bornes SUP du pav?���� contenant les  contr?����les
-        * @return limSupC
-        */
+    /*!
+     * M?����thode d'acc?����s: renvoie les bornes SUP du pav?���� contenant les  contr?����les
+     * @return limSupC
+     */
 
-       double* getLimSupHybrid();
+    double* getLimSupHybrid();
 
-       /*!
-        * M?����thode d'acc?����s: renvoie le pas de discr?����tisation du pav?���� contenant les  contr?����les
-        * @return stepC
-        */
+    /*!
+     * M?����thode d'acc?����s: renvoie le pas de discr?����tisation du pav?���� contenant les  contr?����les
+     * @return stepC
+     */
 
-       double* getStepHybrid();
-       /*!
-        * M?����thode d'acc?����s: renvoie la dimension de l'espace des  contr?����les
-        * @return dimC
-        */
-       unsigned long long int getDimHybrid() const;
-       /*!
-        * M?����thode d'acc?����s: renvoie les nb de points par axe des  contr?����les
-        * @return NbPointsC
-        */
-       unsigned long long int* getNbPointsHybrid();
-       /*!
-        * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
-        * @return  ControlCoords
-        */
-       double** getHybridCoords() const;
-       /*!
-        * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
-        * @return  ControlCoords
-        */
-       unsigned long long int** getHybridIntCoords();
-       /*!
-        * M?����thode d'acc?����s: renvoie le nombre total de points de discr?����tisation de contr?����les
-        * @return  ControlCoords
-        */
-       unsigned long long int getTotalNbPointsHybrid() const;
+    double* getStepHybrid();
+    /*!
+     * M?����thode d'acc?����s: renvoie la dimension de l'espace des  contr?����les
+     * @return dimC
+     */
+    unsigned long long int getDimHybrid() const;
+    /*!
+     * M?����thode d'acc?����s: renvoie les nb de points par axe des  contr?����les
+     * @return NbPointsC
+     */
+    unsigned long long int* getNbPointsHybrid();
+    /*!
+     * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
+     * @return  ControlCoords
+     */
+    double** getHybridCoords() const;
+    /*!
+     * M?����thode d'acc?����s: renvoie le pointeur sur le tableau qui stocke les coordonn?����es r?����elles des contr?����les
+     * @return  ControlCoords
+     */
+    unsigned long long int** getHybridIntCoords();
+    /*!
+     * M?����thode d'acc?����s: renvoie le nombre total de points de discr?����tisation de contr?����les
+     * @return  ControlCoords
+     */
+    unsigned long long int getTotalNbPointsHybrid() const;
 
     /*   ***************************************************************
      *  Fin des m?����thodes d'acc?����s aux param?����tres de controles
@@ -378,6 +396,7 @@ public:
      * @param u variable de contr?����le
      */
     double calculRho_local(const double *x) const;
+    double calculRho_local_hybrid(const double *xc, const unsigned long long int * xd) const;
 
     /*!
      * m?����thode d'acc?����s au param?����tre qui d?����finit  si le pas de temps
@@ -412,13 +431,23 @@ private:
     double calculL_local_ana(const double *x) const;
     double calculMF_local_ana(const double *x) const;
 
+
     double calculL_local_num_tych(const double *x) const;
     double calculMF_local_num_tych(const double *x) const;
     double calculL_local_ana_tych(const double *x) const;
 
+    double calculL_local_num_hybrid(const double *xc, const unsigned long long int * xd) const;
+    double calculMF_local_num_hybrid(const double *xc, const unsigned long long int * xd) const;
+    double calculL_local_ana_hybrid(const double *xc, const unsigned long long int * xd) const;
+    double calculMF_local_ana_hybrid(const double *xc, const unsigned long long int * xd) const;
+
     double returnL_local_ana(const double *x) const;
 
     double returnMF_local_ana(const double *x) const;
+
+    double returnL_local_ana_hybrid(const double *xc, const unsigned long long int * xd) const;
+
+        double returnMF_local_ana_hybrid(const double *xc, const unsigned long long int * xd) const;
 
     /*!
      * Méthode  qui sert  dans le cas où la dynamique est déjà discrète en temps
@@ -442,7 +471,10 @@ private:
     void FDiscretRK2_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
     void FDiscretRK4_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
 
-    void FDiscret_Hybrid(const double *xc, unsigned long long int * xd, const double *uc, const unsigned long long int  *ud, double *resc, unsigned long long int resd, double rho) const;
+    void FDiscret_hybrid(const double *xc, const unsigned long long int * xd, const double *uc, const unsigned long long int  *ud, double *resc, unsigned long long int *resd, double *jump, unsigned long long int *tempResD, double rho) const;
+    void FDiscretEuler_hybrid(const double *xc, const unsigned long long int * xd, const double *uc, const unsigned long long int  *ud, double *resc, unsigned long long int *resd, double *jump, unsigned long long int *tempResD, double rho) const;
+    void FDiscretRK2_hybrid(const double *xc, const unsigned long long int * xd, const double *uc, const unsigned long long int  *ud, double *resc, unsigned long long int *resd, double *jump, unsigned long long int *tempResD, double rho) const;
+    void FDiscretRK4_hybrid(const double *xc, const unsigned long long int * xd, const double *uc, const unsigned long long int  *ud, double *resc, unsigned long long int *resd, double *jump, unsigned long long int *tempResD, double rho) const;
 
 
     int fd_dyn_type;
@@ -476,6 +508,8 @@ private:
     double **jacob;
     void (*localDynBounds)(const double *x, double *res);
     void (*jacobian)(const double *x, const double *u, double **jacob);
+    void (*localDynBounds_hybrid)(const double *x, const unsigned long long int * xd, double *res);
+    void (*jacobian_hybrid)(const double *x, const unsigned long long int * xd, const double *u, double **jacob);
     void (*jacobian_tych)(const double *x, const double *u, const double *v, double **jacob);
     double dynSignFactor;
     };

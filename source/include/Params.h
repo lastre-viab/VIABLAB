@@ -29,8 +29,11 @@ struct gridParams
     bool *SORTIE_OK_SUP;
     int OMP_THREADS;
     GridMethod GRID_METHOD;
-    unsigned long long int DIM_HC;
+    bool IS_HYBRID;
     unsigned long long int DIM_HD;
+    unsigned long long int DIM_HC;
+    unsigned long long int *NBPOINTS_HD; //!<   tableau indicant le nombre de points par axe
+
     };
 
 /*!
@@ -70,9 +73,10 @@ struct systemParams
     void (*DYNAMICS_FD)(const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
     void (*DYNAMICS_TYCH_FD)(const unsigned long long int*, const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
 
-    void (*DYNAMICS_HYBRID_D)(const double*, const unsigned long long int*, const double*, const unsigned long long int*, unsigned long long int*);
-    void (*DYNAMICS_HYBRID_C)(const double*, const unsigned long long int*, const double*, const unsigned long long int*, double*);
+    void (*DYNAMICS_HYBRID_D)(const double*, const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
+    void (*DYNAMICS_HYBRID_C)(const double*, const unsigned long long int*, const double*, double*);
     double (*CONSTR_XU_HYBRID)(const double*, const unsigned long long int*, const double*, const unsigned long long int*);
+    void (*RESET_MAP_HYBRID)(const double *, const unsigned long long int*, const unsigned long long int*, double *, const unsigned long long int*);
 
     double (*CONSTR_XU)(const double*, const double *u);
     double (*CONSTR_XV_TYCH)(const double*, const double *v);
@@ -80,6 +84,7 @@ struct systemParams
     double (*CONTROL_ELIGIBILITY_FOR_TRAJ_fd)(const unsigned long long int*, const unsigned long long int*, const unsigned long long int*);
 
     double (*CONSTR_X)(const double*);
+    double (*CONSTR_X_HYBRID)(const double*, const unsigned long long int*);
     double (*CONSTR_X_fd)(const unsigned long long int*);
     double (*DYN_CONSTR_FOR_TRAJ)(const double*, double*);
     double (*TARGET)(const double*);
@@ -93,8 +98,10 @@ struct systemParams
     double (*M_FUNC)(const double*, const double*);
     double (*M_FUNC_TYCH)(const double*, const double*, const double*);
     void (*JACOBIAN)(const double *x, const double *u, double **jacob);
+    void (*JACOBIAN_HYBRID)(const double *x, const unsigned long long int*, const double *u, double **jacob);
     void (*JACOBIAN_TYCH)(const double *x, const double *u, const double *v, double **jacob);
     void (*LOCAL_DYN_BOUNDS)(const double *x, double *res);
+    void (*LOCAL_DYN_BOUNDS_HYBRID)(const double *x, const unsigned long long int*, double *res);
 
     ComputeMethod COMPUTE_LC;
     double LIP;
