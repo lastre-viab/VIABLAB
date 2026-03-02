@@ -24,10 +24,17 @@
 #ifndef SYSDYN_H_
 #define SYSDYN_H_
 
+#include <memory>
+
 #include "defs.h"
 #include "Params.h"
 #include "Grid.h"
 #include "ControlGrid.h"
+
+class SysdynBase;
+class SimpleSysDyn;
+class TychasticSysDyn;
+class HybridSysDyn;
 
 /*!
  * \class SysDyn
@@ -424,7 +431,17 @@ public:
     int getDim() const;
 private:
 
+    ComputeMethod computeMF;
+    ComputeMethod computeLC;
     void initializeMethods(const systemParams &SP);
+    void initializeSubSystems(const systemParams &SP, int continuousStateDim, int discreteStateDim, const controlParams &cp, Grid *refGrid);
+
+    std::unique_ptr<SimpleSysDyn> simpleSystem;
+    std::unique_ptr<TychasticSysDyn> tychasticSystem;
+    std::unique_ptr<HybridSysDyn> hybridSystem;
+    std::unique_ptr<ControlGrid> controls;
+    std::unique_ptr<ControlGrid> tyches;
+    std::unique_ptr<ControlGrid> hybridTransistionControls;
 
     double calculL_local_num(const double *x) const;
     double calculMF_local_num(const double *x) const;
@@ -449,24 +466,12 @@ private:
 
         double returnMF_local_ana_hybrid(const double *xc, const unsigned long long int * xd) const;
 
-    /*!
-     * Méthode  qui sert  dans le cas où la dynamique est déjà discrète en temps
-     * mais continue en espace
-     */
     void FDiscret(const double *x, const double *u, double *res, double rho) const;
-    /*!
-     * Méthodes  qui seront utilisées dans le cas où
-     * la dynamique est continue en temps et en espace
-     */
     void FDiscretEuler(const double *x, const double *u, double *res, double rho) const;
     void FDiscretRK2(const double *x, const double *u, double *res, double rho) const;
     void FDiscretRK4(const double *x, const double *u, double *res, double rho) const;
 
     void FDiscret_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
-    /*!
-     * Méthodes  qui seront utilisées dans le cas où
-     * la dynamique est continue en temps et en espace
-     */
     void FDiscretEuler_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
     void FDiscretRK2_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
     void FDiscretRK4_tych(const double *x, const double *u, const double *v, double *res, double rho) const;
@@ -483,15 +488,6 @@ private:
     int discretisation;
     DynType dynType;
 
-    ControlGrid * controls;
-    ControlGrid * tyches;
-    ControlGrid * hybridTransistionControls;
-
-    int dimS;
-
-    int dimS_hc;
-    int dimS_hd;
-
     bool isTychastic;
     bool isHybrid;
     double L;  // constante de Lipschitz
@@ -500,12 +496,6 @@ private:
     double lfunc_L;  // constante de Lipschitz
     double lfunc_MF;  // majoration de la norme de la dynamique
 
-    double *image, *FXmoinsH, *xTemp, *FXplusH;
-    Grid *grid;
-    bool globalTimeStep;
-    ComputeMethod computeMF;
-    ComputeMethod computeLC;
-    double **jacob;
     void (*localDynBounds)(const double *x, double *res);
     void (*jacobian)(const double *x, const double *u, double **jacob);
     void (*localDynBounds_hybrid)(const double *x, const unsigned long long int * xd, double *res);
