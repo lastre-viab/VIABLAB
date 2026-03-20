@@ -222,20 +222,21 @@ void dynamics_hybrid_c(const double *x, const unsigned long long int *xd, const 
 
     image[1] = x[1] + BES_f - FIXED_PLUIE;
     }
-void dynamics_hybrid_d(const unsigned long long int *x, const unsigned long long int *u, unsigned long long int *image)
+
+void dynamics_hybrid_d(const double *xc, const unsigned long long int *xd, const unsigned long long int *ud, unsigned long long int *image)
     {
-    //u[0] = surcreusement
-    //u[1] = investissement
+    //ud[0] = surcreusement
+    //ud[1] = investissement
     //x[0] : profondeur puit
     //x[1] : equipement
 
-    image[0] = u[0]; // nouveau niveau
-    image[1] = x[1] + u[1]; // n
+    image[0] = ud[0]; // nouveau niveau
+    image[1] = xd[1] + ud[1]; // n
     }
 
 
-void resetMap_hybrid(const double *x, const unsigned long long int *currentDiscreteState, const unsigned long long int *nextDiscreteState,
-	const unsigned long long int *discreteControl, double *image)
+	void resetMap_hybrid(const double *x, const unsigned long long int *currentDiscreteState, const unsigned long long int *discreteControl,
+		double *image, unsigned long long int *nextDiscreteState)
     {
     // discrete control : [0] = surcreusement
     // discrete control : [1] = investissement
@@ -253,6 +254,8 @@ void resetMap_hybrid(const double *x, const unsigned long long int *currentDiscr
 
     image[0] = x[0] - CoutSurcreuse(currentDiscreteState[0], discreteControl[0]) - CoutInvest(discreteControl[1]);
     image[1] = x[1];
+	nextDiscreteState[0] = currentDiscreteState[0];
+	nextDiscreteState[1] = currentDiscreteState[1];
     }
 
 // Constraints

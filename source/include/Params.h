@@ -76,7 +76,7 @@ struct systemParams
     void (*DYNAMICS_HYBRID_D)(const double*, const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
     void (*DYNAMICS_HYBRID_C)(const double*, const unsigned long long int*, const double*, double*);
     double (*CONSTR_XU_HYBRID)(const double*, const unsigned long long int*, const double*, const unsigned long long int*);
-    void (*RESET_MAP_HYBRID)(const double *, const unsigned long long int*, const unsigned long long int*, double *, const unsigned long long int*);
+    void (*RESET_MAP_HYBRID)(const double *, const unsigned long long int*, const unsigned long long int*, double *, unsigned long long int*);
 
     double (*CONSTR_XU)(const double*, const double *u);
     double (*CONSTR_XV_TYCH)(const double*, const double *v);
@@ -109,8 +109,10 @@ struct systemParams
     bool globDeltat;
     ComputeMethod COMPUTE_MF;
     double MF;
-    double L_MF;    
+    double L_MF;
+    double TIME_STEP_FACTOR;
     TimeDiscretizationScheme SCHEME;
+    bool IS_IMPLICIT;
     bool SCALE_PARAM;
     DynType DYN_TYPE;     // type of dynamics : FD, CD,
     FdDynType FD_DYN_TYPE; // pour indiquer le type de repr�sentation de la dynamique : fonction ou fihciers r�tro

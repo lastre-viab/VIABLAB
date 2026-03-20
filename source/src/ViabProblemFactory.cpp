@@ -49,7 +49,7 @@ Viabi* ViabProblemFactory::constructViabilityProblem(GridMethod gridMethod)
 	    {
 	    vp = new ViabiBitSet(problemParameters);
 	    }
-	else if( dynSysType == DH)
+	else if( dynSysType == DH || dynSysType == CH)
 	    {
 	    vp = new ViabiBitSetHybrid(problemParameters);
 	    }

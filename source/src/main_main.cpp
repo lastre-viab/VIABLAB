@@ -248,7 +248,7 @@ int main(int argc, char **argv)
      */
     
     viabProblem->computeTrajectories();
-    if (avp.SAVE_PROJECTION | avp.SAVE_SLICE_BOUND)
+    if (avp.SAVE_PROJECTION || avp.SAVE_SLICE_BOUND || avp.SAVE_SLICE)
 	{
         viabProblem->saveViableSets();
 	}

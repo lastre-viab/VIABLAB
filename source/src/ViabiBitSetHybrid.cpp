@@ -125,7 +125,7 @@ void ViabiBitSetHybrid::noyauViabi(int nbArret)
     unsigned long long int * currentDiscreteState = new unsigned long long int[dim_d];
     double * currentContinuousState = new double[dim_c];
 
-    testK0();
+    //testK0();
 
     while (comptEnleves > (unsigned long long int) nbArret)
 	{
@@ -171,8 +171,8 @@ void ViabiBitSetHybrid::noyauViabi(int nbArret)
 			    {
 			    xCoordsDouble[dirTramage] = limInf[dirTramage] + k * gridStep[dirTramage];
 			    xCoordsInt[dirTramage] = k;
-//			    logVector("[ViabiHybrid] : coordsDouble: ", xCoordsDouble, dim);
-//			    logVector("[ViabiHybrid] : coordsint: ", xCoordsInt, dim);
+		//	    logVector("[ViabiHybrid] : coordsDouble: ", xCoordsDouble, dim);
+		//	    logVector("[ViabiHybrid] : coordsint: ", xCoordsInt, dim);
 
 			    for(int j = 0; j< dim_c; j++)
 				{
@@ -183,8 +183,8 @@ void ViabiBitSetHybrid::noyauViabi(int nbArret)
 				currentDiscreteState[i] = xCoordsInt[dim_c + i];
 				}
 
-//			    logVector("[ViabiHybrid] : ===========cont state: ", currentContinuousState, 2);
-//			   logVector("[ViabiHybrid] : ============discrete state: ",currentDiscreteState, 2);
+	//		    logVector("[ViabiHybrid] : ===========cont state: ", currentContinuousState, 2);
+	//		   logVector("[ViabiHybrid] : ============discrete state: ",currentDiscreteState, 2);
 			    testNonVide = this->findViabImagePoint(currentContinuousState, currentDiscreteState, false);
 
 			    if (!testNonVide)
@@ -256,8 +256,8 @@ bool ViabiBitSetHybrid::findViabImagePoint(double *xCoordsDouble, unsigned long 
      * contrôles à parcourir
      */
 
-        //logVector("[ViabiHybrid] : xDouble: ", xCoordsDouble, 2);
-        //    logVector("[ViabiHybrid] : xint: ",xCoordsInt, 2);
+     //   logVector("[ViabiHybrid] : xDouble: ", xCoordsDouble, 2);
+      //     logVector("[ViabiHybrid] : xint: ",xCoordsInt, 2);
     while ((cu_c < nbCTotal) && !testNonVide)
 	{
 	cu_d = 0;
@@ -284,7 +284,9 @@ bool ViabiBitSetHybrid::CheckViability(double *xCoordsDouble, unsigned long long
 	double *doubleImage, unsigned long long int *intImage, unsigned long long int *gridCoords, double * tempResetc, unsigned long long int * tempResetd, double rho)
     {
     bool testNonVide = false;
-
+	double hMax = grid->maxStep;
+	unsigned long long int *testI = new unsigned long long int[dim];
+	double *testV = new double[dim];
     unsigned long long int cellNum, posTemp;
     if (dynsys->constraintsXU_hybrid(xCoordsDouble, xCoordsInt, uc, ud) < PLUS_INF)
 	{
@@ -314,9 +316,14 @@ bool ViabiBitSetHybrid::CheckViability(double *xCoordsDouble, unsigned long long
 		while (ii < nbPointsCube_c && !testNonVide)
 		    {
 		    posTemp = cellNum + indicesDecalCell_c[ii];
-		    grid->numToIntCoords(posTemp, gridCoords);
+			grid->numToIntAndDoubleCoords(posTemp, testI, testV);
 		   // logVector("[ViabiHybrid] :coords du voisin: ", gridCoords, dim);
-		    testNonVide = grid->isInSet(gridCoords);
+			double dist = 0.0;
+			for (int k = 0; k < dim_c; k++)
+			{
+				dist = max(dist, abs(testV[k] - doubleImage[k]));
+			}
+			testNonVide = grid->isInSet(testI) && (dist <= hMax / 2.0);
 		    ii++;
 		    }
 		}
@@ -354,13 +361,14 @@ void ViabiBitSetHybrid::setK0()
     double *gridStep = grid->step;
 
     double xCoordsDouble[dim];
-
+	unsigned long long int xCoordsInt[dim];
     //    cout<<"masque points enleves cree"<<masquePointsEnleves;
     unsigned long long int longTrame = grid->getLongTrame();
     boost::dynamic_bitset<> masque;
     unsigned long long int indice[dim - 1];
     bool testK;
-
+	unsigned long long int * currentDiscreteState = new unsigned long long int[dim_d];
+	double * currentContinuousState = new double[dim_c];
     unsigned long long int posX = 0;
 
     for (posX = 0; posX < tailleTrame; posX++)
@@ -368,21 +376,34 @@ void ViabiBitSetHybrid::setK0()
 
 	numToIntCoords_gen(posX, dim - 1, nbPointsSub, indice);
 
-	for (int j = 0; j < dirTramage; j++)
-	    {
-	    xCoordsDouble[j] = limInf[j] + indice[j] * gridStep[j];
-	    }
+    	for (int j = 0; j < dirTramage; j++)
+    	{
+    		xCoordsDouble[j] = limInf[j] + indice[j] * gridStep[j];
+    		xCoordsInt[j] = indice[j];
+    	}
 
-	for (int j = dirTramage + 1; j < dim; j++)
-	    {
-	    xCoordsDouble[j] = limInf[j] + indice[j - 1] * gridStep[j];
-	    }
-
+    	for (int j = dirTramage + 1; j < dim; j++)
+    	{
+    		xCoordsDouble[j] = limInf[j] + indice[j - 1] * gridStep[j];
+    		xCoordsInt[j] = indice[j - 1];
+    	}
 	for (unsigned long long int k = 0; k < longTrame; k++)
 	    {
-	    xCoordsDouble[dirTramage] = limInf[dirTramage] + k * gridStep[dirTramage];
+		xCoordsDouble[dirTramage] = limInf[dirTramage] + k * gridStep[dirTramage];
+		xCoordsInt[dirTramage] = k;
+		//	    logVector("[ViabiHybrid] : coordsDouble: ", xCoordsDouble, dim);
+		//	    logVector("[ViabiHybrid] : coordsint: ", xCoordsInt, dim);
 
-	    testK = (dynsys->constraintsX(xCoordsDouble) < PLUS_INF);
+		for(int j = 0; j< dim_c; j++)
+		{
+			currentContinuousState[j] = xCoordsDouble[j];
+		}
+		for(int i = 0; i < dim_d; i++)
+		{
+			currentDiscreteState[i] = xCoordsInt[dim_c + i];
+		}
+
+	    testK = (dynsys->constraintsX(currentContinuousState) < PLUS_INF);
 
 	    grid->setPoint(posX, k, testK);
 	    }

@@ -335,10 +335,11 @@ void ParametersManager::readSystemParametersFromJson(ptree &allParamsRoot)
     systemParameters->globDeltat = dataRoot.get<bool>("IS_TIMESTEP_GLOBAL", false);
 
     systemParameters->SCHEME = dataRoot.get < TimeDiscretizationScheme > ("TIME_DISCRETIZATION_SCHEME", EL);
+	systemParameters->IS_IMPLICIT = dataRoot.get < bool > ("USE_IMPLICIT_SCHEME", false);
     systemParameters->SCALE_PARAM = dataRoot.get<bool>("SCALING", false);
-
-    systemParameters->L_LIP = 1.0;
-    systemParameters->L_MF = 1.0;
+	systemParameters->TIME_STEP_FACTOR = dataRoot.get<double>("TIME_STEP_FACTOR", 1.0);
+    systemParameters->L_LIP = 0.0;
+    systemParameters->L_MF = 0.0;
 
     if (gridParameters->GRID_METHOD != BS)
 	{

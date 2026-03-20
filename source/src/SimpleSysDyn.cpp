@@ -24,6 +24,7 @@ SimpleSysDyn::SimpleSysDyn(const systemParams &SP, int stateDim, const controlPa
       muFunc_fd(nullptr), mFunc(nullptr), calculLFunc(), calculMFunc(), discretDynamics(), fd_dyn_type(0), timeHorizon(0.0), retroFileName(),
       discretisation(0), dynType(DD), lfunc_L(0.0), lfunc_MF(0.0), dynSignFactor(1.0), ownsControls(false)
     {
+	timeStepFactor = SP.TIME_STEP_FACTOR;
     if (!controls)
 	{
 	ownsControls = true;
@@ -201,18 +202,12 @@ double SimpleSysDyn::calculRho_local(const double *x) const
 	{
 	return 1.0;
 	}
-    double rho1;
+
     double h = grid->maxStep;
     double LL = calculLFunc ? calculLFunc(x) : returnL_local_ana(x);
     double MFF = calculMFunc ? calculMFunc(x) : returnMF_local_ana(x);
-    if (MFF * LL < 2.0 * h)
-	{
-	MFF = 1.0;
-	LL = 1.0;
-	}
 
-    rho1 = sqrt((2.0 * h) / (LL * MFF));
-    return rho1;
+    return timeStepFactor * sqrt((h) / max(h *h, LL * MFF));
     }
 
 int SimpleSysDyn::getFDDynType() const
@@ -317,7 +312,7 @@ void SimpleSysDyn::FDiscretRK2(const double *x, const double *u, double *res, do
 
     for (i = 0; i < dimS; i++)
 	{
-	res[i] = x[i] + rho * dynSignFactor * Fx[i];
+	res[i] = x[i] + rho * Fx[i];
 	}
 
     grid->periodizePoint(res);
@@ -326,7 +321,7 @@ void SimpleSysDyn::FDiscretRK2(const double *x, const double *u, double *res, do
 
     for (i = 0; i < dimS; i++)
 	{
-	res[i] = x[i] + 0.5 * rho * dynSignFactor * (Fx[i] + Fres[i]);
+	res[i] = x[i] + 0.5 * rho *  (Fx[i] + Fres[i]);
 	}
 
     grid->periodizePoint(res);

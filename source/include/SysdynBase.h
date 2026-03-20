@@ -33,6 +33,7 @@ protected:
     bool isHybrid;
     double L;
     double MF;
+    double timeStepFactor;
     double *image;
     double *FXmoinsH;
     double *xTemp;

@@ -62,6 +62,63 @@ bool GridBitSetHybrid::isHybridPointInGrid(double *continuousState, unsigned lon
     return isInGrid;
     }
 
+/*!
+ * cette fonction corrige les coordonn�es r�elles d'un vecteur
+ * qui sont p�riodiques en les ramenant le cas �ch�ant  dans l'intervalle de la p�riode
+ */
+void GridBitSetHybrid::periodizeHybridPoint(double *vect) const
+{
+	int i;
+	double dist;
+	bool testDepass;
+	////cout<< " peridisation  vect=";
+	//printVector(vect,dim);
+
+	for (i = 0; i < dim_hc; i++)
+	{
+		/*
+		 * On teste  si la variable est d�crar�e p�riodique
+		 */
+		////cout<< " i= "<< i<< " periodic["<<i<<"]= "<<periodic[i]<<endl;
+		if (periodic[i])
+		{
+			testDepass = true;
+			/*
+			 * La periode
+			 */
+			dist = limSup[i] - limInf[i];
+			////cout<< " dist= "<<dist<<endl;
+			/*
+			 * Correction par p�riode enti�re
+			 */
+			while (testDepass)
+			{
+				//	//cout<< " test depass="<<testDepass<<endl;
+				if (vect[i] > limSup[i])
+				{
+					vect[i] -= dist;
+				}
+				else
+				{
+					if (vect[i] < limInf[i])
+					{
+						vect[i] += dist;
+					}
+					else
+					{
+						testDepass = false;
+					}
+				}
+				//		//cout<< " vect= ";
+				//		printVector(vect,dim);
+			}
+		}
+	}
+	//	//cout<< "Periodise a fini  vect= ";
+	//				printVector(vect,dim);
+	////system("pause");
+}
+
 unsigned long long int GridBitSetHybrid::LocalizeHybridPoint(double *doubleCoords, unsigned long long int *intCoords)
     {
     unsigned long long int numCell = (unsigned long long int) (((doubleCoords)[0] - limInf[0]) / step[0]);
@@ -80,7 +137,7 @@ unsigned long long int GridBitSetHybrid::LocalizeHybridPoint(double *doubleCoord
 
     for (int i = dim_hc; i < dim; i++)
 	{
-	numCell = numCell * (nbPoints[i]) + intCoords[i - dim_hd];
+	numCell = numCell * (nbPoints[i]) + intCoords[i - dim_hc];
 	}
     return numCell;
     }

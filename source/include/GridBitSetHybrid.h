@@ -25,6 +25,7 @@ public:
 	void saveValOnGridHybrid(const string &fileName) const;
 	void saveValOnGridLightHybrid(const string &fileName) const;
 	void loadSetHybrid(const string &fileName);
+	void periodizeHybridPoint(double *vect) const;
 
 private:
 	void ComputeShiftsForContinuousState();

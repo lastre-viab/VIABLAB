@@ -51,7 +51,7 @@ double constraintsXV_tych(const double *x, const double *v);
 void dynamics_hybrid_c(const double *x, const unsigned long long int *xd, const double *u, double *image);
 void dynamics_hybrid_d(const double *x, const unsigned long long int *xd, const unsigned long long int *u, unsigned long long int *image);
 double constraintsXU_hybrid(const double *x, const unsigned long long int *xd, const double *u, const unsigned long long int *ud);
-void resetMap_hybrid(const double * xc, const unsigned long long int* xd, const unsigned long long int* resetControl, double * imagec, const unsigned long long int* imaged);
+void resetMap_hybrid(const double * xc, const unsigned long long int* xd, const unsigned long long int* resetControl, double * imagec, unsigned long long int* imaged);
 double constraintsX_hybrid(const double *x, const unsigned long long int *xd);
 void jacobian_hybrid(const double *x, const unsigned long long int *xd, const double *u, double **jacob);
 void localDynBounds_hybrid(const double *x, const unsigned long long int *xd, double *res);

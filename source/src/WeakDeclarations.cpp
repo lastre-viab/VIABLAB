@@ -158,7 +158,7 @@ double constraintsXU_hybrid(const double *x, const unsigned long long int *xd, c
     return 0.0;
     }
 
-void resetMap_hybrid(const double * xc, const unsigned long long int* xd, const unsigned long long int* resetControl, double * imagec, const unsigned long long int* imaged)
+void resetMap_hybrid(const double * xc, const unsigned long long int* xd, const unsigned long long int* resetControl, double * imagec, unsigned long long int* imaged)
     {
 
     }

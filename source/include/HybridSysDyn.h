@@ -2,12 +2,12 @@
 #define HYBRIDSYSDYN_H_
 
 #include "SimpleSysDyn.h"
-
+#include "GridBitSetHybrid.h"
 class HybridSysDyn : public SimpleSysDyn
     {
 public:
     HybridSysDyn();
-    HybridSysDyn(const systemParams &SP, int continuousStateDim, int discreteStateDim, const controlParams &cp, Grid *refGrid, ControlGrid *controlGrid = nullptr, ControlGrid *hybridControls = nullptr);
+    HybridSysDyn(const systemParams &SP, int continuousStateDim, int discreteStateDim, const controlParams &cp, GridBitSetHybrid *refGrid, ControlGrid *controlGrid = nullptr, ControlGrid *hybridControls = nullptr);
     ~HybridSysDyn() override;
 
     void initializeMethods(const systemParams &SP) override;
@@ -36,10 +36,10 @@ protected:
     int dimS_hc;
     int dimS_hd;
     ControlGrid *hybridTransistionControls;
-
+	GridBitSetHybrid *hybridGrid;
     void (*dynamics_hybrid_d)(const double*, const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
     void (*dynamics_hybrid_c)(const double*, const unsigned long long int*, const double*, double*);
-    void (*resetmap_hybrid)(const double*, const unsigned long long int*, const unsigned long long int*, double*, const unsigned long long int*);
+    void (*resetmap_hybrid)(const double*, const unsigned long long int*, const unsigned long long int*, double*, unsigned long long int*);
 
     double (*constraintsXU_hybrid)(const double*, const unsigned long long int*, const double*, const unsigned long long int*);
     double (*constraintsX_hybrid)(const double*, const unsigned long long int*);

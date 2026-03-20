@@ -71,7 +71,7 @@ SysDyn::SysDyn(const systemParams &SP, int ds, const controlParams &cp, Grid *gr
 
     MF = SP.MF;
     L = SP.LIP;
-
+timeStepFactor = SP.TIME_STEP_FACTOR;
     lfunc_L = SP.L_LIP;  // constante de Lipschitz
     lfunc_MF = SP.L_MF;  // majoration de la norme de la dynamique
 
@@ -672,10 +672,11 @@ int SysDyn::getDim() const
     }
 
 void SysDyn::initializeSubSystems(const systemParams &SP, int continuousStateDim, int discreteStateDim, const controlParams &cp, Grid *refGrid)
-    {
+{
     int totalDim = continuousStateDim + discreteStateDim;
     simpleSystem = std::make_unique<SimpleSysDyn>(SP, totalDim, cp, refGrid, controls.get());
     tychasticSystem = std::make_unique<TychasticSysDyn>(SP, totalDim, cp, refGrid, controls.get(), tyches.get());
-    hybridSystem = std::make_unique<HybridSysDyn>(SP, continuousStateDim, discreteStateDim, cp, refGrid, controls.get(), hybridTransistionControls.get());
-    }
+    hybridSystem = std::make_unique<HybridSysDyn>(SP, continuousStateDim, discreteStateDim, cp, static_cast<GridBitSetHybrid*>(refGrid), controls.get(), hybridTransistionControls.get());
+}
+
 

@@ -462,7 +462,7 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print
 				{
 				dist = max(dist, abs(testV[k] - doubleVect1[k]));
 				}
-			    testNonVide = grid->isInSet(testI) && (dist <= hMax / 2.0);
+			    testNonVide = grid->isInSet(testI) && (dist < hMax / 2.0);
 
 			    }
 			ii++;
@@ -1542,6 +1542,7 @@ void ViabiBitSet::noyauViabi_sansControle(int nbArret)
     unsigned long long int longTrame = grid->getLongTrame();
     boost::dynamic_bitset<> masque;
     boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(longTrame, 0);
+	boost::dynamic_bitset<> *masqueDummy = new boost::dynamic_bitset<>(longTrame, 0);
     boost::dynamic_bitset<> **gridTab = grid->getGridTab();
 
     //pointeur sur la fonction d'analyse d'un point
@@ -1559,7 +1560,10 @@ void ViabiBitSet::noyauViabi_sansControle(int nbArret)
     unsigned long long int comptEtats = 0, comptEnleves = nbArret + 1;
     unsigned long long int subGridSize = grid->getNbPointsTotalSubGrid();
     testK0();
-
+	unsigned long long int start = 0;
+	unsigned long long int end = subGridSize;
+	int dir = 1;
+	bool forward = true;
     while (comptEnleves > (unsigned long long int) nbArret)
 	{
 	cout << "nouvelle boucle while\n";
@@ -1567,20 +1571,24 @@ void ViabiBitSet::noyauViabi_sansControle(int nbArret)
 	comptEnleves = 0;
 	comptEtats = 0;
 
-	for (unsigned long long int posX = 0; posX < subGridSize; posX++)
+    	start = forward ? 0 : subGridSize - 1;
+    	end = forward ? subGridSize : -1;
+    	dir = forward ? 1 : -1;
+	for (unsigned long long int posX = start; posX != end; posX+=dir)
 	    {
 	    //cout<< " posX="<<posX<<endl;
+	//	cout<<  "Set " <<(*gridTab[posX])<< " ";
 	    if (!gridTab[posX]->none())
 		{
 		comptEtats++;
 		testF = false;
 		numToIntCoords_gen(posX, dim - 1, nbPointsSub, indice);
 
-		//cout<<  (*gridTab[posX])<<endl;
+
 
 		masque = grid->analyseTrameMasqueBis(posX, 0);
 
-		//	cout<<"masque d'analyse  "<<masque<<endl;
+		//	cout<<" masque "<<masque<< " ";
 
 		masquePointsEnleves->set();
 
@@ -1615,19 +1623,25 @@ void ViabiBitSet::noyauViabi_sansControle(int nbArret)
 			    }	// fin de if masque[k]
 			}	// fin de for  de parcours de masque
 		    //cout<< " fini"<<endl;
-		    //cout<< " masque points enleves "<<*masquePointsEnleves<<endl;
+		 //   cout<< " delete "<<*masquePointsEnleves<<" ";
 		    if (masquePointsEnleves->count() < (unsigned long long int) longTrame)
 			{
 
 			*gridTab[posX] &= (*masquePointsEnleves);
+
 			}
 
 		    }
-
+	    //	cout<<  " Final Set " <<(*gridTab[posX])<<endl;
 		}			//fin de if la trame n'est pas vide
-
+		else
+		{
+			//cout<< " masque "<<*masqueDummy<<" ";
+			//cout<< " delete "<<*masqueDummy<<" ";
+			//cout<<  " Final Set " <<(*gridTab[posX])<<endl;
+		}
 	    }				// fin de for de parcours de la trame
-
+//forward = !forward;
     cout << "End of iteration " << nbIter << " Number of points removed: " << comptEnleves << "\n";
 
 	nbIter++;
@@ -1913,7 +1927,7 @@ void ViabiBitSet::ViabilityKernel(int nbArret)
 	t2 = tim.tv_sec + (tim.tv_usec / 1000000.0);
 	elapsed_time = (double) ((t2 - t1));
 	cout << "Elapsed time : " << elapsed_time << " sec." << endl << endl;
-	//   cout<< "=============================================================================="<<endl;
+	   cout<< "=============================================================================="<<endl;
 	/*  * sauvegardes
 	 */
 	if (avp->INTERMEDIATE_SAVINGS)
@@ -1926,9 +1940,10 @@ void ViabiBitSet::ViabilityKernel(int nbArret)
 	/*
 	 * raffinement du maillage
 	 */
-
+    	cout<< " refIter = "<<refIter<<endl;
 	if (refIter < refine)
 	    {
+		cout<< " rafinement "<<refIter<<endl;
 	    grid->refine();
 	    }
 	}

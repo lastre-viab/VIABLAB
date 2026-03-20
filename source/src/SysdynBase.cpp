@@ -1,7 +1,7 @@
 #include "../include/SysdynBase.h"
 
 SysdynBase::SysdynBase()
-    : dimS(0), isTychastic(false), isHybrid(false), L(0.0), MF(0.0), image(nullptr), FXmoinsH(nullptr), xTemp(nullptr), FXplusH(nullptr),
+    : dimS(0), isTychastic(false), isHybrid(false), L(0.0), MF(0.0), timeStepFactor(1.0), image(nullptr), FXmoinsH(nullptr), xTemp(nullptr), FXplusH(nullptr),
       grid(nullptr), globalTimeStep(true), computeMF(ComputeMethod::ANALYTICAL), computeLC(ComputeMethod::ANALYTICAL), jacob(nullptr)
     {
     }

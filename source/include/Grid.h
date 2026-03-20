@@ -124,7 +124,7 @@ public:
      * fonction abstraite permettant  d'enregistrer dans un fichier
      * la valeur définissant l'ensemble sur la grille
      * La version light permet d'enregistrer seulement les points
-     * appartenant au noyau de viabilit�
+     * appartenant au noyau de viabilit�
      * Dans le cal d'ensemble minces par exemple
      * cela permet de diminuer la taille des fichiers
      * Dans le cas de l'ensemble épigraphique la valeur réelle est enregistrée

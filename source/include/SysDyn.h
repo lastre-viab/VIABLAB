@@ -74,7 +74,7 @@ public:
     void (*dynamics_tych_fd)(const unsigned long long int*, const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
     void (*dynamics_hybrid_d)(const double*, const unsigned long long int*, const unsigned long long int*, unsigned long long int*);
     void (*dynamics_hybrid_c)(const double*, const unsigned long long int*, const double*, double*);
-    void (*resetmap_hybrid)(const double *, const unsigned long long int*, const unsigned long long int*, double *, const unsigned long long int*);
+    void (*resetmap_hybrid)(const double *, const unsigned long long int*, const unsigned long long int*, double *, unsigned long long int*);
 
     /*!
      * \brief Pointeur sur l'une des fonctions membres d?����finissant une m?����thode de discr?����tisation
@@ -492,7 +492,7 @@ private:
     bool isHybrid;
     double L;  // constante de Lipschitz
     double MF;  // majoration de la norme de la dynamique
-
+double timeStepFactor;
     double lfunc_L;  // constante de Lipschitz
     double lfunc_MF;  // majoration de la norme de la dynamique
 

@@ -14,7 +14,7 @@ ControlGrid::ControlGrid()
     limSupC = new double[1];
     limInfC = new double[1];
     nbPointsC = new unsigned long long int[1];
-    totalNbPointsC = 0;
+    totalNbPointsC = 1;
     controlCoords = new double*[1];
     controlIntCoords = new unsigned long long int*[1];
     }
@@ -48,44 +48,74 @@ ControlGrid::~ControlGrid()
 ControlGrid::ControlGrid(int dim, double * limInf, double * limSup, unsigned long long int * nbPoints)
     {
     dimC = dim;
-    stepC = new double[dim];
-    limSupC = new double[dim];
-    limInfC = new double[dim];
-    nbPointsC = new unsigned long long int[dim];
-
-    for(int k = 0; k < dim; k++)
+	int tabsize = max(dim, 1);
+    stepC = new double[tabsize];
+    limSupC = new double[tabsize];
+    limInfC = new double[tabsize];
+    nbPointsC = new unsigned long long int[tabsize];
+if (dimC > 0)
+{
+	for(int k = 0; k < dim; k++)
 	{
-	limSupC[k] = limSup[k];
-	limInfC[k] = limInf[k];
-	nbPointsC[k] = nbPoints[k];
+		limSupC[k] = limSup[k];
+		limInfC[k] = limInf[k];
+		nbPointsC[k] = nbPoints[k];
 	}
 
-    spdlog::debug("[System] : Control dimension {}", dimC);
-    totalNbPointsC = 1;
-    for (int dc = 0; dc < dimC; dc++)
-	{
-	totalNbPointsC *= nbPointsC[dc];
-	stepC[dc] = (limSupC[dc] - limInfC[dc]) / (nbPointsC[dc] - 1);
-	}
-
-    spdlog::debug("[System] : nbPoints controle total  {}", totalNbPointsC);
-    logVector("[System]: control discretization step :", stepC, dimC);
-    logVector("[System]: control inf limits :", limInfC, dimC);
-    logVector("[System]: control sup limits :", limSupC, dimC);
-    controlCoords = new double*[totalNbPointsC];
-    controlIntCoords = new unsigned long long int*[totalNbPointsC];
-    unsigned long long int *coordsIntC = new unsigned long long int[dimC];
-
-    for (unsigned long long int k = 0; k < totalNbPointsC; k++)
-	{
-	controlCoords[k] = new double[dimC];
-	controlIntCoords[k] = new unsigned long long int[dimC];
-	numToIntCoords_gen(k, dimC, nbPointsC, coordsIntC);
+	spdlog::debug("[System] : Control dimension {}", dimC);
+	totalNbPointsC = 1;
 	for (int dc = 0; dc < dimC; dc++)
-	    {
-	    controlCoords[k][dc] = limInfC[dc] + stepC[dc] * coordsIntC[dc]; //+0.5*stepC[dc];
-	    controlIntCoords[k][dc] = coordsIntC[dc];
-	    }
+	{
+		totalNbPointsC *= nbPointsC[dc];
+		stepC[dc] = (limSupC[dc] - limInfC[dc]) / (nbPointsC[dc] - 1);
+	}
+
+	spdlog::debug("[System] : nbPoints controle total  {}", totalNbPointsC);
+	logVector("[System]: control discretization step :", stepC, dimC);
+	logVector("[System]: control inf limits :", limInfC, dimC);
+	logVector("[System]: control sup limits :", limSupC, dimC);
+	controlCoords = new double*[totalNbPointsC];
+	controlIntCoords = new unsigned long long int*[totalNbPointsC];
+	unsigned long long int *coordsIntC = new unsigned long long int[dimC];
+
+	for (unsigned long long int k = 0; k < totalNbPointsC; k++)
+	{
+		controlCoords[k] = new double[dimC];
+		controlIntCoords[k] = new unsigned long long int[dimC];
+		numToIntCoords_gen(k, dimC, nbPointsC, coordsIntC);
+		for (int dc = 0; dc < dimC; dc++)
+		{
+			controlCoords[k][dc] = limInfC[dc] + stepC[dc] * coordsIntC[dc]; //+0.5*stepC[dc];
+			controlIntCoords[k][dc] = coordsIntC[dc];
+		}
+	}
+}
+	else
+	{
+
+			limSupC[0] = 0.0;
+			limInfC[0] = 0.0;
+			nbPointsC[0] = 1;
+
+		spdlog::debug("[System] : Control dimension {}", dimC);
+		totalNbPointsC = 1;
+			stepC[0] = 1.0;
+
+		spdlog::debug("[System] : nbPoints controle total  {}", totalNbPointsC);
+		logVector("[System]: control discretization step :", stepC, dimC);
+		logVector("[System]: control inf limits :", limInfC, dimC);
+		logVector("[System]: control sup limits :", limSupC, dimC);
+		controlCoords = new double*[totalNbPointsC];
+		controlIntCoords = new unsigned long long int*[totalNbPointsC];
+		unsigned long long int *coordsIntC = new unsigned long long int[1];
+
+		for (unsigned long long int k = 0; k < totalNbPointsC; k++)
+		{
+			controlCoords[k] = new double[1];
+			controlIntCoords[k] = new unsigned long long int[1];
+				controlCoords[k][0] = 0.0; //+0.5*stepC[dc];
+				controlIntCoords[k][0] = 0;
+		}
 	}
     }
 

@@ -6,7 +6,6 @@
 #include "../include/defs.h"
 #include <cstdlib>
 
-#include "Exemple_multiDim_data.h"
 
 extern "C" {
 std::string paramsFile = "hybridTest.json";
@@ -14,15 +13,57 @@ std::string paramsFile = "hybridTest.json";
 //------------------------------------------------------------------------------------------------------
 //  Model description source for the test problem
 //------------------------------------------------------------------------------------------------------
+using std::abs;
+using std::max;
 
+
+double a = 0.7;
+double c = 1.5;
+double eps = 0.25;
+double tol = 0.001;
+double reset = 0.5;
+    double resetAlpha1 = 0.5;
+    double resetAlpha2 = -0.5;
+    double resetBeta1 = 1.0;
+    double resetBeta2 = 1.0;
+    int resetNbLines = 1;
+double * resetAlphas;
+    double * resetBetas;
+bool withReset = false;
 
 void loadModelData(const ParametersManager* PM)
 {
+    spdlog::info("[LoadModelData] : STARt");
+    const modelParams* modelParams = PM->getModelParameters();
+    a = modelParams->getDouble("CIRCLE_PARAM");
+    c = modelParams->getDouble("CONSTR_PARAM");
+    eps = modelParams->getDouble("EPS_PARAM");
+    tol = modelParams->getDouble("TOL_PARAM");
+    reset = modelParams->getDouble("RESET_PARAM");
+    resetAlpha1 = modelParams->getDouble("RESET_ALPHA1_PARAM");
+    resetAlpha2 = modelParams->getDouble("RESET_ALPHA2_PARAM");
+    resetBeta1 = modelParams->getDouble("RESET_BETA1_PARAM");
+    resetBeta2 = modelParams->getDouble("RESET_BETA2_PARAM");
+    resetAlpha1 = modelParams->getDouble("RESET_ALPHA1_PARAM");
+    resetNbLines = modelParams->getInt("RESET_NBLINES");
+    withReset = modelParams->getBool("WITH_RESET_PARAM");
+    resetAlphas = new double[resetNbLines];
+    resetBetas = new double[resetNbLines];
+    if (resetNbLines >= 1)
+    {
+        resetAlphas[0] = resetAlpha1;
+        resetBetas[0] = resetBeta1;
+    }
+    if (resetNbLines >= 2)
+    {
+        resetAlphas[1] = resetAlpha2;
+        resetBetas[1] = resetBeta2;
+    }
+
+    spdlog::info("[LoadModelData] : model params ok");
+    spdlog::info("[LoadModelData] : Finished");
 }
 
-double a = 1.0;
-double c = 2.0;
-double eps = 0.1;
 
 double norm(const double* x)
 {
@@ -36,161 +77,82 @@ double norm(const double* x)
 
 void dynamics_hybrid_c(const double* x, const unsigned long long int* xd, const double* u, double* image)
 {
-    double n = norm(x);
-    image[0] = x[1] + (n - a) * x[0] / n;
-    image[1] = -x[0] + (n - a) * x[1] / n;
+    double nx = norm(x);
+    double alpha = (nx - a) / nx;
+    image[0] = alpha * x[0] + x[1];
+    image[1] = - x[0] +  alpha * x[1];
 }
 
-void dynamics_hybrid_d(const unsigned long long int* x, const unsigned long long int* u, unsigned long long int* image)
+void jacobian_hybrid(const double* x, const unsigned long long int* xd, const double* u, double** image)
 {
-
-    image[0] = x[0]; // nouveau niveau
-    image[1] = x[1]; // n
+    double nx = norm(x);
+    double alpha = (nx - a) / nx;
+    image[0][0] = a * x[0] * x[0] / (nx * nx * nx) + alpha;
+    image[0][1] = 1 + x[0] * a * x[1] / (nx * nx * nx);
+    image[1][0] = -1 + x[0] * a * x[1] / (nx * nx * nx);
+    image[1][1] = a * x[1] * x[1] / (nx * nx * nx) + alpha;
 }
 
+void localDynBounds_hybrid(const double* x, const unsigned long long int* xd, double* res)
+{
+    double nx = norm(x);
+    double alpha = (nx - a) / nx;
+    res[0] = abs(x[1] + alpha * x[0]);
+    res[1] = abs(-x[0] + alpha * x[1]);
+}
+
+void dynamics_hybrid_d(const double* x, const unsigned long long int* xd, const unsigned long long int* u,
+                       unsigned long long int* image)
+{
+    image[0] = xd[0];
+}
+
+bool isInResetSet(const double* x, const unsigned long long int* currentDiscreteState)
+{
+    if (!withReset)
+    {
+        return false;
+    }
+    bool isInReset = false;
+    for (int i = 0; i < resetNbLines; i++)
+    {
+        isInReset |= abs(x[0] + resetAlphas[i] * x[1] - resetBetas[i]) < tol;
+    }
+    return isInReset;
+}
 
 void resetMap_hybrid(const double* x, const unsigned long long int* currentDiscreteState,
-                     const unsigned long long int* nextDiscreteState,
-                     const unsigned long long int* discreteControl, double* image)
+                     const unsigned long long int* discreteControl, double* image,
+                     unsigned long long int* nextDiscreteState)
 {
-    image[0] = x[0] - 1;
-    image[1] = x[1];
-}
-
-// Constraints
-
-// Check M[](t) constraint: M[](t) in {0,E(t),I+(t)}
-bool CheckMConstraints(const unsigned long long int M, const unsigned long long int E,
-                       const unsigned long long int Iplus)
-{
-    if (E == 3)
+    if (isInResetSet(x, currentDiscreteState))
     {
-        return true;
-    }
-
-    if (M != 0 && M != E && M != Iplus)
-    {
-        return false;
-    }
-    return true;
-}
-
-// Check I+(t) constraint
-bool CheckIConstraint(const unsigned long long int E, const unsigned long long int Iplus)
-{
-    if (Iplus < 0)
-    {
-        return false;
-    }
-    // si E(t)=0，I+(t)=0,1,2
-    if (E == 0)
-    {
-        return (Iplus == 0 || Iplus == 1 || Iplus == 2);
-    }
-    // si E(t)=1, I+(t)=0,2
-    else if (E == 1)
-    {
-        return (Iplus == 0 || Iplus == 2);
-    }
-    // si E(t)=2, I+(t)=0,1
-    else if (E == 2)
-    {
-        return (Iplus == 0 || Iplus == 1);
-    }
-    // si E(t)=3, I+(t)=0
-    else if (E == 3)
-    {
-        return (Iplus == 0);
+        image[0] = x[0] - reset;
+        image[1] = x[1];
     }
     else
     {
-        return false;
+        image[0] = x[0];
+        image[1] = x[1];
     }
+    nextDiscreteState[0] = currentDiscreteState[0];
 }
 
 
-double constraintsXU_hybrid(const double* x, const unsigned long long int* xd, const double* u,
-                            const unsigned long long int* ud)
+double constraintsX(const double* x)
 {
-    // discrete control : ud[0] = surcreusement
-    // discrete control : ud[1] = investissement
-    // x[0] = capital
-    // x[1] = niveau de la nappe
-    // discreteState xd[0] = niveau puit
-    // DiscreteState xd[1] = equipement
-    // cont control M : mode irrigation = u[1]
-    // cont control S : spec = u[0]
-
-    getIntControlCoords(u, continuousControlIntCoords);
-
-    if (!CheckMConstraints(continuousControlIntCoords[1], xd[1], ud[1]))
-    {
-        //spdlog::info("[contraints XU ] : M pas OK");
-        return PLUS_INF;
-    }
-
-    // Check S(t) constraint: S(t) in [P(t)/5, 8]
-    if (xd[0] > ud[0])
+    if (norm(x) < eps)
     {
         return PLUS_INF;
     }
-
-    // Check I+(t) constraint
-    if (!CheckIConstraint(xd[1], ud[1]))
+    if ((x[0] < -c) || (x[0] > c))
     {
         return PLUS_INF;
     }
-
-    // Check the constraint: h(t)+BES_f(t)*a+BES_c(t)*a<=S(t)*5
-    double BES_f = BesoinEnEau(continuousControlIntCoords);
-    // double BES_c = BesoinEnEau(M_c, Sp_c, BES_PARAM);
-
-    if (x[1] + BES_f * BES_para > ud[0] * 5)
-    {
-        // spdlog::info("[contraints XU ] :niveau de la nappe {}", x[1]);
-        // spdlog::info("[contraints XU ] :besoin eau {}", BES_f * BES_para);
-        // spdlog::info("[contraints XU ] :niveau puit {}", ud[0] * 5);
-        return PLUS_INF;
-    }
-
-    // Check the constraint: h>=30 and M_k=0, then Sp_k=0
-
-    if (x[1] >= 30 && continuousControlIntCoords[1] == 0 && continuousControlIntCoords[0] != 0)
-    {
-        // spdlog::info("[contraints XU ] : Pas droit d'arroser à la main");
-        return PLUS_INF;
-    }
-
-
-    // Check the constraint: C(t)
-
-    double CS = CoutSurcreuse(xd[0], ud[0]);
-    double CI = CoutInvest(ud[1]);
-    double PV_f = PrixVente(continuousControlIntCoords);
-
-    double CP_f = CoutProduction(continuousControlIntCoords);
-
-    // Constraint 1: γ*C(t)-CS(t)-CI(t)-CP_f(t)-CP_c(t)-FC>=0
-    if (gamma_para * (x[0] - CS - CI) - CP_f - FIXED_COSTSR < 0)
-    {
-        //	 spdlog::info("[contraints XU ] : pas assez de capital");
-        //	 spdlog::info("[contraints XU ] : capital {}", x[0]);
-        //	 spdlog::info("[contraints XU ] : cout creuser {}", CS);
-        //	 spdlog::info("[contraints XU ] : cout investir {}", CI);
-        //	 spdlog::info("[contraints XU ] : cout produire {}", CP_f);
-        //	 spdlog::info("[contraints XU ] : cout fixe {}", FIXED_COSTSR);
-        return PLUS_INF;
-    }
-    if (gamma_para* x[0]
-    <
-    0
-    )
+    if ((x[1] < -c) || (x[1] > c))
     {
         return PLUS_INF;
     }
-
-    // If all constraints are satisfied, return 1.0 to indicate feasibility
-    // spdlog::info("[contraints XU ] : OK");
     return 1.0;
 }
 }
