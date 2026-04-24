@@ -1,7 +1,7 @@
 {
     "ALGORITHM_PARAMETERS": {
         "COMPUTE_MIN_TIME": false,
-        "COMPUTE_VIABLE_SET": false,
+        "COMPUTE_VIABLE_SET": true,
         "GRID_REFINMENTS_NUMBER": 0,        
         "INTERMEDIATE_SAVINGS": false,
         "ITERATION_STOP_LEVEL": 0,
@@ -10,12 +10,12 @@
             0,
             0
         ],
-        "SAVE_BOUNDARY": false,
+        "SAVE_BOUNDARY": true,
         "SAVE_PROJECTION": false,
         "SAVE_SLICE": false,
         "SAVE_SLICE_BOUND": false,
         "SAVE_SUBLEVEL": false,
-        "SAVE_VIABSET_LIGHT": false,
+        "SAVE_VIABSET_LIGHT": true,
         "SET_TYPE": "VIAB",
         "TARGET_OR_DEPARTURE": "DEPARTURE"
     },

@@ -96,6 +96,7 @@ Grid_BitSet::Grid_BitSet(const gridParams &gp) :
     arePointsGridCenters = gp.GRID_TYPE;
 
     maxStep = 0;
+  UseSubGridVectorShifts = false;
     for (int i = 0; i < dim; i++)
 	{
 	nbPoints[i] = gp.NBPOINTS[i];
@@ -106,6 +107,8 @@ Grid_BitSet::Grid_BitSet(const gridParams &gp) :
 
 	step[i] = (limSup[i] - limInf[i]) / (nbPoints[i] - 1);
 	maxStep = max(maxStep, step[i]);
+
+      UseSubGridVectorShifts |= (nbPoints[i] < 3);
 	}
 
     for (int i = 0; i < dirTramage; i++)
@@ -154,14 +157,17 @@ Grid_BitSet::Grid_BitSet(const gridParams &gp) :
 	pow3 *= 3;
 	}
     indicesDecal = new long long int[pow3];
-
+  neighborShifts = new  long long int *[pow3];
     lesDecalagesAxes = new unsigned long long int*[dim];
     indicesDecalAxes = new unsigned long long int[dim];
     for (int k = 0; k < dim; k++)
 	{
 	lesDecalagesAxes[k] = new unsigned long long int[dim];
 	}
-
+  for (int k = 0; k < pow3; k++)
+  {
+    neighborShifts[k] = new  long long int[dim];
+  }
     computeGridShifts();
 
     nbCellsSub = new unsigned long long int[dim - 1];
@@ -183,11 +189,15 @@ Grid_BitSet::Grid_BitSet(const gridParams &gp) :
     indicesDecalSub = new long long int[pow3Sub];
     lesDecalagesAxesSub = new unsigned long long int*[dim - 1];
     indicesDecalAxesSub = new unsigned long long int[dim - 1];
-
+neighborShiftsSub = new  long long int *[pow3Sub];
     for (int k = 0; k < dim - 1; k++)
 	{
 	lesDecalagesAxesSub[k] = new unsigned long long int[dim - 1];
 	}
+  for (int k = 0; k < pow3Sub; k++)
+  {
+    neighborShiftsSub[k] = new  long long int[dim - 1];
+  }
     computeSubGridShifts();
     gridTab = new boost::dynamic_bitset<>*[nbPointsTotalSubGrid];
 
@@ -764,7 +774,7 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueBis(unsigned long long in
 	}
     }
 
-boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasque(unsigned long long int posX) const
+boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasqueWithVectorShifts(unsigned long long int posX) const
     {
     int i = 0;
     double x = limInf[0] + step[0];
@@ -811,13 +821,107 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasque(unsigned long long int p
 	else
 	    {
 	    int k = 0;
-	    while ((indicesDecalSub[k] < 0 && posX < ((unsigned long long int) -indicesDecalSub[k])) && (k < pow3Sub))
+
+		while (k < pow3Sub)
+		    {
+		    if (isValidSubShift(indice, neighborShiftsSub[k]))
+			{
+			masque &= (((*gridTab[posX + indicesDecalSub[k]])));
+
+			//on d�cale la trame de 1 bit et on fait le ET pour chaque
+			//bit �a donne : b[i] ET b[i+1]
+			masqueDecale = ((*gridTab[posX + indicesDecalSub[k]])) >> (1);
+			masqueDecale[longTrame - 1] = 1;
+			masque &= (masqueDecale);
+			//on d�cale la trame de 1 bite  et on fait le ET pour chaque
+			//bit �a donne : b[i] ET b[i-1]
+			masqueDecale = ((*gridTab[posX + indicesDecalSub[k]])) << (1);
+			masqueDecale[0] = 1;
+			masque &= (masqueDecale);
+
+			}
+		    k++;
+		    }
+
+
+	    masque ^= (laTrame);
+	    masque &= (laTrame);
+
+	    iFront = laTrame.find_first();
+
+	    masque[iFront] = 1;
+
+	    while (iFront < longTrame)
 		{
-		//cout<< " k ="<<k<< " indices dcal="<<indicesDecalSub[k]<<endl;
+		iNext = laTrame.find_next(iFront);
+		while (iNext - iFront == 1 && iNext < longTrame)
+		    {
+		    iFront = iNext;
+		    iNext = laTrame.find_next(iFront);
+		    }
+		if (iNext < longTrame)
+		    {
+		    masque[iFront] = 1;
+		    masque[iNext] = 1;
+		    iFront = iNext;
+		    }
+		else
+		    {
+		    masque[iFront] = 1;
+		    iFront = iNext;
+		    }
+		}
+	    return (masque);
+	    }
+	}
+    }
+
+
+boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasque(unsigned long long int posX) const
+    {
+    int i = 0;
+    double x = limInf[0] + step[0];
+    unsigned long long int *indice = new unsigned long long int[dim - 1];
+    numToIntCoords_gen(posX, dim - 1, nbPointsSubGrid, indice);
+
+    boost::dynamic_bitset<> laTrame(longTrame);
+    unsigned long long int iFront;
+    unsigned long long int iNext;
+    boost::dynamic_bitset<> masqueDecale(longTrame);
+    boost::dynamic_bitset<> masque;
+
+    bool testBord = false;
+    i = 0;
+    while ((i < dim - 1) && !testBord)
+	{
+	testBord = testBord | ((indice[i] == nbPointsSubGrid[i] - 1) | (indice[i] == 0));
+	i++;
+	}
+    delete[] indice;
+
+    if (testBord)
+	{
+	return ((*gridTab[posX]));
+	}
+    else
+	{
+	laTrame = (*gridTab[posX]);
+	// on test si la trame n'est pas vide
+	if (laTrame.none())
+	    { // cout<<"trame vide "<<laTrame;
+	    return laTrame;
+	    }
+	else
+	    {
+	    int k = 0;
+	    while (indicesDecalSub[k] < 0 && (int) posX + indicesDecalSub[k] < 0 && (k < pow3Sub))
+		{
+
 		k++;
 		}
 	    if ((k < pow3Sub) & (posX + indicesDecalSub[k] < nbPointsTotalSubGrid))
 		{
+
 		masque = (*gridTab[posX + indicesDecalSub[k]]);
 
 		//on d�cale la trame de 1 bite  et on fait le ET pour chaque
@@ -834,10 +938,10 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasque(unsigned long long int p
 		masqueDecale[0] = 1;
 		masque &= (masqueDecale);
 
-		while (k < pow3Sub)
+                k++;
+		while (k < pow3Sub && posX + indicesDecalSub[k] < nbPointsTotalSubGrid)
 		    {
-		    if (indicesDecalSub[k] < 0 && posX >= ((unsigned long long int) -indicesDecalSub[k]))
-			{
+
 			masque &= (((*gridTab[posX + indicesDecalSub[k]])));
 
 			//on d�cale la trame de 1 bite  et on fait le ET pour chaque
@@ -851,7 +955,6 @@ boost::dynamic_bitset<> Grid_BitSet::analyseTrameMasque(unsigned long long int p
 			masqueDecale[0] = 1;
 			masque &= (masqueDecale);
 
-			}
 		    k++;
 		    }
 		}
@@ -1489,6 +1592,18 @@ bool Grid_BitSet::isInSet(const unsigned long long int *coords) const
     return (*gridTab[posX])[coords[dirTramage]];
     }
 
+bool Grid_BitSet::isValidSubShift(const unsigned long long int *coords, const long long int *shift) const
+{
+
+  bool result = true;
+  for (int i = 0; i < dim-1 && result; i++)
+  {
+    result &= ((int) coords[i] + shift[i] < (int)nbPointsSubGrid[i] && 0 <= (int) coords[i] + shift[i]);
+  }
+
+  return result;
+}
+
 int Grid_BitSet::getNumberOfViableNeighbors(unsigned long long int pos) const
     {
     int res = 0;
@@ -1542,7 +1657,7 @@ unsigned long long int Grid_BitSet::getNearestPointInSet(const double *coords) c
 void Grid_BitSet::computeSubGridShifts()
     {
 
-    //  cout<< " compute subgrid shifts \n";
+     cout<< " compute subgrid shifts \n";
 
     nbTotalCellsSub = 1;
     for (int i = 0; i < dim - 1; i++)
@@ -1578,7 +1693,7 @@ void Grid_BitSet::computeSubGridShifts()
 	indicesDecalCellSub[k] = numX;
 
 	}
-    /* cout<<" SUB grid: les decalages  dans le cube  sont ";
+    cout<<" SUB grid: les decalages  dans le cube  sont ";
      for(int ll=0;ll<nbPointsCubeSub;ll++)
      {
      for(int i=0;i<dim-1;i++)
@@ -1586,14 +1701,14 @@ void Grid_BitSet::computeSubGridShifts()
      cout<< " "<<lesDecalagesCellSub[ll][i];
 
      }
-     //  cout<< " numero correspondant " <<indicesDecalCellSub[ll]<<endl;
+       cout<< " numero correspondant " <<indicesDecalCellSub[ll]<<endl;
      }
      cout<<endl;
-     */
+
     ////system("pause");
     int tempInt;
     int *indiceTemp = new int[dim - 1];
-    // cout<< "  calcul des  voisins d'un point de grilles  \n";
+     cout<< "  calcul des  voisins d'un point de grilles  \n";
     for (int p = 0; p < pow3Sub; p++)
 	{
 	tempInt = p;
@@ -1601,26 +1716,40 @@ void Grid_BitSet::computeSubGridShifts()
 	    {
 
 	    indiceTemp[k] = tempInt % 3;
+	  neighborShiftsSub[p][k] = indiceTemp[k];
 	    tempInt = (tempInt - indiceTemp[k]) / 3;
 	    }
 	numX = indiceTemp[0];
 	for (int i = 0; i < dim - 2; i++)
 	    {
-	    numX = numX * nbPointsSubGrid[i + 1] + indiceTemp[i + 1];
+	    numX = numX * (int)nbPointsSubGrid[i + 1] + indiceTemp[i + 1];
 
 	    }
-	indicesDecalSub[p] = numX;
+      for(int i=0;i<dim-1;i++)
+      {
+        cout<< " "<< indiceTemp[i];
 
+      }
+	indicesDecalSub[p] = numX;
+cout<< " num = " << indicesDecalSub[p]<<endl;
 	}
     tempInt = indicesDecalSub[(pow3Sub - 1) / 2];
+  for (int d = 0; d < dim-1; d++)
+  {
+    indiceTemp[d] = neighborShiftsSub[(pow3Sub - 1) / 2][d];
+  }
     for (int p = 0; p < pow3Sub; p++)
 	{
 
 	indicesDecalSub[p] -= tempInt;
-	// cout<<" "<<indicesDecalSub[p]<<" ";
+      for (int d = 0; d < dim-1; d++)
+      {
+        neighborShiftsSub[p][d] -= indiceTemp[d];
+      }
+	 cout<<" "<<indicesDecalSub[p]<<" ";
 
 	}
-    // cout<< "\n fini le voisinage  entier il reste les axes\n";
+     cout<< "\n fini le voisinage  entier il reste les axes\n";
 
     int Pow2 = 1;
     for (int k = 0; k < dim - 1; k++)

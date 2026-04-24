@@ -45,8 +45,8 @@
         ],
         "STATE_DIMENSION": 2,
         "STATE_GRID_POINTS": [
-            4001,
-            4001
+            2001,
+            2001
         ],
         "STATE_MAX_VALUES": [
             2,

@@ -50,7 +50,7 @@
 		{
 		  "STATE_DIMENSION": 1, 
           "STATE_GRID_POINTS": [ 
-              1   
+              2   
           ],
           "SLICE_DIRECTIONS": [
               1
@@ -62,11 +62,11 @@
 		"HYBRID_CONTINUOUS_SUBGRID":
 		{
           "STATE_DIMENSION": 2, 
-          "GRID_MAIN_DIR": 1,
+          "GRID_MAIN_DIR": 0,
         		  
           "STATE_GRID_POINTS": [    
-              401,   
-              401    
+              2001,   
+              2001    
           ],
           "STATE_MAX_VALUES": [    
               1.0, 
@@ -100,10 +100,11 @@
     },
     "SYSTEM_PARAMETERS": {   
         "DYNAMICS_TYPE": "CH",
-		"DYN_BOUND": 2.0,
+		"DYN_BOUND": 1.0,
         "LIPSCHITZ_CONSTANT": 2,
-        "DYN_BOUND_COMPUTE_METHOD": "ANALYTICAL",
-        "LIPSCHITZ_CONSTANT_COMPUTE_METHOD": "ANALYTICAL",
+        "DYN_BOUND_COMPUTE_METHOD": "ANALYTICAL_CALC",
+        "LIPSCHITZ_CONSTANT_COMPUTE_METHOD": "ANALYTICAL_CALC",
+		"TIME_STEP_FACTOR": 1.8,
         "TIME_DISCRETIZATION_SCHEME": "RK2",
         "TIME_HORIZON": 20
     },
@@ -117,12 +118,12 @@
         "RESET_PARAM": 0.5,
         "RESET_ALPHA1_PARAM": 0.0,
 		"RESET_ALPHA2_PARAM": -0.0,
-		"RESET_BETA1_PARAM": 0.5,
+		"RESET_BETA1_PARAM": 0.95,
 		"RESET_BETA2_PARAM": 1.0,
 		"RESET_NBLINES": 1,
         "EPS_PARAM": 0.25,
         "TOL_PARAM": 0.005,
 		"CONSTR_PARAM": 1.0,
-		"WITH_RESET_PARAM" : false
+		"WITH_RESET_PARAM" : true
     }
 }

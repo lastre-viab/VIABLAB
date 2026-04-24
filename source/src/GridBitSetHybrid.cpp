@@ -23,10 +23,276 @@ GridBitSetHybrid::GridBitSetHybrid(const gridParams &gp) :
 	maxStep = max(maxStep, step[i]);
 	}
     nbCellPointsContinuousState = pow(2, dim_hc);
+  pow3Sub_c = 1;
+  for (int p = 0; p < dim_hc - 1; p++)
+  {
+    pow3Sub_c *= 3;
+  }
+  indicesDecalSub_c = new long long int[pow3Sub_c];
+  int indiceShiftSub = 0;
+  unsigned long long int indiceTemp[dim - 1];
+  //logVector("[GridBitSetHybrid] : indicesDecalSub ", indicesDecalSub, getPow3Sub());
+  unsigned long long int shift = indicesDecalSub[(int) getPow3Sub() - 1];
+  //spdlog::debug(" shift {}, pow3sub_c = {}, ",shift, pow3Sub_c);
+  for (int k = 0; k < (int) getPow3Sub(); k++)
+  {
+    numToIntCoords_gen(indicesDecalSub[k] + shift, dim - 1, nbPointsSubGrid, indiceTemp);
+    //logVector("[GridBitSetHybrid] : indiceTemp ", indiceTemp, dim - 1);
+    bool zeroTest = true;
+    for (int i = 0; i < dim_hd; i++) {
+      zeroTest &= indiceTemp[dim_hc -1 + i] == 0;
+    }
+    if (zeroTest) {
+      //spdlog::debug(" k {}, indicesDecalSub= {}, ",k, indicesDecalSub[k]);
+
+      indicesDecalSub_c[indiceShiftSub] = indicesDecalSub[k];
+      indiceShiftSub++;
+    }
+
+  }
     continuousStateShifts = new unsigned long long int[nbCellPointsContinuousState];
-    for (int k = 0; k < (int) nbCellPointsContinuousState; k++)
+    int indiceShift = 0;
+	for (int k = 0; k < (int) nbPointsCube; k++)
 	{
-	continuousStateShifts[k] = indicesDecalCell[k];
+		bool zeroTest = true;
+		for (int i = 0; i < dim_hd; i++) {
+			zeroTest &= lesDecalagesCell[k][dim_hc + i] == 0;
+		}
+		if (zeroTest) {
+			continuousStateShifts[indiceShift] = indicesDecalCell[k];
+			indiceShift++;
+		}
+
+	}
+    }
+
+bool GridBitSetHybrid::isValidSubShift(const unsigned long long int *coords, const long long int *shift) const
+{
+
+  bool result = true;
+  for (int i = 0; i < dim-1 && result; i++)
+  {
+    result &= ((int) coords[i] + shift[i] < (int)nbPointsSubGrid[i] && 0 <= (int) coords[i] + shift[i]);
+    if ( i >= dim_hc - 1)
+    {
+      result &=  shift[i]  == 0;
+    }
+  }
+
+  return result;
+}
+
+
+boost::dynamic_bitset<> GridBitSetHybrid::analyseTrameMasqueWithVectorShifts(unsigned long long int posX) const
+    {
+    int i = 0;
+    double x = limInf[0] + step[0];
+    unsigned long long int *indice = new unsigned long long int[dim - 1];
+    numToIntCoords_gen(posX, dim - 1, nbPointsSubGrid, indice);
+
+    boost::dynamic_bitset<> laTrame(longTrame);
+    unsigned long long int iFront;
+    unsigned long long int iNext;
+    boost::dynamic_bitset<> masqueDecale(longTrame);
+    boost::dynamic_bitset<> masque(longTrame);
+
+    bool testBord = false;
+    i = 0;
+    while ((i < dim_hc - 1) && !testBord)
+	{
+	testBord = testBord | ((indice[i] == nbPointsSubGrid[i] - 1) | (indice[i] == 0));
+	i++;
+	}
+
+    if (testBord)
+	{
+	return ((*gridTab[posX]));
+	}
+    else
+	{
+	laTrame = (*gridTab[posX]);
+	// on test si la trame n'est pas vide
+	if (laTrame.none())
+	    {
+	    return laTrame;
+	    }
+	else
+	    {
+	    int k = 0;
+	  bool toInit = true;
+
+		while (k < getPow3Sub())
+		    {
+		    if (isValidSubShift(indice, neighborShiftsSub[k]))
+			{
+		      if (toInit)
+		      {
+		        masque = (((*gridTab[posX + indicesDecalSub[k]])));
+		        toInit = false;
+		      }
+			else
+			{
+			  masque &= (((*gridTab[posX + indicesDecalSub[k]])));
+			}
+			//on d�cale la trame de 1 bit et on fait le ET pour chaque
+			//bit �a donne : b[i] ET b[i+1]
+			masqueDecale = ((*gridTab[posX + indicesDecalSub[k]])) >> (1);
+			masqueDecale[longTrame - 1] = 1;
+			masque &= (masqueDecale);
+			//on d�cale la trame de 1 bite  et on fait le ET pour chaque
+			//bit �a donne : b[i] ET b[i-1]
+			masqueDecale = ((*gridTab[posX + indicesDecalSub[k]])) << (1);
+			masqueDecale[0] = 1;
+			masque &= (masqueDecale);
+			}
+		    k++;
+		    }
+
+
+	    masque ^= (laTrame);
+	    masque &= (laTrame);
+
+	    iFront = laTrame.find_first();
+	    masque[iFront] = 1;
+
+	    while (iFront < longTrame)
+		{
+		iNext = laTrame.find_next(iFront);
+		while (iNext - iFront == 1 && iNext < longTrame)
+		    {
+		    iFront = iNext;
+		    iNext = laTrame.find_next(iFront);
+		    }
+		if (iNext < longTrame)
+		    {
+		    masque[iFront] = 1;
+		    masque[iNext] = 1;
+		    iFront = iNext;
+		    }
+		else
+		    {
+		    masque[iFront] = 1;
+		    iFront = iNext;
+		    }
+		}
+	    return (masque);
+	    }
+	}
+    }
+
+
+boost::dynamic_bitset<> GridBitSetHybrid::analyseTrameMasque(unsigned long long int posX) const
+    {
+    int i = 0;
+    double x = limInf[0] + step[0];
+    unsigned long long int *indice = new unsigned long long int[dim - 1];
+    numToIntCoords_gen(posX, dim - 1, nbPointsSubGrid, indice);
+    boost::dynamic_bitset<> laTrame(longTrame);
+    unsigned long long int iFront;
+    unsigned long long int iNext;
+    boost::dynamic_bitset<> masqueDecale(longTrame);
+    boost::dynamic_bitset<> masque;
+    //deuxi�me  test : si la trame n'est pas sur la fornti�re de l'espace
+
+    //cout<<"\n";
+    bool testBord = false;
+    i = 0;
+    while ((i < dim - 1) && !testBord)
+	{
+	testBord = testBord | ((indice[i] == nbPointsSubGrid[i] - 1) | (indice[i] == 0));
+	i++;
+	}
+    delete[] indice;
+
+    if (testBord)
+	{
+	return ((*gridTab[posX]));
+	}
+    else
+	{
+	laTrame = (*gridTab[posX]);
+	// on test si la trame n'est pas vide
+	if (laTrame.none())
+	    { // cout<<"trame vide "<<laTrame;
+	    return laTrame;
+	    }
+	else
+	    {
+	    int k = 0;
+	    while ((indicesDecalSub_c[k] < 0 && posX < ((unsigned long long int) -indicesDecalSub_c[k])) && (k < pow3Sub_c))
+		{
+		//cout<< " k ="<<k<< " indices dcal="<<indicesDecalSub[k]<<endl;
+		k++;
+		}
+	    if ((k < pow3Sub_c) & (posX + indicesDecalSub_c[k] < nbPointsTotalSubGrid))
+		{
+		masque = (*gridTab[posX + indicesDecalSub_c[k]]);
+
+		//on d�cale la trame de 1 bite  et on fait le ET pour chaque
+		//bit �a donne : b[i] ET b[i+1]
+		masqueDecale = ((*gridTab[posX + indicesDecalSub_c[k]])) >> (1);
+
+		masqueDecale[longTrame - 1] = 1;
+		masque &= (masqueDecale);
+
+		//on d�cale la trame de 1 bite  et on fait le ET pour chaque
+		//bit �a donne : b[i] ET b[i-1]
+		masqueDecale = ((*gridTab[posX + indicesDecalSub_c[k]])) << (1);
+
+		masqueDecale[0] = 1;
+		masque &= (masqueDecale);
+
+		while (k < pow3Sub_c)
+		    {
+		    if (indicesDecalSub_c[k] < 0 && posX >= ((unsigned long long int) -indicesDecalSub_c[k]))
+			{
+			masque &= (((*gridTab[posX + indicesDecalSub_c[k]])));
+
+			//on d�cale la trame de 1 bite  et on fait le ET pour chaque
+			//bit �a donne : b[i] ET b[i+1]
+			masqueDecale = ((*gridTab[posX + indicesDecalSub_c[k]])) >> (1);
+			masqueDecale[longTrame - 1] = 1;
+			masque &= (masqueDecale);
+			//on d�cale la trame de 1 bite  et on fait le ET pour chaque
+			//bit �a donne : b[i] ET b[i-1]
+			masqueDecale = ((*gridTab[posX + indicesDecalSub_c[k]])) << (1);
+			masqueDecale[0] = 1;
+			masque &= (masqueDecale);
+
+			}
+		    k++;
+		    }
+		}
+
+	    masque ^= (laTrame);
+	    masque &= (laTrame);
+
+	    iFront = laTrame.find_first();
+
+	    masque[iFront] = 1;
+
+	    while (iFront < longTrame)
+		{
+		iNext = laTrame.find_next(iFront);
+		while (iNext - iFront == 1 && iNext < longTrame)
+		    {
+		    iFront = iNext;
+		    iNext = laTrame.find_next(iFront);
+		    }
+		if (iNext < longTrame)
+		    {
+		    masque[iFront] = 1;
+		    masque[iNext] = 1;
+		    iFront = iNext;
+		    }
+		else
+		    {
+		    masque[iFront] = 1;
+		    iFront = iNext;
+		    }
+		}
+	    return (masque);
+	    }
 	}
     }
 

@@ -18,7 +18,7 @@
         "SAVE_SLICE": 0,
         "SAVE_SLICE_BOUND": 0,
         "SAVE_SUBLEVEL": 0,
-        "SAVE_VIABSET_LIGHT": 0,
+        "SAVE_VIABSET_LIGHT": 1,
         "SET_TYPE": 1,
         "TARGET_OR_DEPARTURE": 1,
         "TRAJECTORY_TYPE": 1
@@ -26,7 +26,7 @@
     "CONTROL_PARAMETERS": {
         "CONTROL_DIMENSION": 1,
         "CONTROL_GRID_POINTS": [
-            100
+            101
         ],
         "CONTROL_MAX_VALUES": [
             1
@@ -57,8 +57,8 @@
         ],
         "STATE_DIMENSION": 2,
         "STATE_GRID_POINTS": [
-            200,
-            200
+            401,
+            401
         ],
         "STATE_MAX_VALUES": [
             1,
@@ -77,14 +77,15 @@
             0
         ]
     },
-    "SYSTEM_PARAMETERS": {
-        "DYNAMICS_TYPE": 1,
-        "DYN_BOUND": 1,
-        "DYN_BOUND_COMPUTE_METHOD": 2,
-        "IS_TIMESTEP_GLOBAL": 0,
-        "LIPSCHITZ_CONSTANT": 1,
-        "LIPSCHITZ_CONSTANT_COMPUTE_METHOD": 2,
-        "TIME_DISCRETIZATION_SCHEME": "RK4",
-        "TIME_HORIZON": 1
+ "SYSTEM_PARAMETERS": {   
+        "DYNAMICS_TYPE": "CC",
+		"DYN_BOUND": 1.0,
+        "LIPSCHITZ_CONSTANT": 1.0,
+        "DYN_BOUND_COMPUTE_METHOD": "ANALYTICAL",
+        "LIPSCHITZ_CONSTANT_COMPUTE_METHOD": "ANALYTICAL",
+		"TIME_STEP_FACTOR": 1.0,
+        "TIME_DISCRETIZATION_SCHEME": "RK2",
+		"USE_IMPLICIT_SCHEME" : false,
+        "TIME_HORIZON": 20
     }
-}
+    }

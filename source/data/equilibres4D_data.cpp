@@ -46,7 +46,7 @@
 
 extern "C" {
 
-std::string paramsFile = "equilibres4D_data";
+std::string paramsFile = "Equilibres4D_params.json";
     
 /*
  * Definition of the dynamics  and associated functions and constants

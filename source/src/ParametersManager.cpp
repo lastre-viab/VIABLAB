@@ -351,7 +351,7 @@ void ParametersManager::readSystemParametersFromJson(ptree &allParamsRoot)
 	    {
 	    systemParameters->L_LIP = dataRoot.get<double>("TIME_HORIZON", 10.0);
 	    }
-	systemParameters->L_MF = dataRoot.get<double>("COST_BOUND_CONSTANT", 1.0);
+	systemParameters->L_MF = dataRoot.get<double>("COST_BOUND_CONSTANT", 0.0);
 	}
 
     spdlog::debug("[ParametrManager] : Cost function bound {}, Cost function Lipschitz contant {}", systemParameters->L_MF, systemParameters->L_LIP);

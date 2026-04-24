@@ -177,7 +177,7 @@ double ViabiMicroMacroTrajectoryHelper::computeOptimalTrajectory(double *initPos
 
 		    rho = dynsys->calculRho_local(doubleCoordsOnDiscreteTraj);
 
-		    rho = min(rho, T - time);
+		   // rho = min(rho, T - time);
 		    realTimeStep = rho;
 
 		    optimSuccessor = this->findOptimalDiscreteSuccessor(currentDiscreteTrajPos, time, rho);

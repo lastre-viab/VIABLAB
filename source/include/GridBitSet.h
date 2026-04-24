@@ -39,6 +39,7 @@ public:
     void addPointToSet(unsigned long long int pos, double value);
     int getNumberOfViableNeighbors(unsigned long long int pos) const;
     virtual bool isInSet(const unsigned long long int *coords) const;
+  virtual bool isValidSubShift(const unsigned long long int *coords, const long long int *shift) const;
     virtual unsigned long long int getNearestPointInSet(const double *coords) const;
 
     void findNearestViabPointInCell(const double *startPoint, const double *currentPoint,
@@ -47,8 +48,9 @@ public:
     virtual void saveValOnGrid(const string &fileName) const;
     virtual void saveValOnGridLight(const string &fileName) const;
 
-    boost::dynamic_bitset<> analyseTrameMasque(unsigned long long int posX) const;
-    unsigned long long int getDirTram() const;
+    virtual boost::dynamic_bitset<> analyseTrameMasque(unsigned long long int posX) const;
+   virtual boost::dynamic_bitset<> analyseTrameMasqueWithVectorShifts(unsigned long long int posX) const;
+  unsigned long long int getDirTram() const;
     unsigned long long int getLongTrame() const;
     boost::dynamic_bitset<>**getGridTab();
     boost::dynamic_bitset<>**getGridTabNew();
@@ -92,13 +94,19 @@ public:
      *   (i_0,i_1,...i_{d-1}) \mapsto i_0+i_1*n_0+i_2*n_1*n_0+\dots +i_{d_1}\prod_{j=0}^{d-2}n_j
      *   \f]
      */
-
+ bool UseSubGridVectorShifts;
 protected :
     unsigned long long int intCoordsToNum_dm1(const unsigned long long int *coords) const;
+    [[nodiscard]] int getPow3Sub() const
+	{
+	return pow3Sub;
+	}
     int dirTramage;
     boost::dynamic_bitset<> **gridTab;
     boost::dynamic_bitset<> **gridTabNew;
     unsigned long long int *nbPointsSubGrid;
+  long long int *indicesDecalSub;
+  long long int ** neighborShiftsSub;
 
     unsigned long long int longTrame;
     unsigned long long int nbPointsTotalSubGrid;
@@ -111,7 +119,7 @@ private:
 
     int nbPointsCubeSub;
     int pow3Sub;
-    long long int *indicesDecalSub;
+
     long long int *indicesDecalCellSub;
 
     unsigned long long int *indicesDecalAxesSub;

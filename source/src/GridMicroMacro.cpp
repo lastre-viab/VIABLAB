@@ -169,7 +169,11 @@ GridMicroMacro::GridMicroMacro(const gridParams &gp)
 	pow3 *= 3;
 	}
     indicesDecal = new long long int[pow3];
-
+  neighborShifts = new  long long int *[pow3];
+  for (int k = 0; k < pow3; k++)
+  {
+    neighborShifts[k] = new  long long int[dim];
+  }
     lesDecalagesAxes = new unsigned long long int*[dim];
     indicesDecalAxes = new unsigned long long int[dim];
     for (int k = 0; k < dim; k++)

@@ -211,12 +211,7 @@ double HybridSysDyn::calculRho_local_hybrid(const double* xc, const unsigned lon
     double h = hybridGrid->maxStep;
     double LL = calculLHybridFunc ? calculLHybridFunc(xc, xd) : returnL_local_ana_hybrid(xc, xd);
     double MFF = calculMHybridFunc ? calculMHybridFunc(xc, xd) : returnMF_local_ana_hybrid(xc, xd);
-    if (MFF * LL < 2.0 * h)
-    {
-        MFF = 1.0;
-        LL = 1.0;
-    }
-    return sqrt((2.0 * h) / (LL * MFF));
+    return timeStepFactor * sqrt((h) / max(h *h, LL * MFF));
 }
 
 void HybridSysDyn::FDiscret_hybrid(const double* xc, const unsigned long long int* xd, const double* uc,

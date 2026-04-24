@@ -41,6 +41,8 @@ class Grid
 
 protected:
     Grid();
+
+    long long int ** neighborShifts;
 public:
 
     int dim; /*!<\brief Dimension  	 */

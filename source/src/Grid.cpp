@@ -214,7 +214,8 @@ void Grid::computeGridShifts()
 	indicesDecalCell[k] = numX;
 
 	}
-    /* cout<< " nbPointsCube = "<<nbPointsCube<< " dim = "<<dim<<endl;
+
+     /*cout<< " nbPointsCube = "<<nbPointsCube<< " dim = "<<dim<<endl;
      cout<<" grid: les decalages  dans le cube  sont ";
      for(int ll=0;ll<nbPointsCube;ll++)
      {
@@ -225,8 +226,8 @@ void Grid::computeGridShifts()
      }
      cout<< " numero correspondant " <<indicesDecalCell[ll]<<endl;
      }
-     cout<<endl;*/
-
+     cout<<endl;
+*/
     ////system("pause");
     int tempInt;
     int *indiceTemp = new int[dim];
@@ -238,6 +239,7 @@ void Grid::computeGridShifts()
 	    {
 
 	    indiceTemp[k] = tempInt % 3;
+	  neighborShifts[p][k] = indiceTemp[k];
 	    tempInt = (tempInt - indiceTemp[k]) / 3;
 	    }
 	numX = indiceTemp[0];
@@ -250,10 +252,18 @@ void Grid::computeGridShifts()
 
 	}
     tempInt = indicesDecal[(pow3 - 1) / 2];
+  for (int d = 0; d < dim; d++)
+  {
+    indiceTemp[d] = neighborShifts[(pow3 - 1) / 2][d];
+  }
     for (int p = 0; p < pow3; p++)
 	{
 
 	indicesDecal[p] -= tempInt;
+      for (int d = 0; d < dim; d++)
+      {
+         neighborShifts[p][d] -= indiceTemp[d];
+      }
 	//   cout<<" "<<indicesDecal[p]<<" ";
 
 	}

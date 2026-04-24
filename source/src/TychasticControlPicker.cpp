@@ -9,8 +9,9 @@
 
 TychasticControlPicker::TychasticControlPicker(ViabiTrajectoryHelper *vth,
 		TrajectoryParametersManager *tpm, indexSorter_t *sorterPtr) :
-		strategies { }, trajectoryHelper(vth), tp(
-				*tpm->getTrajectoryParameters()) {
+trajectoryHelper(vth),
+strategies { }, tp(*tpm->getTrajectoryParameters())
+{
 	trajIndex = tpm->getTrajectoryIndex();
 	tycheIndex = 0;
 	sysDyn = vth->GetDynSys();

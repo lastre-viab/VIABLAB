@@ -62,6 +62,10 @@ public:
     bool findViabImagePoint(double *currentPos, bool print);
     bool findGuarantedViabImagePoint(double *xCoordsDouble, bool print);
     bool findViabImagePoint_noControl(double *xCoordsDouble, bool print);
+    bool searchViableControl(double *xCoordsDouble, double **controlCoords,
+        unsigned long long int nbCTotal, double rho, double hMax,
+        const long long int *indicesDecalCell, int nbPointsCube,
+        unsigned long long int *testI, double *testV);
     void initialiseTargetPointList();
 
 private:

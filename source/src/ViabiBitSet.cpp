@@ -361,10 +361,78 @@ void ViabiBitSet::noyauViabi_FD(int nbArret)
     cout << "fini nbIter=" << nbIter;
     }
 
+bool ViabiBitSet::searchViableControl(double *xCoordsDouble,
+    double **controlCoords,
+    unsigned long long int nbCTotal,
+    double rho,
+    double hMax,
+    const long long int *indicesDecalCell,
+    int nbPointsCube,
+    unsigned long long int *testI,
+    double *testV)
+    {
+    bool testNonVide = false;
+    double doubleVect1[dim];
+    int cellNum, posTemp;
+    unsigned long long int cu = 0;
+    int stepCu = 1;
+
+    while ((cu < nbCTotal) && !testNonVide)
+	{
+	/*
+	 * on ne choisit que ceux qui vérifies les éventuelles contraintes mixtes
+	 * au point en cours
+	 */
+	if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
+	    {
+	    /*
+	     * calcul du successeur du point en cours
+	     */
+	    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[cu], doubleVect1, rho);
+	    if (grid->isPointInGrid(doubleVect1))
+		{
+		/*
+		 *  le successeur est dans la grille de calcul
+		 */
+		if (dynsys->constraintsX(doubleVect1) < PLUS_INF)
+		    {
+		    /*
+		     * le successeur vérifie les contraintes
+		     * On identifie la maille où il se trouve
+		     */
+		    cellNum = grid->localizePoint(doubleVect1);
+		    /*
+		     * On parcourt les sommets de la maille
+		     * autour du successeur pour voir s'il y a des
+		     * points viables
+		     */
+		    int ii = 0;
+		    while (ii < nbPointsCube && !testNonVide)
+			{
+			posTemp = cellNum + indicesDecalCell[ii];
+			grid->numToIntAndDoubleCoords(posTemp, testI, testV);
+
+			if (dynsys->dynConstraintsForTraj(xCoordsDouble, testV) < PLUS_INF)
+			    {
+				testNonVide = grid->isInSet(testI);
+			    }
+			ii++;
+			}
+		    }
+		}
+	    else
+		{
+		testNonVide = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1) && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
+		}
+	    }
+	cu += stepCu;
+	}			//fin de parcours de tous les contrôles
+
+    return testNonVide;
+    }
+
 bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print)
     {
-
-    //cout<< " findImage no control debut"<<endl;
     print = false;
     int nbPointsCube = (int) pow(2.0, dim);		//pow(2.0, dim);
     /*
@@ -388,13 +456,6 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print
      * du sommet inf
      */
     const long long int *indicesDecalCell = grid->getIndicesDecalCell();
-    /*
-     * coordonnées du points corent de la trajectoire
-     */
-
-    /*
-     * numéros de mailles
-     */
     int cellNum, posTemp;
 
     double rho = dynsys->calculRho_local(xCoordsDouble);
@@ -413,73 +474,9 @@ bool ViabiBitSet::findViabImagePoint_noControl(double *xCoordsDouble, bool print
      */
 
     int stepCu = 1;
-
-    //cout<< " parcours controles debut = "<<cu<< " step= "<<stepCu<< " nb controls total "<<nbCTotal<<endl;
-    while ((cu < nbCTotal) && !testNonVide)
-	{
-	/*
-	 * on ne choisit que ceux qui vérifies les éventuelles contrainets mixtes
-	 * au point en cours
-	 */
-	if (dynsys->constraintsXU(xCoordsDouble, controlCoords[cu]) < PLUS_INF)
-	    {
-	    //cout<< " constr XU OK rho = "<<rho<<endl;
-	    //cout<< " xCoords "; printVector(xCoordsDouble, dim);
-	    /*
-	     * calcul du successeur  du point en cours
-	     */
-	    (dynsys->*(dynsys->discretDynamics))(xCoordsDouble, controlCoords[cu], doubleVect1, rho);
-	    //cout<< "image "; printVector(doubleVect1, dim);
-
-	    if (grid->isPointInGrid(doubleVect1))
-		{
-		/*
-		 *  le sucesseur est dans la grille de calcul
-		 */
-		if (dynsys->constraintsX(doubleVect1) < PLUS_INF)
-		    {
-
-		    /*
-		     * le successeur vérifie les contraintes
-		     * On identifie la maille où il se trouve
-		     */
-		    cellNum = grid->localizePoint(doubleVect1);
-
-		    /*
-		     * On parcours les sommets de la maille
-		     * autour du sucesseur pour voir s'il y a des
-		     * points viables
-		     */
-		    int ii = 0;
-		    while (ii < nbPointsCube && !testNonVide)
-			{
-			posTemp = cellNum + indicesDecalCell[ii];
-			grid->numToIntAndDoubleCoords(posTemp, testI, testV);
-			if (dynsys->dynConstraintsForTraj(xCoordsDouble, testV) < PLUS_INF)
-			    {
-			    double dist = 0.0;
-			    for (int k = 0; k < dim; k++)
-				{
-				dist = max(dist, abs(testV[k] - doubleVect1[k]));
-				}
-			    testNonVide = grid->isInSet(testI) && (dist < hMax / 2.0);
-
-			    }
-			ii++;
-			}
-		    }
-		}
-	    else
-		{
-		//cout<< " sortie du domaine : autorisation : "<<grid->unboundedDomain<< "point "<< doubleVect1[0]<<" "<<doubleVect1[1]<<endl;
-		testNonVide = grid->unboundedDomain && grid->isPointInGridWithConstr(doubleVect1) && (dynsys->constraintsX(doubleVect1) < PLUS_INF);
-		}
-	    }
-	cu += stepCu;
-	}			//fin de parcours de tous les contrôles
+  testNonVide = searchViableControl(xCoordsDouble, controlCoords, nbCTotal, rho, hMax, indicesDecalCell, nbPointsCube, testI, testV);
 
     return testNonVide;
-
     }
 
 bool ViabiBitSet::findViabImagePoint(double *xCoordsDouble, bool print)
@@ -1537,8 +1534,6 @@ void ViabiBitSet::noyauViabi_sansControle(int nbArret)
     const unsigned long long int *nbPointsSub = grid->getNbPointsSubGrid();
 
     bool testF;
-
-    //    cout<<"masque points enleves cree"<<masquePointsEnleves;
     unsigned long long int longTrame = grid->getLongTrame();
     boost::dynamic_bitset<> masque;
     boost::dynamic_bitset<> *masquePointsEnleves = new boost::dynamic_bitset<>(longTrame, 0);
@@ -1571,24 +1566,17 @@ void ViabiBitSet::noyauViabi_sansControle(int nbArret)
 	comptEnleves = 0;
 	comptEtats = 0;
 
-    	start = forward ? 0 : subGridSize - 1;
-    	end = forward ? subGridSize : -1;
+    	start = 0;//forward ? 0 : subGridSize - 1;
+    	end = subGridSize;//forward ? subGridSize : -1;
     	dir = forward ? 1 : -1;
-	for (unsigned long long int posX = start; posX != end; posX+=dir)
+	for (unsigned long long int posX = start; posX != end; posX++)
 	    {
-	    //cout<< " posX="<<posX<<endl;
-	//	cout<<  "Set " <<(*gridTab[posX])<< " ";
 	    if (!gridTab[posX]->none())
 		{
 		comptEtats++;
 		testF = false;
 		numToIntCoords_gen(posX, dim - 1, nbPointsSub, indice);
-
-
-
-		masque = grid->analyseTrameMasqueBis(posX, 0);
-
-		//	cout<<" masque "<<masque<< " ";
+		masque = grid->analyseTrameMasque(posX);
 
 		masquePointsEnleves->set();
 
@@ -1607,14 +1595,12 @@ void ViabiBitSet::noyauViabi_sansControle(int nbArret)
 			{
 			xCoordsDouble[j] = limInf[j] + indice[j - 1] * gridStep[j];
 			}
-		    ///cout<< " Analyse en cours "<<endl;
 		    for (unsigned long long int k = 0; k < longTrame; k++)
 			{
 			if (masque[k])
 			    {
 			    xCoordsDouble[dirTramage] = limInf[dirTramage] + k * gridStep[dirTramage];
 			    testNonVide = this->findViabImagePoint_noControl(xCoordsDouble, false);
-			    //cout<<" "<<testNonVide;
 			    if (!testNonVide)
 				{
 				masquePointsEnleves->set(k, false);
@@ -1622,17 +1608,11 @@ void ViabiBitSet::noyauViabi_sansControle(int nbArret)
 				}
 			    }	// fin de if masque[k]
 			}	// fin de for  de parcours de masque
-		    //cout<< " fini"<<endl;
-		 //   cout<< " delete "<<*masquePointsEnleves<<" ";
 		    if (masquePointsEnleves->count() < (unsigned long long int) longTrame)
 			{
-
 			*gridTab[posX] &= (*masquePointsEnleves);
-
 			}
-
 		    }
-	    //	cout<<  " Final Set " <<(*gridTab[posX])<<endl;
 		}			//fin de if la trame n'est pas vide
 		else
 		{
@@ -1643,10 +1623,11 @@ void ViabiBitSet::noyauViabi_sansControle(int nbArret)
 	    }				// fin de for de parcours de la trame
 //forward = !forward;
     cout << "End of iteration " << nbIter << " Number of points removed: " << comptEnleves << "\n";
-
+      spdlog::debug("Iteration {} finie nb points enleves {}", nbIter, comptEnleves);
 	nbIter++;
 
 	}
+
     cout << "fini nbIter=" << nbIter;
     //foncCarNoyau->printTrame();
 

@@ -10,7 +10,7 @@
 	"GRID_MAIN_DIR" : 2,
 	"STATE_MIN_VALUES" :[ -1.0, -1.0, -2.0, -0.01],	
     "STATE_MAX_VALUES" :[ 1.0, 1.0, 2.0, 0.01],
-    "STATE_GRID_POINTS" :[ 201, 201, 201, 5]
+    "STATE_GRID_POINTS" :[ 21, 21, 2, 2]
 },
 "SYSTEM_PARAMETERS" : 
 {

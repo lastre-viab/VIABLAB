@@ -4,7 +4,7 @@
         "COMPUTE_VIABLE_SET": true,
 		"GRID_REFINMENTS_NUMBER": 0,
         "INTERMEDIATE_SAVINGS": false,
-        "ITERATION_STOP_LEVEL": 100,
+        "ITERATION_STOP_LEVEL": 0,
         "LEVEL": 0,
         "PROJECTION_AXIS": [    
             1,
@@ -30,8 +30,8 @@
           "STATE_DIMENSION": 2, 
           "GRID_MAIN_DIR": 0,
           "STATE_GRID_POINTS": [    
-              4001,   
-              4001    
+              2001,   
+              2001    
           ],
           "STATE_MAX_VALUES": [    
               1.0, 
@@ -64,10 +64,9 @@
     },
     "SYSTEM_PARAMETERS": {   
         "DYNAMICS_TYPE": "CC",
-		"DYN_BOUND": 0.01,
 		"DYN_BOUND": 0.5,
-        "LIPSCHITZ_CONSTANT": 0.005,
-        "DYN_BOUND_COMPUTE_METHOD": "ANALYTICAL",
+        "LIPSCHITZ_CONSTANT": 0.1,
+        "DYN_BOUND_COMPUTE_METHOD": "ANALYTICAL_CALC",
         "LIPSCHITZ_CONSTANT_COMPUTE_METHOD": "ANALYTICAL_CALC",
 		"TIME_STEP_FACTOR": 1.5,
         "TIME_DISCRETIZATION_SCHEME": "RK2",
@@ -81,7 +80,7 @@
     }],
     "MODEL_PARAMETERS": {
         "CIRCLE_PARAM": 0.7,
-        "EPS_PARAM": 0.2,
+        "EPS_PARAM": 0.1,
         "TOL_PARAM": 0.005,
 		"CONSTR_PARAM": 1.0
     }

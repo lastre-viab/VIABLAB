@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
 project( viabLab )
-#To build ViabLab as a library, set the variable BUILD_LIB to ON
-option(BUILD_LIB "Builds ViabLab as static Library" OFF)   
 	
 IF(CMAKE_SYSTEM_NAME STREQUAL Darwin) # The target system is MAC OS
   set(CMAKE_C_COMPILER   gcc)
@@ -54,13 +52,7 @@ file(GLOB_RECURSE Viab_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLI
 file(GLOB MODEL_FILES "data/*.cpp")
 
 
-if(BUILD_LIB)
-    message("Building ViabLab as library  ")
-    ADD_LIBRARY(viabLabLib STATIC ${Viab_SOURCES} ${Viab_HEADERS})  # creation de la librairie  
-	
-else()
     message("Building ViabLab as executable ")
-	option(VIABLAB_LIBRARY_STATIC "Compile foo_library as static library" OFF)
 	ADD_EXECUTABLE(${PROJECT_NAME}  ${Viab_SOURCES} ${Viab_HEADERS})  # Executable creation
     set_target_properties(${PROJECT_NAME} PROPERTIES ENABLE_EXPORTS 1)
     # Link all shared libraries to the executable
@@ -68,14 +60,6 @@ else()
     target_link_libraries(${PROJECT_NAME} dl spdlog::spdlog_header_only)
     #target_link_libraries(${PROJECT_NAME} PRIVATE dl spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE VIABLAB_LIBRARY_BUILD)
-
-    if(WIN32)
-        #Invoke ar to generate a .dll.a from the .obj files, required to link the executable
-        add_custom_command(TARGET ${PROJECT_NAME} PRE_LINK
-            COMMAND sh -c "${CMAKE_AR} cr lib${PROJECT_NAME}.dll.a $$(find . -name '*.obj')"
-            COMMENT "Generating lib${PROJECT_NAME}.dll.a for external linking")
-    endif(WIN32)
-
 
     # Create a shared library for each CPP file
     foreach(MODEL_FILE ${MODEL_FILES})
@@ -88,6 +72,3 @@ else()
         target_link_libraries(${LIB_NAME} ${PROJECT_NAME})
     endforeach()
     
-endif(BUILD_LIB)
-
-unset(BUILD_LIB CACHE)
