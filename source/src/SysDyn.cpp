@@ -650,10 +650,16 @@ bool SysDyn::isTimeStepGlobal()
 void SysDyn::setDynamicsForward()
     {
     dynSignFactor = 1.0;
+  simpleSystem->setDynamicsForward();
+  hybridSystem->setDynamicsForward();
+  tychasticSystem->setDynamicsForward();
     }
 void SysDyn::setDynamicsBackward()
     {
     dynSignFactor = -1.0;
+  simpleSystem->setDynamicsBackward();
+  hybridSystem->setDynamicsBackward();
+  tychasticSystem->setDynamicsBackward();
     }
 
 void SysDyn::getTychasticImage(const double *x, const double *u, const double *v, double *imageVect, double rho) const

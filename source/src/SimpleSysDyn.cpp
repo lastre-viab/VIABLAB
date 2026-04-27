@@ -206,8 +206,15 @@ double SimpleSysDyn::calculRho_local(const double *x) const
     double h = grid->maxStep;
     double LL = calculLFunc ? calculLFunc(x) : returnL_local_ana(x);
     double MFF = calculMFunc ? calculMFunc(x) : returnMF_local_ana(x);
+  if (MFF * LL < 2.0 * h)
+  {
+    MFF = 1.0;
+    LL = 1.0;
+  }
 
-    return timeStepFactor * sqrt((h) / max(h *h, LL * MFF));
+  double rho1 = sqrt((2.0 * h) / (LL * MFF));
+  return timeStepFactor * rho1;
+    //return timeStepFactor * sqrt((h) / max(h *h, LL * MFF));
     }
 
 int SimpleSysDyn::getFDDynType() const
@@ -312,7 +319,7 @@ void SimpleSysDyn::FDiscretRK2(const double *x, const double *u, double *res, do
 
     for (i = 0; i < dimS; i++)
 	{
-	res[i] = x[i] + rho * Fx[i];
+	res[i] = x[i] + rho * dynSignFactor * Fx[i];
 	}
 
     grid->periodizePoint(res);
@@ -321,7 +328,7 @@ void SimpleSysDyn::FDiscretRK2(const double *x, const double *u, double *res, do
 
     for (i = 0; i < dimS; i++)
 	{
-	res[i] = x[i] + 0.5 * rho *  (Fx[i] + Fres[i]);
+	res[i] = x[i] + 0.5 * rho * dynSignFactor *  (Fx[i] + Fres[i]);
 	}
 
     grid->periodizePoint(res);
