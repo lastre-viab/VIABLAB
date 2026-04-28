@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
   message(".. MAC OS OPTIONS: ${OPTION}")
   message("-- [-O3] MODE.")				# <--- O3 MODE
-  set(CMAKE_CXX_FLAGS " -std=c++17  -Wall -Wextra -g -Wno-deprecated  -Wno-vla-cxx-extension -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-c2x-extensions -Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include")	
+  set(CMAKE_CXX_FLAGS " -std=c++17  -Wall -Wextra -g -Wno-deprecated  -Wno-vla-extension -Wno-inconsistent-missing-override -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-c2x-extensions -Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include")	
   set(CMAKE_EXE_LINKER_FLAGS "-flto") # Linking time optimisations
   set(CMAKE_EXECUTABLE_ENABLE_EXPORTS TRUE)
 
