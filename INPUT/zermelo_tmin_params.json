@@ -14,18 +14,6 @@
 	"COMPUTE_MIN_TIME" : 1,
 	"NUMBER_OF_TRAJECTORIES" : 2,
 	"TRAJECTORY_TYPE" : 3,
-	"INITIAL_POINTS" :
-	{
-		"POINT" :
-		{
-			"POINT_COORDINATES" : [-4.0, -1.5]
-		},
-		
-		"POINT" :
-		{
-			"POINT_COORDINATES" : [-5.0, 1.5]
-		}
-	},
 	"INTERMEDIATE_SAVINGS" :0,
 	"SAVE_BOUNDARY" :1,
 	"SAVE_PROJECTION" : 0
@@ -46,6 +34,18 @@
 	"GRID_METHOD" : 2,
 	"STATE_MAX_VALUES" :[ 1.0, 2.5],
     "STATE_MIN_VALUES" :[ -6.0, -2.5],	
-    "STATE_GRID_POINTS" :[ 701, 501]
-}
+    "STATE_GRID_POINTS" :[ 351, 251]
+},
+"TRAJECTORY_PARAMETERS": [
+	{
+        "INITIAL_POINT": [-4.0, -1.5],
+        "TRAJECTORY_TYPE": "OP",
+        "TRAJECTORY_TIME_HORIZON": 16.0
+    },
+	{
+        "INITIAL_POINT": [-5.0, 1.0],
+        "TRAJECTORY_TYPE": "OP",
+        "TRAJECTORY_TIME_HORIZON": 16.0
+    }
+	]
 }

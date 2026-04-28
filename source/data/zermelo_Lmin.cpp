@@ -29,10 +29,11 @@
 #include "../include/utilities.h"
 
 extern "C" {
+  std::string paramsFile = "zermelo_Lmin_params.json";
 /*
  * Definition of the dynamics  and associated functions and constants
  */
-double c=0.0, a=0.75;
+double c=0.0, a=0.25;
 
 void dynamics(const double *x, const double *u, double *image)
 {

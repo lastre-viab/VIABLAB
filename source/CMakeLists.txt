@@ -1,16 +1,27 @@
 cmake_minimum_required(VERSION 3.5)
 project( viabLab )
-	
-IF(CMAKE_SYSTEM_NAME STREQUAL Darwin) # The target system is MAC OS
-  set(CMAKE_C_COMPILER   gcc)
-  set(CMAKE_CXX_COMPILER c++)
-   
-  set(OPTION "-std=c++17")
-  message(".. OPTIONS: ${OPTION}")
+	IF(CMAKE_SYSTEM_NAME STREQUAL Darwin) # The target system is MAC OS
+  
+  set(CMAKE_C_COMPILER   clang)
+  set(CMAKE_CXX_COMPILER clang++)
+  set(CMAKE_OSX_ARCHITECTURES arm64)
+  set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include" )
+  set(OpenMP_C_LIB_NAMES "omp")
+  set(OpenMP_omp_LIBRARY "/opt/homebrew/Cellar/libomp/22.1.4/lib/libomp.dylib" )
+  set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I/opt/homebrew/Cellar/libomp/22.1.4/include" )
+  set(OpenMP_CXX_LIB_NAMES "omp" )
+  set(OpenMP_CXX_omp_LIBRARY "/opt/homebrew/Cellar/libomp/22.1.4/lib/libomp.dylib")
+  set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+  message(".. MAC OS OPTIONS: ${OPTION}")
   message("-- [-O3] MODE.")				# <--- O3 MODE
-  set(CMAKE_CXX_FLAGS "${OPTION} -fopenmp -Wall -Wextra -O3 -flat_namespace,-undefined dynamic_lookup -Wno-deprecated -Wno-unused")	# <--- O3 MODE
+  set(CMAKE_CXX_FLAGS " -std=c++17  -Wall -Wextra -g -Wno-deprecated  -Wno-vla-cxx-extension -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-c2x-extensions -Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include")	
   set(CMAKE_EXE_LINKER_FLAGS "-flto") # Linking time optimisations
   set(CMAKE_EXECUTABLE_ENABLE_EXPORTS TRUE)
+
+set(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS} -undefined dynamic_lookup")
+
  
   
 ELSE()
@@ -57,7 +68,13 @@ file(GLOB MODEL_FILES "data/*.cpp")
     set_target_properties(${PROJECT_NAME} PROPERTIES ENABLE_EXPORTS 1)
     # Link all shared libraries to the executable
 	 message("Dynamic libs value from cmake ${CMAKE_DL_LIBS}  ")
-    target_link_libraries(${PROJECT_NAME} dl spdlog::spdlog_header_only)
+      
+
+IF(CMAKE_SYSTEM_NAME STREQUAL Darwin) # The target system is MAC OS
+target_link_libraries(${PROJECT_NAME} dl spdlog::spdlog_header_only /opt/homebrew/Cellar/libomp/22.1.4/lib/libomp.dylib)
+ELSE()
+target_link_libraries(${PROJECT_NAME} dl spdlog::spdlog_header_only)
+ENDIF()
     #target_link_libraries(${PROJECT_NAME} PRIVATE dl spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE VIABLAB_LIBRARY_BUILD)
 

@@ -29,14 +29,15 @@
 #include "../include/utilities.h"
 
 extern "C" {
+  std::string paramsFile = "zermelo_tmin_params.json";
 /*
  * Definition of the dynamics  and associated functions and constants
  */
-double c=0.0, a=0.75;
+double c=0.0, a=0.25;
 
 void dynamics(const double *x, const double *u, double *image)
 {
-  image[0]= cos(u[0]) + c+a*tanh(x[1]);
+  image[0]= cos(u[0]) + c - a*tanh(x[1]);
   image[1]= sin(u[0]);
 }
 

@@ -163,7 +163,7 @@ void ViabiBitSet::testK0()
     unsigned long long int posX = 0;
 
     boost::dynamic_bitset<> **gridTab = grid->getGridTab();
-#pragma omp parallel for num_threads(nbOMPThreads)  private(posX) shared( gridTab, limInf, gridStep, nbPointsSub,dirTramage , longTrame, tailleTrame) default(none)
+#pragma omp parallel for num_threads(nbOMPThreads)  private(posX) shared( gridTab, limInf, gridStep, nbPointsSub,dirTramage , longTrame, tailleTrame,PLUS_INF) default(none)
 
     for (posX = 0; posX < tailleTrame; posX++)
 	{

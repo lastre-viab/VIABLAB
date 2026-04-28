@@ -707,14 +707,14 @@ void ViabiMicroMacro::computeCurrIm_tmin_new(int iter)
 	itPoint++;
 	}
 
-    spdlog::info("[Min Time problem] : Computing current image finished. number of cells {}", currentCellsImage.size());
+    spdlog::info("[Min Time problem] : Computing current image finished. number of cells {}", currentPointsImage.size());
     currentPointsImage.clear();
     }
 
 
 void ViabiMicroMacro::computeCurrIm_Lmin_new(int iter)
     {
-    spdlog::info("[Integral cost problem] : Computing current image. number of points {}", currentCellsImage.size());
+    spdlog::info("[Integral cost problem] : Computing current image. number of points {}", currentPointsImage.size());
     int posX;
 
     list<imageCell>::iterator itStart, itNew;
@@ -785,7 +785,7 @@ void ViabiMicroMacro::computeCurrIm_Lmin_new(int iter)
 	itPoint++;
 	}
     currentPointsImage.clear();
-    spdlog::info("[Integral cost problem] : Computing current image finished. number of points {}", currentCellsImage.size());
+    spdlog::info("[Integral cost problem] : Computing current image finished. number of points {}", currentPointsImage.size());
 
     }
 
@@ -848,7 +848,7 @@ void ViabiMicroMacro::computeConvexifiedImage_tmin_new(int iter)
 
 void ViabiMicroMacro::computeConvexifiedImage_Lmin_new(int iter)
     {
-    spdlog::info("[Integral cost problem] : Computing current image. number of points {}", currentCellsImage.size());
+    spdlog::info("[Integral cost problem] : Computing current image. number of points {}", currentPointsImage.size());
     int posX;
 
     list<imageCell>::iterator itStart, itNew;
@@ -920,7 +920,7 @@ void ViabiMicroMacro::computeConvexifiedImage_Lmin_new(int iter)
 	itPoint++;
 	}
     currentPointsImage.clear();
-    spdlog::info("[Integral cost problem] : Computing current image finished. number of points {}", currentCellsImage.size());
+    spdlog::info("[Integral cost problem] : Computing current image finished. number of points {}", currentPointsImage.size());
 
     }
 

@@ -47,14 +47,8 @@ using namespace boost::property_tree;
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h" // or "../stdout_sinks.h" if no colors needed
 #include "spdlog/spdlog.h"
-/*
- #if defined(__APPLE__)
+ #include <functional>
 
- #include <sys/param.h>
- #include <mach-o/dyld.h>
- #endif
- #include <inttypes.h>
- */
 #include <ctime>
 #include <map>
 #include <numeric> // pour std::iota
